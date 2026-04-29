@@ -1,0 +1,20 @@
+{
+  "name": "daypalette-color-admin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev:web": "pnpm --dir apps/admin-web dev",
+    "dev:api": "pnpm --dir apps/admin-api start:dev",
+    "build:web": "pnpm --dir apps/admin-web build",
+    "build:api": "pnpm --dir apps/admin-api build",
+    "build:packages": "pnpm -r --filter './packages/*' build",
+    "lint:web": "pnpm --dir apps/admin-web lint",
+    "lint:api": "pnpm --dir apps/admin-api lint",
+    "lint": "pnpm lint:web && pnpm lint:api",
+    "build": "pnpm build:packages && pnpm build:web && pnpm build:api"
+  },
+  "devDependencies": {
+    "@types/node": "^24.12.2",
+    "typescript": "^5.7.3"
+  }
+}

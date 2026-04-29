@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --dp-bg-page: #f9f8f6;
+  --dp-text-primary: #1a1a1a;
+  --dp-text-muted: #8c8c8c;
+  --dp-border-subtle: rgba(0, 0, 0, 0.08);
+  --dp-border-hairline: rgba(0, 0, 0, 0.03);
+  --dp-surface-card: #ffffff;
+  --dp-overlay-glass: rgba(249, 248, 246, 0.75);
+  --dp-fill-inverse: #1a1a1a;
+  --dp-text-on-inverse: #ffffff;
+  --dp-palette-main: #e8d8d3;
+  --dp-palette-secondary: #c5b9b6;
+  --dp-palette-accent: #5d637a;
+
+  --background: var(--dp-bg-page);
+  --foreground: var(--dp-text-primary);
+  --card: var(--dp-surface-card);
+  --card-foreground: var(--dp-text-primary);
+  --primary: var(--dp-fill-inverse);
+  --primary-foreground: var(--dp-text-on-inverse);
+  --muted: var(--dp-overlay-glass);
+  --muted-foreground: var(--dp-text-muted);
+  --border: var(--dp-border-subtle);
+  --input: var(--dp-border-subtle);
+  --ring: rgba(26, 26, 26, 0.18);
+  --radius: 18px;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  font-family: 'DM Sans', 'Noto Sans SC', sans-serif;
+  color: var(--foreground);
+  background:
+    radial-gradient(circle at top left, rgba(232, 216, 211, 0.6), transparent 30%),
+    radial-gradient(circle at right 10% top 20%, rgba(93, 99, 122, 0.12), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(249, 248, 246, 0.95)),
+    var(--background);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+.display-font {
+  font-family: 'Cormorant Garamond', 'Noto Serif SC', serif;
+}
