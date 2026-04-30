@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "frontend-module-playbook": {
+      "source": "SymbolWu/frontend-module-playbook",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-module-playbook/SKILL.md",
+      "computedHash": "9f98e54e4a08f6beca4cab67f95658180bebe062327c06b0dda2b62e282b4560"
+    }
+  }
+}
