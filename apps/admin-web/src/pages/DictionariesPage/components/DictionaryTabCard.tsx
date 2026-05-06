@@ -13,15 +13,15 @@ export function DictionaryTabCard({ isActive, model, onSelect }: DictionaryTabCa
   return (
     <button
       className={cn(
-        'paper-card min-w-[196px] px-4 py-4 text-left transition-colors duration-200',
+        'paper-card min-w-[168px] px-3.5 py-3 text-left transition-colors duration-200',
         isActive ? 'border-[var(--dp-fill-inverse)] bg-[var(--dp-surface-soft)]' : 'hover:bg-[var(--dp-surface-soft)]',
       )}
       onClick={() => onSelect(model.key)}
       type="button"
     >
-      <p className="truncate text-base font-semibold text-foreground">{model.labelZh}</p>
-      <p className="mt-1 truncate text-sm text-[var(--dp-text-muted)]">{model.labelEn}</p>
-      <div className="mt-4 flex items-center justify-between gap-3 text-xs text-[var(--dp-text-muted)]">
+      <p className="truncate text-[15px] font-semibold text-foreground">{model.labelZh}</p>
+      <p className="mt-0.5 truncate text-[13px] text-[var(--dp-text-muted)]">{model.labelEn}</p>
+      <div className="mt-3 flex items-center justify-between gap-3 text-xs text-[var(--dp-text-muted)]">
         <span>{model.itemCountLabel}</span>
         <span>{model.selectionModeLabel}</span>
       </div>

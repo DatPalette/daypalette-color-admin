@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 
 import { Button } from '@/components/ui/button'
 import type { DictionaryItemDto } from '@/models/dictionaries'
+import { shouldShowEnglishLabel } from '../display'
 
 interface DictionaryItemCardProps {
   item: DictionaryItemDto
@@ -16,7 +17,9 @@ export function DictionaryItemCard({ item, onDelete, onEdit }: DictionaryItemCar
         <div className="min-w-0">
           <p className="label-caps text-[var(--dp-text-muted)]">{item.id}</p>
           <h3 className="mt-3 truncate text-lg font-semibold text-foreground">{item.labelZh}</h3>
-          <p className="mt-1 truncate text-sm text-[var(--dp-text-muted)]">{item.labelEn}</p>
+          {shouldShowEnglishLabel(item.id, item.labelEn) ? (
+            <p className="mt-1 truncate text-sm text-[var(--dp-text-muted)]">{item.labelEn}</p>
+          ) : null}
         </div>
 
         <span className="shrink-0 border border-[var(--dp-border-subtle)] px-2.5 py-1 label-caps text-[var(--dp-text-muted)]">

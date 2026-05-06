@@ -10,6 +10,7 @@ import { DictionaryItemCard } from './components/DictionaryItemCard'
 import { DictionaryItemDialog, type DictionaryItemFormValue } from './components/DictionaryItemDialog'
 import { DictionarySettingsDrawer, type DictionarySettingsFormValue } from './components/DictionarySettingsDrawer'
 import { DictionaryTabCard } from './components/DictionaryTabCard'
+import { shouldShowEnglishLabel } from './display'
 import { useDictionariesPageViewModel } from './view-model/useDictionariesPageViewModel'
 import { buildNewDictionaryItemDraft } from './view-model/helpers'
 
@@ -200,8 +201,8 @@ export function DictionariesPage({
         <div className="paper-card border-red-200 bg-red-50 px-5 py-4 text-sm leading-6 text-red-700">{errorMessage}</div>
       ) : null}
 
-      <section className="space-y-6">
-        <div className="scrollbar-hide -mx-1 flex gap-3 overflow-x-auto px-1 pb-1">
+      <section className="space-y-4">
+        <div className="scrollbar-hide -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
           {tabItems.map((card) => (
             <DictionaryTabCard
               key={card.key}
@@ -219,40 +220,42 @@ export function DictionariesPage({
         </div>
 
         {draft && activeTab ? (
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_360px]">
-            <div className="paper-card bg-white px-5 py-5">
-              <div className="flex items-start justify-between gap-4">
+          <div className="grid items-start gap-3 xl:grid-cols-[minmax(0,1.2fr)_360px]">
+            <div className="paper-card bg-white px-4 py-4">
+              <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="label-caps text-[var(--dp-text-muted)]">{draft.key}</p>
-                  <h2 className="mt-3 text-xl font-semibold text-foreground">{draft.labelZh}</h2>
-                  <p className="mt-1 text-sm text-[var(--dp-text-muted)]">{draft.labelEn}</p>
+                  <h2 className="mt-2 text-lg font-semibold text-foreground">{draft.labelZh}</h2>
+                  {shouldShowEnglishLabel(draft.key, draft.labelEn) ? (
+                    <p className="mt-0.5 text-sm text-[var(--dp-text-muted)]">{draft.labelEn}</p>
+                  ) : null}
                 </div>
                 <Button onClick={() => setIsSettingsDrawerOpen(true)} size="sm" variant="outline">
                   编辑字典
                 </Button>
               </div>
 
-              <p className="mt-4 text-sm leading-7 text-[var(--dp-text-muted)]">
+              <p className="mt-3 max-w-[58ch] text-sm leading-6 text-[var(--dp-text-muted)]">
                 {draft.descriptionZh || draft.descriptionEn || '当前字典还没有补充说明。'}
               </p>
             </div>
 
-            <div className="paper-card grid gap-4 bg-white px-5 py-5 sm:grid-cols-2 xl:grid-cols-1">
+            <div className="paper-card grid gap-x-4 gap-y-3 bg-white px-4 py-4 sm:grid-cols-2 xl:grid-cols-2">
               <div>
                 <p className="label-caps text-[var(--dp-text-muted)]">Selection Mode</p>
-                <p className="mt-2 text-sm text-foreground">{draft.selectionMode}</p>
+                <p className="mt-1.5 text-sm text-foreground">{draft.selectionMode}</p>
               </div>
               <div>
                 <p className="label-caps text-[var(--dp-text-muted)]">Entity Scopes</p>
-                <p className="mt-2 text-sm text-foreground">{draft.entityScopes.join(' / ')}</p>
+                <p className="mt-1.5 text-sm leading-6 text-foreground">{draft.entityScopes.join(' / ')}</p>
               </div>
               <div>
                 <p className="label-caps text-[var(--dp-text-muted)]">Field Mappings</p>
-                <p className="mt-2 text-sm text-foreground">{draft.fieldMappings.length} 项映射</p>
+                <p className="mt-1.5 text-sm text-foreground">{draft.fieldMappings.length} 项映射</p>
               </div>
               <div>
                 <p className="label-caps text-[var(--dp-text-muted)]">Items</p>
-                <p className="mt-2 text-sm text-foreground">{activeTab.itemCountLabel}</p>
+                <p className="mt-1.5 text-sm text-foreground">{activeTab.itemCountLabel}</p>
               </div>
             </div>
           </div>
