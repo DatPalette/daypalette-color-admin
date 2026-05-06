@@ -1,6 +1,7 @@
 export interface PaletteCardModel {
   id: string
   occasionLabel: string
+  previewHexes: string[]
   sourceCountLabel: string
   status: string
   trioSummary: string

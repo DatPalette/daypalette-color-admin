@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
+import { X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type { BaseColorDeleteCheckDto, BaseColorDto, BaseColorEditorOptions } from '@/models/base-colors'
 
 import { MultiSelectChips, SectionTitle, SelectInput, TextInput } from './BaseColorEditorControls'
@@ -20,6 +20,7 @@ export function BaseColorDetailPanel({
   isSaving,
   onCreateDraft,
   onCheckDeleteRisk,
+  onClose,
   onDelete,
   onDeleteReasonChange,
   onDraftFieldChange,
@@ -40,6 +41,7 @@ export function BaseColorDetailPanel({
   isSaving: boolean
   onCreateDraft: () => void
   onCheckDeleteRisk: () => Promise<void>
+  onClose: () => void
   onDelete: () => Promise<void>
   onDeleteReasonChange: (value: string) => void
   onDraftFieldChange: (
@@ -63,59 +65,82 @@ export function BaseColorDetailPanel({
 }): ReactElement {
   if (!draft || !editorOptions) {
     return (
-      <Card className="border-[var(--dp-border-hairline)] bg-white/90">
-        <CardContent className="p-6 text-sm leading-6 text-muted-foreground">
-          当前还没有可展示的基础色。
-        </CardContent>
-      </Card>
+      <div className="flex h-full flex-col bg-white">
+        <div className="flex items-center justify-between border-b border-[var(--dp-border-subtle)] px-6 py-5">
+          <h2 className="display-font text-[2rem] leading-none tracking-[-0.03em] text-foreground">编辑颜色资产</h2>
+          <button className="text-muted-foreground hover:text-foreground" onClick={onClose} type="button">
+            <X className="size-5" />
+          </button>
+        </div>
+        <div className="p-6 text-sm leading-6 text-muted-foreground">当前还没有可展示的基础色。</div>
+      </div>
     )
   }
 
   const summary = [draft.tone, draft.colorFamily, draft.status].join(' · ')
 
   return (
-    <Card className="border-[var(--dp-border-hairline)] bg-white/92">
-      <div className="h-36 rounded-t-[28px]" style={{ backgroundColor: draft.hex }} />
-      <CardHeader>
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-2">
-            <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">{draft.id || 'new-base-color'}</p>
-            <CardTitle className="text-3xl">{isCreating ? '新增基础色' : '编辑基础色'}</CardTitle>
-            <CardDescription className="text-sm">
-              {isCreating ? '保存会创建新记录并写回 raw JSON 文件。' : '保存会直接回写到 raw JSON 文件。'}
-            </CardDescription>
-          </div>
+    <div className="flex h-full flex-col bg-white">
+      <div className="flex items-start justify-between gap-4 border-b border-[var(--dp-border-subtle)] px-6 py-5">
+        <div className="space-y-2">
+          <p className="label-caps text-muted-foreground">{draft.id || 'new-base-color'}</p>
+          <h2 className="display-font text-[2rem] leading-none tracking-[-0.03em] text-foreground">编辑颜色资产</h2>
+          <p className="text-sm text-muted-foreground">
+            {isCreating ? '保存会创建新记录并写回 raw JSON 文件。' : '保存会直接回写到 raw JSON 文件。'}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
           {!isCreating ? (
-            <Button onClick={onCreateDraft} variant="outline">
-              新增基础色
+            <Button onClick={onCreateDraft} size="sm" variant="ghost">
+              新增
             </Button>
           ) : null}
+          <button className="text-muted-foreground hover:text-foreground" onClick={onClose} type="button">
+            <X className="size-5" />
+          </button>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-5 text-sm leading-6 text-foreground">
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-6 py-6 text-sm leading-6 text-foreground">
         {saveMessage ? (
-          <div className="rounded-[20px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          <div className="mb-6 border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
             {saveMessage}
           </div>
         ) : null}
 
-        <div className="grid grid-cols-2 gap-3 text-xs text-muted-foreground">
-          <div className="rounded-[18px] bg-[var(--dp-bg-page)] px-4 py-3">
-            <p className="uppercase tracking-[0.18em]">Hex</p>
-            <p className="mt-2 text-sm text-foreground">{draft.hex}</p>
+        <section className="space-y-3 border-b border-[var(--dp-border-subtle)] pb-8">
+          <SectionTitle>Color Value</SectionTitle>
+          <div className="grid gap-4 sm:grid-cols-[96px_minmax(0,1fr)]">
+            <div className="h-24 border border-black/5" style={{ backgroundColor: draft.hex }} />
+            <div className="space-y-2">
+              <input
+                className="w-full border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-[var(--dp-fill-inverse)]"
+                onChange={(event) => onDraftFieldChange('hex', event.target.value)}
+                value={draft.hex}
+              />
+              <p className="text-xs italic text-muted-foreground">Ref: curated base color sample</p>
+            </div>
           </div>
-          <div className="rounded-[18px] bg-[var(--dp-bg-page)] px-4 py-3">
-            <p className="uppercase tracking-[0.18em]">Neutral Core</p>
-            <p className="mt-2 text-sm text-foreground">{draft.isNeutralCore ? 'Yes' : 'No'}</p>
+        </section>
+
+        <div className="grid gap-4 border-b border-[var(--dp-border-subtle)] py-8 sm:grid-cols-2">
+          <div>
+            <SectionTitle>Chinese Name</SectionTitle>
+            <p className="mt-2 text-[1.9rem] leading-none tracking-[-0.03em] text-foreground">{draft.nameZh}</p>
+          </div>
+          <div>
+            <SectionTitle>English Name</SectionTitle>
+            <p className="mt-2 text-lg text-muted-foreground">{draft.nameEn}</p>
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 border-b border-[var(--dp-border-subtle)] py-8">
           <SectionTitle>Summary</SectionTitle>
-          <p>{summary}</p>
+          <p className="text-sm leading-7 text-muted-foreground">{summary}</p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 border-b border-[var(--dp-border-subtle)] py-8 md:grid-cols-2">
           <TextInput
             disabled={!isCreating}
             label="ID"
@@ -144,56 +169,57 @@ export function BaseColorDetailPanel({
             value={draft.status}
           />
           <SelectInput
-            label="Lightness"
-            onChange={(value) => onDraftFieldChange('lightnessLevel', value)}
-            options={editorOptions.lightnessLevels}
-            value={draft.lightnessLevel}
-          />
-          <SelectInput
             label="Saturation"
             onChange={(value) => onDraftFieldChange('saturationLevel', value)}
             options={editorOptions.saturationLevels}
             value={draft.saturationLevel}
           />
+          <SelectInput
+            label="Lightness"
+            onChange={(value) => onDraftFieldChange('lightnessLevel', value)}
+            options={editorOptions.lightnessLevels}
+            value={draft.lightnessLevel}
+          />
         </div>
 
-        <label className="flex items-center gap-3 rounded-[18px] border border-[var(--dp-border-hairline)] bg-[var(--dp-bg-page)] px-4 py-3">
+        <label className="my-8 flex items-center justify-between gap-3 border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3">
+          <div>
+            <SectionTitle>Neutral Core</SectionTitle>
+            <p className="mt-1 text-sm text-muted-foreground">用于保留基础中性色，不随普通色卡一同淘汰。</p>
+          </div>
           <input
             checked={draft.isNeutralCore}
             className="size-4 accent-[var(--dp-fill-inverse)]"
             onChange={(event) => onDraftFieldChange('isNeutralCore', event.target.checked)}
             type="checkbox"
           />
-          <span>作为中性色核心保留</span>
         </label>
 
-        <MultiSelectChips
-          label="Style Tags"
-          onToggle={(value) => onDraftTagToggle('styleTags', value)}
-          options={editorOptions.styleTags}
-          selectedValues={draft.styleTags}
-        />
+        <div className="space-y-6 border-b border-[var(--dp-border-subtle)] pb-8">
+          <MultiSelectChips
+            label="Style Tags"
+            onToggle={(value) => onDraftTagToggle('styleTags', value)}
+            options={editorOptions.styleTags}
+            selectedValues={draft.styleTags}
+          />
 
-        <MultiSelectChips
-          label="Occasion Tags"
-          onToggle={(value) => onDraftTagToggle('occasionTags', value)}
-          options={editorOptions.occasionTags}
-          selectedValues={draft.occasionTags}
-        />
+          <MultiSelectChips
+            label="Occasion Tags"
+            onToggle={(value) => onDraftTagToggle('occasionTags', value)}
+            options={editorOptions.occasionTags}
+            selectedValues={draft.occasionTags}
+          />
 
-        <MultiSelectChips
-          label="Season Tags"
-          onToggle={(value) => onDraftTagToggle('seasonTags', value)}
-          options={editorOptions.seasonTags}
-          selectedValues={draft.seasonTags}
-        />
-
-        <Button className="w-full" disabled={isSaving} onClick={() => void onSave()} variant="primary">
-          {isSaving ? '正在保存…' : isCreating ? '创建基础色' : '保存基础色'}
-        </Button>
+          <MultiSelectChips
+            label="Season Tags"
+            onToggle={(value) => onDraftTagToggle('seasonTags', value)}
+            options={editorOptions.seasonTags}
+            selectedValues={draft.seasonTags}
+          />
+        </div>
 
         {!isCreating ? (
-          <div className="space-y-4 rounded-[24px] border border-amber-200 bg-amber-50/70 p-4">
+          <div className="space-y-4 border-b border-[var(--dp-border-subtle)] py-8">
             <div className="space-y-2">
               <SectionTitle>Delete Guard</SectionTitle>
               <p className="text-sm leading-6 text-foreground">
@@ -205,11 +231,11 @@ export function BaseColorDetailPanel({
 
             {deleteCheck ? (
               deleteCheck.canDelete ? (
-                <div className="rounded-[20px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                <div className="border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
                   当前未发现 palette 引用，可以执行软删除。
                 </div>
               ) : (
-                <div className="space-y-3 rounded-[20px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="space-y-3 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                   <p>当前基础色仍被以下 palette 引用，不能软删除：</p>
                   <div className="space-y-2 text-xs leading-5">
                     {deleteCheck.blockingReferences.map((reference) => (
@@ -232,7 +258,7 @@ export function BaseColorDetailPanel({
                 {isDeleteChecking ? '正在检查…' : '检查删除风险'}
               </Button>
               <Button
-                className="w-full"
+                className="w-full border-red-300 text-red-700 hover:bg-red-50"
                 disabled={isDeleteChecking || isDeleting || !deleteCheck?.canDelete}
                 onClick={() => void onDelete()}
                 variant="outline"
@@ -243,14 +269,14 @@ export function BaseColorDetailPanel({
           </div>
         ) : null}
 
-        <div className="space-y-3 rounded-[24px] border border-sky-200 bg-sky-50/70 p-4">
+        <div className="space-y-3 py-8">
           <div className="space-y-2">
             <SectionTitle>Archived Base Colors</SectionTitle>
             <p className="text-sm leading-6 text-foreground">已软删除的基础色会出现在这里，恢复后会重新回到可编辑列表。</p>
           </div>
 
           {archivedBaseColors.length === 0 ? (
-            <div className="rounded-[18px] border border-sky-100 bg-white/70 px-4 py-3 text-sm text-muted-foreground">
+            <div className="border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3 text-sm text-muted-foreground">
               当前没有已归档的基础色。
             </div>
           ) : (
@@ -258,7 +284,7 @@ export function BaseColorDetailPanel({
               {archivedBaseColors.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between gap-3 rounded-[18px] border border-sky-100 bg-white/80 px-4 py-3"
+                  className="flex items-center justify-between gap-3 border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3"
                 >
                   <div>
                     <p className="text-sm font-medium text-foreground">{item.nameZh || item.id}</p>
@@ -278,7 +304,20 @@ export function BaseColorDetailPanel({
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      <div className="border-t border-[var(--dp-border-subtle)] bg-white px-6 py-5">
+        <div className="flex items-center gap-3">
+          {!isCreating ? (
+            <Button className="border-red-300 text-red-700 hover:bg-red-50" onClick={() => void onCheckDeleteRisk()} variant="outline">
+              检查删除风险
+            </Button>
+          ) : null}
+          <Button className="flex-1" disabled={isSaving} onClick={() => void onSave()} variant="primary">
+            {isSaving ? '正在保存…' : isCreating ? '创建基础色' : '保存基础色'}
+          </Button>
+        </div>
+      </div>
+    </div>
   )
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { getBaseColorCollection } from '@/services/base-colors/base-colors.service'
+import type { BaseColorCollectionDto } from '@/models/base-colors'
 import { getCollectionsCollection } from '@/services/collections/collections.service'
 import { getDictionariesCollection } from '@/services/dictionaries/dictionaries.service'
 import type {
@@ -65,6 +66,7 @@ interface PalettesPageViewModel {
 export function usePalettesPageViewModel(): PalettesPageViewModel {
   const [collection, setCollection] = useState<PaletteCollectionDto | null>(null)
   const [allCollection, setAllCollection] = useState<PaletteCollectionDto | null>(null)
+  const [baseColorCollection, setBaseColorCollection] = useState<BaseColorCollectionDto | null>(null)
   const [selectedPaletteId, setSelectedPaletteId] = useState<string | null>(null)
   const [deleteCheck, setDeleteCheck] = useState<PaletteDeleteCheckDto | null>(null)
   const [deleteReason, setDeleteReason] = useState('')
@@ -105,10 +107,11 @@ export function usePalettesPageViewModel(): PalettesPageViewModel {
 
       setCollection(nextCollection)
       setAllCollection(nextAllCollection)
+      setBaseColorCollection(baseColors)
       setEditorOptions(nextEditorOptions)
       setSelectedPaletteId(nextSelectedPaletteId)
       setIsCreating(false)
-      setModel(toPalettesPageModel(nextCollection, nextSelectedPaletteId, nextEditorOptions))
+      setModel(toPalettesPageModel(nextCollection, nextSelectedPaletteId, baseColors, nextEditorOptions))
       setDraft(clonePalette(nextSelectedPalette))
     } catch {
       setErrorMessage('配色盘列表加载失败。请先启动 admin-api，再刷新页面。')
@@ -127,7 +130,7 @@ export function usePalettesPageViewModel(): PalettesPageViewModel {
     setDeleteReason('')
     setIsCreating(false)
     setSaveMessage(null)
-    setModel(toPalettesPageModel(collection, id, editorOptions))
+    setModel(toPalettesPageModel(collection, id, baseColorCollection, editorOptions))
     setDraft(clonePalette(findSelectedPalette(collection, id)))
   }
 
@@ -203,7 +206,7 @@ export function usePalettesPageViewModel(): PalettesPageViewModel {
       setAllCollection(nextAllCollection)
       setSelectedPaletteId(nextSelectedPalette?.id ?? nextCollection.items[0]?.id ?? null)
       setIsCreating(false)
-      setModel(toPalettesPageModel(nextCollection, draft.id, editorOptions))
+      setModel(toPalettesPageModel(nextCollection, draft.id, baseColorCollection, editorOptions))
       setDraft(clonePalette(nextSelectedPalette))
       setSaveMessage(isCreating ? '已新增 Palette，并写回 palettes.v1.json。' : '已写回 palettes.v1.json。')
     } catch (error) {
@@ -263,7 +266,7 @@ export function usePalettesPageViewModel(): PalettesPageViewModel {
       setIsCreating(false)
       setDeleteCheck(null)
       setDeleteReason('')
-      setModel(toPalettesPageModel(nextCollection, nextSelectedPaletteId, editorOptions))
+      setModel(toPalettesPageModel(nextCollection, nextSelectedPaletteId, baseColorCollection, editorOptions))
       setDraft(clonePalette(nextSelectedPalette))
       setSaveMessage('已执行 Palette 软删除，并写回 palettes.v1.json。')
     } catch (error) {
@@ -287,7 +290,7 @@ export function usePalettesPageViewModel(): PalettesPageViewModel {
       setAllCollection(nextAllCollection)
       setSelectedPaletteId(nextSelectedPalette?.id ?? nextCollection.items[0]?.id ?? null)
       setIsCreating(false)
-      setModel(toPalettesPageModel(nextCollection, id, editorOptions))
+      setModel(toPalettesPageModel(nextCollection, id, baseColorCollection, editorOptions))
       setDraft(clonePalette(nextSelectedPalette))
       setSaveMessage('已恢复 Palette，并重新回到可编辑列表。')
     } catch (error) {

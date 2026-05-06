@@ -17,26 +17,31 @@ export function DictionaryCard({
     <button className="text-left" onClick={() => onSelect(model.key)} type="button">
       <Card
         className={[
-          'h-full border transition-transform duration-300 hover:-translate-y-0.5',
+          'h-full border border-[var(--dp-border-subtle)] bg-white p-0 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_-4px_rgba(26,26,26,0.04)]',
           isSelected
-            ? 'border-[var(--dp-fill-inverse)] bg-white'
-            : 'border-[var(--dp-border-hairline)] bg-white/88',
+            ? 'border-[var(--dp-fill-inverse)] shadow-[0_8px_32px_-4px_rgba(26,26,26,0.06)]'
+            : '',
         ].join(' ')}
       >
-        <CardContent className="space-y-4 p-5">
+        <CardContent className="space-y-5 p-5">
           <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">{model.key}</p>
-            <h3 className="mt-2 text-xl font-medium text-foreground">{model.labelZh}</h3>
-            <p className="text-sm text-muted-foreground">{model.labelEn}</p>
+            <p className="label-caps text-muted-foreground">{model.key}</p>
+            <h3 className="mt-3 text-[1.8rem] font-medium leading-none tracking-[-0.03em] text-foreground">{model.labelZh}</h3>
+            <p className="mt-2 text-base text-muted-foreground">{model.labelEn}</p>
           </div>
 
-          <div className="space-y-2 text-xs text-muted-foreground">
-            <p>{model.scopeSummary}</p>
-            <div className="flex items-center justify-between text-foreground">
-              <span className="rounded-full bg-[var(--dp-bg-page)] px-2.5 py-1">{model.selectionModeLabel}</span>
-              <span>{model.itemCountLabel}</span>
+          <div className="grid grid-cols-2 gap-4 border-t border-[var(--dp-border-subtle)] pt-4">
+            <div>
+              <p className="label-caps text-muted-foreground">Scope</p>
+              <p className="mt-2 text-sm text-foreground">{model.scopeSummary}</p>
+            </div>
+            <div>
+              <p className="label-caps text-muted-foreground">Mode</p>
+              <p className="mt-2 text-sm text-foreground">{model.selectionModeLabel}</p>
             </div>
           </div>
+
+          <div className="border-t border-[var(--dp-border-subtle)] pt-4 text-sm text-muted-foreground">{model.itemCountLabel}</div>
         </CardContent>
       </Card>
     </button>

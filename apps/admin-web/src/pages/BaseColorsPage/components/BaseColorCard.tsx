@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 
-import { Card, CardContent } from '@/components/ui/card'
+import { cn } from '@/utils/cn'
 import type { BaseColorCardModel } from '@/models/base-colors'
 
 interface BaseColorCardProps {
@@ -16,33 +16,46 @@ export function BaseColorCard({
   onSelect,
 }: BaseColorCardProps): ReactElement {
   return (
-    <button className="text-left" onClick={() => onSelect(model.id)} type="button">
-      <Card
-        className={[
-          'h-full overflow-hidden border transition-transform duration-300 hover:-translate-y-0.5',
-          isSelected
-            ? 'border-[var(--dp-fill-inverse)] bg-white'
-            : 'border-[var(--dp-border-hairline)] bg-white/88',
-        ].join(' ')}
+    <button className="block h-full w-full text-left" onClick={() => onSelect(model.id)} type="button">
+      <div
+        className={cn(
+          'paper-card h-full overflow-hidden bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_32px_-4px_rgba(26,26,26,0.04)]',
+          isSelected && 'border-[var(--dp-fill-inverse)] shadow-[0_8px_32px_-4px_rgba(26,26,26,0.08)]',
+        )}
       >
-        <div className="h-28 w-full" style={{ backgroundColor: model.hex }} />
-        <CardContent className="space-y-3 p-5">
-          <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">{model.id}</p>
-            <h3 className="mt-2 text-lg font-medium text-foreground">{model.nameZh}</h3>
-            <p className="text-sm text-muted-foreground">{model.nameEn}</p>
-          </div>
+        <div className="aspect-[4/3] border-b border-[var(--dp-border-subtle)]" style={{ backgroundColor: model.hex }} />
 
-          <div className="space-y-2 text-xs text-muted-foreground">
-            <p>{model.hex}</p>
-            <p>{model.tagSummary}</p>
-            <div className="flex items-center justify-between text-foreground">
-              <span className="rounded-full bg-[var(--dp-bg-page)] px-2.5 py-1">{model.colorFamily}</span>
-              <span className="text-muted-foreground">{model.status}</span>
+        <div className="space-y-5 p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="label-caps text-[var(--dp-text-muted)]">{model.id}</p>
+              <h3 className="display-font mt-3 truncate text-[2rem] leading-none tracking-[-0.03em] text-foreground">
+                {model.nameZh}
+              </h3>
+              <p className="mt-2 truncate text-sm text-[var(--dp-text-muted)]">{model.nameEn}</p>
+            </div>
+            <div className="shrink-0 border border-[var(--dp-border-subtle)] px-3 py-1.5 label-caps text-[var(--dp-text-muted)]">
+              {model.hex}
             </div>
           </div>
-        </CardContent>
-      </Card>
+
+          <div className="grid gap-4 border-t border-[var(--dp-border-subtle)] pt-4 sm:grid-cols-2">
+            <div>
+              <p className="label-caps text-[var(--dp-text-muted)]">Family</p>
+              <p className="mt-2 text-sm text-foreground">{model.colorFamily}</p>
+            </div>
+            <div>
+              <p className="label-caps text-[var(--dp-text-muted)]">Profile</p>
+              <p className="mt-2 text-sm text-foreground">{model.tagSummary}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between border-t border-[var(--dp-border-subtle)] pt-4 text-sm">
+            <span className="text-[var(--dp-text-muted)]">{model.status}</span>
+            <span className="label-caps text-foreground">Edit</span>
+          </div>
+        </div>
+      </div>
     </button>
   )
 }

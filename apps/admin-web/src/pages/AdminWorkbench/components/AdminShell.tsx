@@ -1,80 +1,116 @@
 import type { PropsWithChildren, ReactElement } from 'react'
 
-import { Button } from '@/components/ui/button'
+import {
+  BookMarked,
+  BookOpenText,
+  FolderHeart,
+  FolderKanban,
+  HelpCircle,
+  Palette,
+  SwatchBook,
+  Tags,
+} from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 import { navigationSections } from '../navigation'
+import { TopBar } from './TopBar'
+
+function resolveNavigationIcon(to: string) {
+  if (to.startsWith('/dictionaries/')) {
+    return Tags
+  }
+
+  if (to === '/base-colors') {
+    return Palette
+  }
+
+  if (to === '/palettes') {
+    return SwatchBook
+  }
+
+  if (to === '/collections') {
+    return FolderHeart
+  }
+
+  return BookMarked
+}
 
 // 管理台壳层组件，负责渲染固定侧边导航和当前激活页面内容。
 export function AdminShell({ children }: PropsWithChildren): ReactElement {
   return (
-    <div className="min-h-screen p-4 md:p-6 lg:p-8">
-      <div className="mx-auto grid min-h-[calc(100svh-2rem)] max-w-[1500px] overflow-hidden rounded-[32px] border border-[var(--dp-border-hairline)] bg-white/75 shadow-paper backdrop-blur-xl lg:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className="border-b border-[var(--dp-border-hairline)] bg-[var(--dp-overlay-glass)] p-5 lg:border-b-0 lg:border-r lg:p-6">
-          <div className="space-y-3">
-            <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">DayPalette</p>
-            <div>
-              <h1 className="display-font text-4xl tracking-[-0.04em] text-foreground">Color Admin</h1>
-              <p className="mt-2 max-w-[22ch] text-sm leading-6 text-muted-foreground">
-                本地优先的配色资产管理台，先收口口径，再维护数据本身。
-              </p>
+    <div className="min-h-screen bg-[var(--dp-bg-page)] text-foreground">
+      <aside className="fixed inset-y-0 left-0 z-50 hidden w-[var(--dp-sidebar-width)] flex-col border-r border-[var(--dp-outline-variant)]/30 bg-[var(--dp-bg-page)] py-6 lg:flex">
+        <div className="mb-10 px-6">
+          <h1 className="display-font text-2xl font-bold text-foreground">DayPalette</h1>
+          <p className="mt-1 label-caps text-[var(--dp-text-muted)]/70">资产管理系统</p>
+        </div>
+
+        <nav className="scrollbar-hide flex-1 space-y-6 overflow-y-auto">
+          {navigationSections.map((section) => (
+            <div key={section.title} className="space-y-1">
+              <p className="px-6 label-caps text-[var(--dp-text-muted)]/70">{section.title}</p>
+              <div className="space-y-1">
+                {section.items.map((item) => (
+                  (() => {
+                    const ItemIcon = resolveNavigationIcon(item.to)
+
+                    return (
+                      <NavLink
+                        key={item.to}
+                        className={({ isActive }) =>
+                          [
+                            'flex items-center border-r-2 px-6 py-3 text-[var(--dp-text-muted)] transition-colors duration-200',
+                            isActive
+                              ? 'border-[var(--dp-fill-inverse)] bg-[var(--dp-surface-soft)] font-semibold text-foreground'
+                              : 'border-transparent hover:bg-[var(--dp-surface-soft)] hover:text-foreground',
+                          ].join(' ')
+                        }
+                        to={item.to}
+                      >
+                        <ItemIcon className="mr-3 size-5 shrink-0" />
+                        <span className="truncate text-sm leading-6">{item.label}</span>
+                      </NavLink>
+                    )
+                  })()
+                ))}
+              </div>
+            </div>
+          ))}
+        </nav>
+
+        <div className="mt-auto px-6">
+          <NavLink
+            className="inline-flex h-14 w-full items-center justify-center gap-2 border border-transparent bg-[var(--dp-fill-inverse)] px-6 label-caps text-[var(--dp-text-on-inverse)] transition-opacity hover:opacity-92"
+            to="/base-colors"
+          >
+            <Palette className="size-4" />
+            New Asset
+          </NavLink>
+
+          <div className="mt-6 space-y-3 border-t border-[var(--dp-outline-variant)]/20 pt-6 text-sm text-[var(--dp-text-muted)]">
+            <a className="flex items-center gap-2 hover:text-foreground" href="/README.md">
+              <BookOpenText className="size-4" />
+              Documentation
+            </a>
+            <div className="flex items-center gap-2">
+              <HelpCircle className="size-4" />
+              Support
+            </div>
+            <div className="flex items-center gap-2">
+              <FolderKanban className="size-4" />
+              frontend-module-playbook ready
             </div>
           </div>
+        </div>
+      </aside>
 
-          <nav className="mt-8 space-y-7">
-            {navigationSections.map((section) => (
-              <div key={section.title} className="space-y-3">
-                <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">{section.title}</p>
-                <div className="space-y-2">
-                  {section.items.map((item) => (
-                    <NavLink
-                      key={item.to}
-                      className={({ isActive }) =>
-                        [
-                          'block w-full rounded-[22px] border px-4 py-3 text-left transition-colors',
-                          isActive
-                            ? 'border-transparent bg-[var(--dp-fill-inverse)] text-[var(--dp-text-on-inverse)]'
-                            : 'border-border bg-white/70 text-foreground hover:bg-white',
-                        ].join(' ')
-                      }
-                      to={item.to}
-                    >
-                      {({ isActive }) => (
-                        <>
-                          <span className="block text-sm font-medium">{item.label}</span>
-                          <span
-                            className={[
-                              'mt-1 block text-xs leading-5',
-                              isActive ? 'text-white/75' : 'text-muted-foreground',
-                            ].join(' ')}
-                          >
-                            {item.description}
-                          </span>
-                        </>
-                      )}
-                    </NavLink>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </nav>
+      <TopBar />
 
-          <div className="mt-8 rounded-[24px] border border-border bg-white/70 p-4">
-            <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Skill Ready</p>
-            <p className="mt-2 text-sm leading-6 text-foreground">
-              前端已接入 frontend-module-playbook，后续页面模块按 page / view-model /
-              transformer / service 的边界继续扩展。
-            </p>
-            <Button className="mt-4 w-full" variant="outline">
-              查看项目骨架
-            </Button>
-          </div>
-        </aside>
-
-        <main className="min-w-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(249,248,246,0.96))] p-5 md:p-6 lg:p-8">
+      <main className="min-h-screen lg:ml-[var(--dp-sidebar-width)]">
+        <div className="mx-auto min-h-screen max-w-[1600px] px-5 pb-10 pt-[88px] sm:px-8 lg:px-[var(--dp-page-margin)] lg:pt-[calc(var(--dp-header-height)+var(--dp-page-margin))]">
           {children}
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   )
 }

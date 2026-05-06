@@ -1,5 +1,6 @@
 export interface CollectionCardModel {
   coverPaletteSlug: string
+  coverPreviewHexes: string[]
   id: string
   nameEn: string
   nameZh: string

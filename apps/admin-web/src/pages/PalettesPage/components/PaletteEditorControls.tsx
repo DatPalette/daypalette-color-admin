@@ -4,7 +4,7 @@ import type { PaletteEditorOption } from '@/models/palettes'
 
 // Palette 编辑表单的小标题组件，统一局部表单区的字段标题样式。
 export function SectionTitle({ children }: { children: string }): ReactElement {
-  return <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{children}</p>
+  return <p className="label-caps text-muted-foreground">{children}</p>
 }
 
 // Palette 编辑表单的单行文本输入控件。
@@ -23,7 +23,7 @@ export function TextInput({
     <label className="space-y-2">
       <SectionTitle>{label}</SectionTitle>
       <input
-        className="w-full rounded-[18px] border border-[var(--dp-border-hairline)] bg-[var(--dp-bg-page)] px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-[var(--dp-fill-inverse)]"
+        className="w-full border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-[var(--dp-fill-inverse)]"
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
         value={value}
@@ -48,7 +48,7 @@ export function SelectInput({
     <label className="space-y-2">
       <SectionTitle>{label}</SectionTitle>
       <select
-        className="w-full rounded-[18px] border border-[var(--dp-border-hairline)] bg-[var(--dp-bg-page)] px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-[var(--dp-fill-inverse)]"
+        className="w-full border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-[var(--dp-fill-inverse)]"
         onChange={(event) => onChange(event.target.value)}
         value={value}
       >
@@ -85,12 +85,13 @@ export function MultiSelectChips({
             <button
               key={option.value}
               className={[
-                'rounded-full border px-3 py-1.5 text-xs transition-colors',
+                'border px-3 py-1.5 text-xs transition-colors',
                 isSelected
                   ? 'border-transparent bg-[var(--dp-fill-inverse)] text-[var(--dp-text-on-inverse)]'
-                  : 'border-[var(--dp-border-hairline)] bg-[var(--dp-bg-page)] text-foreground',
+                  : 'border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] text-foreground',
               ].join(' ')}
               onClick={() => onToggle(option.value)}
+              aria-pressed={isSelected}
               type="button"
             >
               {option.label}

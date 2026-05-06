@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
+import { X } from 'lucide-react'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   ArchivedCollectionsSection,
   CollectionDeleteGuardSection,
@@ -26,6 +26,7 @@ export function CollectionDetailPanel({
   isSaving,
   onAddPaletteMember,
   onCheckDeleteRisk,
+  onClose,
   onDelete,
   onDeleteReasonChange,
   onDraftFieldChange,
@@ -48,6 +49,7 @@ export function CollectionDetailPanel({
   isSaving: boolean
   onAddPaletteMember: (paletteId: string) => void
   onCheckDeleteRisk: () => Promise<void>
+  onClose: () => void
   onDelete: () => Promise<void>
   onDeleteReasonChange: (value: string) => void
   onDraftFieldChange: (
@@ -73,70 +75,75 @@ export function CollectionDetailPanel({
 }): ReactElement {
   if (!draft || !editorOptions) {
     return (
-      <Card className="border-[var(--dp-border-hairline)] bg-white/80">
-        <CardContent className="p-6 text-sm leading-6 text-muted-foreground">
-          当前没有可展示的 Collection，请先检查后端返回是否为空。
-        </CardContent>
-      </Card>
+      <div className="flex h-full flex-col bg-white">
+        <div className="flex items-center justify-between border-b border-[var(--dp-border-subtle)] px-6 py-5">
+          <h2 className="display-font text-[2rem] leading-none tracking-[-0.03em] text-foreground">Edit Collection</h2>
+          <button className="text-muted-foreground hover:text-foreground" onClick={onClose} type="button">
+            <X className="size-5" />
+          </button>
+        </div>
+        <div className="p-6 text-sm leading-6 text-muted-foreground">当前没有可展示的 Collection，请先检查后端返回是否为空。</div>
+      </div>
     )
   }
 
-  const paletteLabelMap = buildOptionLabelMap(editorOptions.paletteOptions)
-  const releaseModeLabelMap = buildOptionLabelMap(editorOptions.releaseModeOptions)
-  const statusLabelMap = buildOptionLabelMap(editorOptions.statusOptions)
-  const themeTypeLabelMap = buildOptionLabelMap(editorOptions.themeTypeOptions)
-
   return (
-    <Card className="overflow-hidden border-[var(--dp-border-hairline)] bg-white/88 shadow-paper">
-      <CardHeader className="space-y-3 border-b border-[var(--dp-border-hairline)] bg-[linear-gradient(180deg,rgba(237,243,235,0.8),rgba(255,255,255,0.88))]">
+    <div className="flex h-full flex-col bg-white">
+      <div className="flex items-start justify-between gap-4 border-b border-[var(--dp-border-subtle)] px-6 py-5">
         <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">Collection Detail</p>
-          <CardTitle className="display-font text-4xl tracking-[-0.04em] text-foreground">{draft.nameZh}</CardTitle>
-          <p className="text-sm text-muted-foreground">{draft.nameEn}</p>
+          <p className="label-caps text-muted-foreground">{draft.id}</p>
+          <h2 className="display-font text-[2rem] leading-none tracking-[-0.03em] text-foreground">Edit Collection</h2>
+          <p className="text-sm text-muted-foreground">{draft.nameZh} / {draft.nameEn}</p>
         </div>
+
+        <button className="text-muted-foreground hover:text-foreground" onClick={onClose} type="button">
+          <X className="size-5" />
+        </button>
         <p className="text-sm leading-6 text-muted-foreground">
           当前已支持合集详情编辑、Palette 来源引用检查、软删除与恢复，保存会直接回写 `collections.v1.json`。
         </p>
-      </CardHeader>
+      </div>
 
-      <CardContent className="space-y-6 p-6">
+      <div className="flex-1 overflow-y-auto px-6 py-6">
         {saveMessage ? (
-          <div className="rounded-[20px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          <div className="mb-6 border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
             {saveMessage}
           </div>
         ) : null}
 
-        <CollectionSummarySection draft={draft} editorOptions={editorOptions} />
+        <div className="space-y-8">
+          <CollectionSummarySection draft={draft} editorOptions={editorOptions} />
 
-        <CollectionFormSection
-          draft={draft}
-          editorOptions={editorOptions}
-          isSaving={isSaving}
-          onAddPaletteMember={onAddPaletteMember}
-          onDraftFieldChange={onDraftFieldChange}
-          onDraftTagToggle={onDraftTagToggle}
-          onMovePaletteMember={onMovePaletteMember}
-          onRemovePaletteMember={onRemovePaletteMember}
-          onSave={onSave}
-          onSetCoverPalette={onSetCoverPalette}
-        />
+          <CollectionFormSection
+            draft={draft}
+            editorOptions={editorOptions}
+            isSaving={isSaving}
+            onAddPaletteMember={onAddPaletteMember}
+            onDraftFieldChange={onDraftFieldChange}
+            onDraftTagToggle={onDraftTagToggle}
+            onMovePaletteMember={onMovePaletteMember}
+            onRemovePaletteMember={onRemovePaletteMember}
+            onSave={onSave}
+            onSetCoverPalette={onSetCoverPalette}
+          />
 
-        <CollectionDeleteGuardSection
-          deleteCheck={deleteCheck}
-          deleteReason={deleteReason}
-          isDeleteChecking={isDeleteChecking}
-          isDeleting={isDeleting}
-          onCheckDeleteRisk={onCheckDeleteRisk}
-          onDelete={onDelete}
-          onDeleteReasonChange={onDeleteReasonChange}
-        />
+          <CollectionDeleteGuardSection
+            deleteCheck={deleteCheck}
+            deleteReason={deleteReason}
+            isDeleteChecking={isDeleteChecking}
+            isDeleting={isDeleting}
+            onCheckDeleteRisk={onCheckDeleteRisk}
+            onDelete={onDelete}
+            onDeleteReasonChange={onDeleteReasonChange}
+          />
 
-        <ArchivedCollectionsSection
-          archivedCollections={archivedCollections}
-          isRestoringId={isRestoringId}
-          onRestore={onRestore}
-        />
-      </CardContent>
-    </Card>
+          <ArchivedCollectionsSection
+            archivedCollections={archivedCollections}
+            isRestoringId={isRestoringId}
+            onRestore={onRestore}
+          />
+        </div>
+      </div>
+    </div>
   )
 }

@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 
 // 字典编辑表单的小标题组件，统一局部表单区的字段标题样式。
 export function SectionTitle({ children }: { children: string }): ReactElement {
-  return <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{children}</p>
+  return <p className="label-caps text-muted-foreground">{children}</p>
 }
 
 // 字典编辑表单的单行文本输入控件。
@@ -19,7 +19,7 @@ export function TextInput({
     <label className="space-y-2">
       <SectionTitle>{label}</SectionTitle>
       <input
-        className="w-full rounded-[18px] border border-[var(--dp-border-hairline)] bg-[var(--dp-bg-page)] px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-[var(--dp-fill-inverse)]"
+        className="w-full border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-[var(--dp-fill-inverse)]"
         onChange={(event) => onChange(event.target.value)}
         value={value}
       />
@@ -41,7 +41,7 @@ export function TextAreaInput({
     <label className="space-y-2">
       <SectionTitle>{label}</SectionTitle>
       <textarea
-        className="min-h-[88px] w-full rounded-[18px] border border-[var(--dp-border-hairline)] bg-[var(--dp-bg-page)] px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-[var(--dp-fill-inverse)]"
+        className="min-h-[88px] w-full border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-[var(--dp-fill-inverse)]"
         onChange={(event) => onChange(event.target.value)}
         value={value}
       />

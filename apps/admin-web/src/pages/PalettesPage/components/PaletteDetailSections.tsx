@@ -1,7 +1,6 @@
 import type { ReactElement } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import {
   MultiSelectChips,
   SectionTitle,
@@ -25,7 +24,7 @@ function resolveOptionLabel(optionLabelMap: Map<string, string>, value: string):
 
 function InfoRow({ label, value }: { label: string; value: string }): ReactElement {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-[var(--dp-border-hairline)] py-3 text-sm last:border-b-0">
+    <div className="flex items-start justify-between gap-4 border-b border-[var(--dp-border-subtle)] py-3 text-sm last:border-b-0">
       <span className="text-muted-foreground">{label}</span>
       <span className="text-right text-foreground">{value}</span>
     </div>
@@ -43,31 +42,29 @@ export function PaletteSummarySection({
   const baseColorLabelMap = buildOptionLabelMap(editorOptions.baseColorOptions)
   const occasionLabelMap = buildOptionLabelMap(editorOptions.occasionOptions)
   const statusLabelMap = buildOptionLabelMap(editorOptions.statusOptions)
+  const paletteRows = [
+    { label: 'Primary', value: resolveOptionLabel(baseColorLabelMap, draft.primaryColorId), color: 'var(--dp-palette-main)' },
+    { label: 'Secondary', value: resolveOptionLabel(baseColorLabelMap, draft.secondaryColorId), color: 'var(--dp-palette-secondary)' },
+    { label: 'Accent', value: resolveOptionLabel(baseColorLabelMap, draft.accentColorId), color: 'var(--dp-palette-accent)' },
+  ]
 
   return (
     <>
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-[var(--dp-border-hairline)] bg-[var(--dp-fill-soft)]">
-          <CardContent className="space-y-2 p-4">
-            <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Primary</p>
-            <p className="font-medium text-foreground">{resolveOptionLabel(baseColorLabelMap, draft.primaryColorId)}</p>
-          </CardContent>
-        </Card>
-        <Card className="border-[var(--dp-border-hairline)] bg-[var(--dp-fill-soft)]">
-          <CardContent className="space-y-2 p-4">
-            <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Secondary</p>
-            <p className="font-medium text-foreground">{resolveOptionLabel(baseColorLabelMap, draft.secondaryColorId)}</p>
-          </CardContent>
-        </Card>
-        <Card className="border-[var(--dp-border-hairline)] bg-[var(--dp-fill-soft)]">
-          <CardContent className="space-y-2 p-4">
-            <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Accent</p>
-            <p className="font-medium text-foreground">{resolveOptionLabel(baseColorLabelMap, draft.accentColorId)}</p>
-          </CardContent>
-        </Card>
+      <div className="space-y-3 border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] p-4">
+        {paletteRows.map((row) => (
+          <div key={row.label} className="flex items-center justify-between gap-3 border border-[var(--dp-border-subtle)] bg-white px-4 py-3">
+            <div className="flex items-center gap-3">
+              <span className="size-10 border border-black/5" style={{ backgroundColor: row.color }} />
+              <div>
+                <p className="label-caps text-muted-foreground">{row.label}</p>
+                <p className="mt-1 text-sm font-medium text-foreground">{row.value}</p>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
-      <div className="rounded-[24px] border border-[var(--dp-border-hairline)] bg-[var(--dp-fill-panel)] px-5 py-3">
+      <div className="border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-5 py-3">
         <InfoRow label="Palette ID" value={draft.id} />
         <InfoRow label="Occasion" value={resolveOptionLabel(occasionLabelMap, draft.occasionId)} />
         <InfoRow label="Safety Level" value={draft.safetyLevel} />
@@ -114,7 +111,7 @@ export function PaletteFormSection({
 }): ReactElement {
   return (
     <>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 border-t border-[var(--dp-border-subtle)] pt-8 md:grid-cols-2">
         <TextInput
           disabled={!isCreating}
           label="ID"
@@ -164,57 +161,65 @@ export function PaletteFormSection({
         />
       </div>
 
-      <label className="flex items-center gap-3 rounded-[18px] border border-[var(--dp-border-hairline)] bg-[var(--dp-bg-page)] px-4 py-3">
+      <label className="flex items-center justify-between gap-3 border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3">
+        <div>
+          <SectionTitle>Pro Flag</SectionTitle>
+          <p className="mt-1 text-sm text-muted-foreground">高价值配色可单独标记为 Pro。</p>
+        </div>
         <input
           checked={draft.isPro}
           className="size-4 accent-[var(--dp-fill-inverse)]"
           onChange={(event) => onDraftFieldChange('isPro', event.target.checked)}
           type="checkbox"
         />
-        <span>作为 Pro Palette 保留</span>
       </label>
 
-      <label className="flex items-center gap-3 rounded-[18px] border border-[var(--dp-border-hairline)] bg-[var(--dp-bg-page)] px-4 py-3">
+      <label className="flex items-center justify-between gap-3 border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3">
+        <div>
+          <SectionTitle>Photo Fit</SectionTitle>
+          <p className="mt-1 text-sm text-muted-foreground">适合作为拍照场景推荐时启用。</p>
+        </div>
         <input
           checked={draft.fitPhotoScenario}
           className="size-4 accent-[var(--dp-fill-inverse)]"
           onChange={(event) => onDraftFieldChange('fitPhotoScenario', event.target.checked)}
           type="checkbox"
         />
-        <span>适合作为拍照场景推荐</span>
       </label>
 
-      <MultiSelectChips
-        label="Mood Tags"
-        onToggle={(value) => onDraftTagToggle('moodTags', value)}
-        options={editorOptions.moodTagOptions}
-        selectedValues={draft.moodTags}
-      />
+      <div className="space-y-6 border-b border-[var(--dp-border-subtle)] pb-8">
+        <MultiSelectChips
+          label="Mood Tags"
+          onToggle={(value) => onDraftTagToggle('moodTags', value)}
+          options={editorOptions.moodTagOptions}
+          selectedValues={draft.moodTags}
+        />
 
-      <MultiSelectChips
-        label="Style Tags"
-        onToggle={(value) => onDraftTagToggle('styleTags', value)}
-        options={editorOptions.styleTagOptions}
-        selectedValues={draft.styleTags}
-      />
+        <MultiSelectChips
+          label="Style Tags"
+          onToggle={(value) => onDraftTagToggle('styleTags', value)}
+          options={editorOptions.styleTagOptions}
+          selectedValues={draft.styleTags}
+        />
 
-      <MultiSelectChips
-        label="Season Tags"
-        onToggle={(value) => onDraftTagToggle('seasonTags', value)}
-        options={editorOptions.seasonTagOptions}
-        selectedValues={draft.seasonTags}
-      />
+        <MultiSelectChips
+          label="Season Tags"
+          onToggle={(value) => onDraftTagToggle('seasonTags', value)}
+          options={editorOptions.seasonTagOptions}
+          selectedValues={draft.seasonTags}
+        />
 
-      <MultiSelectChips
-        label="Source Collections"
-        onToggle={(value) => onDraftTagToggle('sourceCollectionIds', value)}
-        options={editorOptions.sourceCollectionOptions}
-        selectedValues={draft.sourceCollectionIds}
-      />
+        <MultiSelectChips
+          label="Source Collections"
+          onToggle={(value) => onDraftTagToggle('sourceCollectionIds', value)}
+          options={editorOptions.sourceCollectionOptions}
+          selectedValues={draft.sourceCollectionIds}
+        />
 
-      <Button className="w-full" disabled={isSaving} onClick={() => void onSave()} variant="primary">
-        {isSaving ? '正在保存…' : isCreating ? '创建 Palette' : '保存 Palette'}
-      </Button>
+        <Button className="w-full" disabled={isSaving} onClick={() => void onSave()} variant="primary">
+          {isSaving ? '正在保存…' : isCreating ? '创建 Palette' : '保存 Palette'}
+        </Button>
+      </div>
     </>
   )
 }
@@ -238,7 +243,7 @@ export function PaletteDeleteGuardSection({
   onDeleteReasonChange: (value: string) => void
 }): ReactElement {
   return (
-    <div className="space-y-4 rounded-[24px] border border-amber-200 bg-amber-50/70 p-4">
+    <div className="space-y-4 border border-amber-200 bg-amber-50/70 p-4">
       <div className="space-y-2">
         <SectionTitle>Delete Guard</SectionTitle>
         <p className="text-sm leading-6 text-foreground">
@@ -250,11 +255,11 @@ export function PaletteDeleteGuardSection({
 
       {deleteCheck ? (
         deleteCheck.canDelete ? (
-          <div className="rounded-[20px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          <div className="border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
             当前未发现 Collection 引用，可以执行软删除。
           </div>
         ) : (
-          <div className="space-y-3 rounded-[20px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="space-y-3 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             <p>当前 Palette 仍被以下 Collection 引用，不能软删除：</p>
             <div className="space-y-2 text-xs leading-5">
               {deleteCheck.blockingReferences.map((reference) => (
@@ -277,7 +282,7 @@ export function PaletteDeleteGuardSection({
           {isDeleteChecking ? '正在检查…' : '检查删除风险'}
         </Button>
         <Button
-          className="w-full"
+          className="w-full border-red-300 text-red-700 hover:bg-red-50"
           disabled={isDeleteChecking || isDeleting || !deleteCheck?.canDelete}
           onClick={() => void onDelete()}
           variant="outline"
@@ -300,14 +305,14 @@ export function ArchivedPalettesSection({
   onRestore: (id: string) => Promise<void>
 }): ReactElement {
   return (
-    <div className="space-y-3 rounded-[24px] border border-sky-200 bg-sky-50/70 p-4">
+    <div className="space-y-3 border border-sky-200 bg-sky-50/70 p-4">
       <div className="space-y-2">
         <SectionTitle>Archived Palettes</SectionTitle>
         <p className="text-sm leading-6 text-foreground">已软删除的 Palette 会出现在这里，恢复后会重新回到可编辑列表。</p>
       </div>
 
       {archivedPalettes.length === 0 ? (
-        <div className="rounded-[18px] border border-sky-100 bg-white/70 px-4 py-3 text-sm text-muted-foreground">
+        <div className="border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3 text-sm text-muted-foreground">
           当前没有已归档的 Palette。
         </div>
       ) : (
@@ -315,7 +320,7 @@ export function ArchivedPalettesSection({
           {archivedPalettes.map((item) => (
             <div
               key={item.id}
-              className="flex items-center justify-between gap-3 rounded-[18px] border border-sky-100 bg-white/80 px-4 py-3"
+              className="flex items-center justify-between gap-3 border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3"
             >
               <div>
                 <p className="text-sm font-medium text-foreground">{item.slug}</p>

@@ -1,20 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --dp-bg-page: #f9f8f6;
-  --dp-text-primary: #1a1a1a;
-  --dp-text-muted: #8c8c8c;
-  --dp-border-subtle: rgba(0, 0, 0, 0.08);
-  --dp-border-hairline: rgba(0, 0, 0, 0.03);
+  --dp-bg-page: #fdf8f8;
+  --dp-text-primary: #1c1b1b;
+  --dp-text-muted: #444748;
+  --dp-border-subtle: rgba(196, 199, 199, 0.5);
+  --dp-border-hairline: rgba(196, 199, 199, 0.3);
   --dp-surface-card: #ffffff;
+  --dp-surface-soft: #f7f3f2;
+  --dp-surface-high: #ebe7e6;
+  --dp-outline: #747878;
+  --dp-outline-variant: #c4c7c7;
   --dp-overlay-glass: rgba(249, 248, 246, 0.75);
   --dp-fill-inverse: #1a1a1a;
   --dp-text-on-inverse: #ffffff;
   --dp-palette-main: #e8d8d3;
   --dp-palette-secondary: #c5b9b6;
   --dp-palette-accent: #5d637a;
+  --dp-sidebar-width: 260px;
+  --dp-header-height: 64px;
+  --dp-page-margin: 40px;
 
   --background: var(--dp-bg-page);
   --foreground: var(--dp-text-primary);
@@ -27,7 +36,7 @@
   --border: var(--dp-border-subtle);
   --input: var(--dp-border-subtle);
   --ring: rgba(26, 26, 26, 0.18);
-  --radius: 18px;
+  --radius: 8px;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -46,13 +55,9 @@ html {
 body {
   margin: 0;
   min-height: 100svh;
-  font-family: 'DM Sans', 'Noto Sans SC', sans-serif;
+  font-family: 'Manrope', 'Noto Sans SC', sans-serif;
   color: var(--foreground);
-  background:
-    radial-gradient(circle at top left, rgba(232, 216, 211, 0.6), transparent 30%),
-    radial-gradient(circle at right 10% top 20%, rgba(93, 99, 122, 0.12), transparent 24%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(249, 248, 246, 0.95)),
-    var(--background);
+  background: var(--background);
 }
 
 button,
@@ -67,5 +72,33 @@ select {
 }
 
 .display-font {
-  font-family: 'Cormorant Garamond', 'Noto Serif SC', serif;
+  font-family: 'Noto Serif SC', 'Noto Serif', serif;
+}
+
+.label-caps {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.paper-card {
+  border: 1px solid rgba(196, 199, 199, 0.3);
+  background: var(--dp-surface-card);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.glass-header {
+  background: rgba(253, 248, 248, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(196, 199, 199, 0.3);
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }

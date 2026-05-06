@@ -33,6 +33,56 @@ export const navigationSections: WorkbenchNavigationSection[] = [
         to: workbenchPaths.dictionaries('styleTag'),
       },
       {
+        label: '季节标签管理',
+        description: '维护季节标签集合',
+        to: workbenchPaths.dictionaries('seasonTag'),
+      },
+      {
+        label: '心情标签管理',
+        description: '维护情绪标签集合',
+        to: workbenchPaths.dictionaries('moodTag'),
+      },
+      {
+        label: '色系管理',
+        description: '维护基础色色系',
+        to: workbenchPaths.dictionaries('colorFamily'),
+      },
+      {
+        label: '冷暖管理',
+        description: '维护冷暖属性',
+        to: workbenchPaths.dictionaries('tone'),
+      },
+      {
+        label: '明度等级管理',
+        description: '维护明度枚举',
+        to: workbenchPaths.dictionaries('lightnessLevel'),
+      },
+      {
+        label: '饱和度等级管理',
+        description: '维护饱和度枚举',
+        to: workbenchPaths.dictionaries('saturationLevel'),
+      },
+      {
+        label: '安全等级管理',
+        description: '维护配色安全等级',
+        to: workbenchPaths.dictionaries('safetyLevel'),
+      },
+      {
+        label: '集合主题管理',
+        description: '维护合集主题类型',
+        to: workbenchPaths.dictionaries('themeType'),
+      },
+      {
+        label: '发布模式管理',
+        description: '维护合集发布模式',
+        to: workbenchPaths.dictionaries('releaseMode'),
+      },
+      {
+        label: '来源类型管理',
+        description: '维护配色来源类型',
+        to: workbenchPaths.dictionaries('sourceType'),
+      },
+      {
         label: '状态管理',
         description: '沉淀生命周期和软删除状态',
         to: workbenchPaths.dictionaries('status'),

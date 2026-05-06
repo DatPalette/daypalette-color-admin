@@ -7,6 +7,7 @@ import type {
   CollectionsPageModel,
 } from '@/models/collections'
 import type { DictionariesDocumentDto, DictionaryNodeDto } from '@/models/dictionaries'
+import type { BaseColorCollectionDto } from '@/models/base-colors'
 import type { PaletteCollectionDto } from '@/models/palettes'
 import { formatUpdatedAtLabel } from '@/utils/format-updated-at-label'
 
@@ -18,6 +19,24 @@ function buildPaletteSlugMap(palettes: PaletteCollectionDto): Map<string, string
 // 把 paletteId 收敛成优先展示 slug、兜底展示原始 id 的文案规则。
 function resolvePaletteSlug(paletteSlugMap: Map<string, string>, paletteId: string): string {
   return paletteSlugMap.get(paletteId) ?? paletteId
+}
+
+function buildBaseColorHexMap(baseColors?: BaseColorCollectionDto | null): Map<string, string> {
+  return new Map((baseColors?.items ?? []).map((item) => [item.id, item.hex]))
+}
+
+function buildPalettePreviewMap(
+  palettes: PaletteCollectionDto,
+  baseColorHexMap: Map<string, string>,
+): Map<string, string[]> {
+  return new Map(
+    palettes.items.map((palette) => [
+      palette.id,
+      [palette.primaryColorId, palette.secondaryColorId, palette.accentColorId].map(
+        (colorId) => baseColorHexMap.get(colorId) ?? 'var(--dp-surface-high)',
+      ),
+    ]),
+  )
 }
 
 // 为编辑器选项建立 value 到 label 的索引，避免页面层反复线性查找。
@@ -34,6 +53,7 @@ function resolveOptionLabel(optionLabelMap: Map<string, string>, value: string):
 function toCollectionCardModel(
   collection: CollectionsDocumentDto['items'][number],
   paletteSlugMap: Map<string, string>,
+  palettePreviewMap: Map<string, string[]>,
   optionMaps: {
     statusLabelMap: Map<string, string>
     themeTypeLabelMap: Map<string, string>
@@ -41,6 +61,11 @@ function toCollectionCardModel(
 ): CollectionCardModel {
   return {
     coverPaletteSlug: resolvePaletteSlug(paletteSlugMap, collection.coverPaletteId),
+    coverPreviewHexes: palettePreviewMap.get(collection.coverPaletteId) ?? [
+      'var(--dp-surface-high)',
+      'var(--dp-palette-secondary)',
+      'var(--dp-palette-accent)',
+    ],
     id: collection.id,
     nameEn: collection.nameEn,
     nameZh: collection.nameZh,
@@ -83,9 +108,11 @@ export function toCollectionsPageModel(
   collectionDocument: CollectionsDocumentDto,
   paletteCollection: PaletteCollectionDto,
   selectedCollectionId: string | null,
+  baseColors?: BaseColorCollectionDto | null,
   editorOptions?: CollectionEditorOptions | null,
 ): CollectionsPageModel {
   const paletteSlugMap = buildPaletteSlugMap(paletteCollection)
+  const palettePreviewMap = buildPalettePreviewMap(paletteCollection, buildBaseColorHexMap(baseColors))
   const optionMaps = {
     statusLabelMap: buildOptionLabelMap(editorOptions?.statusOptions ?? []),
     themeTypeLabelMap: buildOptionLabelMap(editorOptions?.themeTypeOptions ?? []),
@@ -96,7 +123,9 @@ export function toCollectionsPageModel(
     null
 
   return {
-    cards: collectionDocument.items.map((item) => toCollectionCardModel(item, paletteSlugMap, optionMaps)),
+    cards: collectionDocument.items.map((item) =>
+      toCollectionCardModel(item, paletteSlugMap, palettePreviewMap, optionMaps),
+    ),
     detail: toCollectionDetailModel(detailCollection, paletteSlugMap),
     totalLabel: `${collectionDocument.items.length} 本合集`,
     updatedAtLabel: formatUpdatedAtLabel(collectionDocument.updatedAt),

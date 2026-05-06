@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 
+import type { BaseColorCollectionDto } from '@/models/base-colors'
+import { getBaseColorCollection } from '@/services/base-colors/base-colors.service'
 import { getDictionariesCollection } from '@/services/dictionaries/dictionaries.service'
 import type {
   CollectionDeleteCheckDto,
@@ -66,6 +68,7 @@ interface CollectionsPageViewModel {
 export function useCollectionsPageViewModel(): CollectionsPageViewModel {
   const [collectionDocument, setCollectionDocument] = useState<CollectionsDocumentDto | null>(null)
   const [allCollectionDocument, setAllCollectionDocument] = useState<CollectionsDocumentDto | null>(null)
+  const [baseColorCollection, setBaseColorCollection] = useState<BaseColorCollectionDto | null>(null)
   const [paletteCollection, setPaletteCollection] = useState<PaletteCollectionDto | null>(null)
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null)
   const [deleteCheck, setDeleteCheck] = useState<CollectionDeleteCheckDto | null>(null)
@@ -93,10 +96,11 @@ export function useCollectionsPageViewModel(): CollectionsPageViewModel {
     setSaveMessage(null)
 
     try {
-      const [nextCollectionDocument, nextAllCollectionDocument, nextPaletteCollection, dictionaries] = await Promise.all([
+      const [nextCollectionDocument, nextAllCollectionDocument, nextPaletteCollection, nextBaseColorCollection, dictionaries] = await Promise.all([
         getCollectionsCollection(),
         getCollectionsCollection({ includeDeleted: true }),
         getPalettesCollection(),
+        getBaseColorCollection(),
         getDictionariesCollection(),
       ])
       const nextEditorOptions = toCollectionEditorOptions(nextPaletteCollection, dictionaries)
@@ -111,6 +115,7 @@ export function useCollectionsPageViewModel(): CollectionsPageViewModel {
 
       setCollectionDocument(nextCollectionDocument)
       setAllCollectionDocument(nextAllCollectionDocument)
+      setBaseColorCollection(nextBaseColorCollection)
       setPaletteCollection(nextPaletteCollection)
       setEditorOptions(nextEditorOptions)
       setSelectedCollectionId(nextSelectedCollectionId)
@@ -119,6 +124,7 @@ export function useCollectionsPageViewModel(): CollectionsPageViewModel {
           nextCollectionDocument,
           nextPaletteCollection,
           nextSelectedCollectionId,
+          nextBaseColorCollection,
           nextEditorOptions,
         ),
       )
@@ -139,7 +145,7 @@ export function useCollectionsPageViewModel(): CollectionsPageViewModel {
     setDeleteCheck(null)
     setDeleteReason('')
     setSaveMessage(null)
-    setModel(toCollectionsPageModel(collectionDocument, paletteCollection, id, editorOptions))
+    setModel(toCollectionsPageModel(collectionDocument, paletteCollection, id, baseColorCollection, editorOptions))
     setDraft(cloneCollection(findSelectedCollection(collectionDocument, id)))
   }
 
@@ -273,7 +279,15 @@ export function useCollectionsPageViewModel(): CollectionsPageViewModel {
       setCollectionDocument(nextCollectionDocument)
       setAllCollectionDocument(nextAllCollectionDocument)
       setSelectedCollectionId(nextSelectedCollection?.id ?? nextCollectionDocument.items[0]?.id ?? null)
-      setModel(toCollectionsPageModel(nextCollectionDocument, paletteCollection, draft.id, editorOptions))
+      setModel(
+        toCollectionsPageModel(
+          nextCollectionDocument,
+          paletteCollection,
+          draft.id,
+          baseColorCollection,
+          editorOptions,
+        ),
+      )
       setDraft(cloneCollection(nextSelectedCollection))
       setSaveMessage('已写回 collections.v1.json。')
     } catch (error) {
@@ -340,6 +354,7 @@ export function useCollectionsPageViewModel(): CollectionsPageViewModel {
           nextCollectionDocument,
           paletteCollection,
           nextSelectedCollectionId,
+          baseColorCollection,
           editorOptions,
         ),
       )
@@ -369,7 +384,9 @@ export function useCollectionsPageViewModel(): CollectionsPageViewModel {
       setCollectionDocument(nextCollectionDocument)
       setAllCollectionDocument(nextAllCollectionDocument)
       setSelectedCollectionId(nextSelectedCollection?.id ?? nextCollectionDocument.items[0]?.id ?? null)
-      setModel(toCollectionsPageModel(nextCollectionDocument, paletteCollection, id, editorOptions))
+      setModel(
+        toCollectionsPageModel(nextCollectionDocument, paletteCollection, id, baseColorCollection, editorOptions),
+      )
       setDraft(cloneCollection(nextSelectedCollection))
       setSaveMessage('已恢复 Collection，并重新回到可编辑列表。')
     } catch (error) {

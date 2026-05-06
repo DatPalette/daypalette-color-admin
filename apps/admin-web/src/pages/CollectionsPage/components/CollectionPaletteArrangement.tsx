@@ -30,7 +30,7 @@ export function CollectionPaletteArrangement({
   const availablePaletteOptions = paletteOptions.filter((option) => !paletteIds.includes(option.value))
 
   return (
-    <div className="space-y-4 rounded-[24px] border border-[var(--dp-border-hairline)] bg-[var(--dp-fill-panel)] p-4">
+    <div className="space-y-4 border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] p-4">
       <div className="space-y-2">
         <SectionTitle>Member Arrangement</SectionTitle>
         <p className="text-sm leading-6 text-foreground">
@@ -39,7 +39,7 @@ export function CollectionPaletteArrangement({
       </div>
 
       {paletteIds.length === 0 ? (
-        <div className="rounded-[18px] border border-[var(--dp-border-hairline)] bg-white/70 px-4 py-3 text-sm text-muted-foreground">
+        <div className="border border-[var(--dp-border-subtle)] bg-white/70 px-4 py-3 text-sm text-muted-foreground">
           当前还没有成员 palette，请先从下方加入。
         </div>
       ) : (
@@ -51,7 +51,7 @@ export function CollectionPaletteArrangement({
             return (
               <div
                 key={paletteId}
-                className="flex items-center justify-between gap-3 rounded-[18px] border border-[var(--dp-border-hairline)] bg-white/85 px-4 py-3"
+                className="flex items-center justify-between gap-3 border border-[var(--dp-border-subtle)] bg-white/85 px-4 py-3"
               >
                 <div className="min-w-0 space-y-1">
                   <p className="truncate text-sm font-medium text-foreground">{paletteLabel}</p>
@@ -111,7 +111,7 @@ export function CollectionPaletteArrangement({
             {availablePaletteOptions.map((option) => (
               <button
                 key={option.value}
-                className="rounded-full border border-[var(--dp-border-hairline)] bg-[var(--dp-bg-page)] px-3 py-1.5 text-xs text-foreground transition-colors hover:border-[var(--dp-fill-inverse)]"
+                className="border border-[var(--dp-border-subtle)] bg-white px-3 py-1.5 text-xs text-foreground transition-colors hover:border-[var(--dp-fill-inverse)]"
                 onClick={() => onAddPalette(option.value)}
                 type="button"
               >

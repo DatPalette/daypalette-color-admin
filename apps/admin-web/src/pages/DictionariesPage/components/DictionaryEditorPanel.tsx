@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
+import { X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type {
   DictionaryItemCreateDto,
   DictionaryItemDeleteCheckDto,
@@ -24,6 +24,7 @@ export function DictionaryEditorPanel({
   isRestoringItemId,
   isSaving,
   onCheckDeleteRisk,
+  onClose,
   onCreateItem,
   onCreateItemFieldChange,
   onDeleteItem,
@@ -45,6 +46,7 @@ export function DictionaryEditorPanel({
   isRestoringItemId: string | null
   isSaving: boolean
   onCheckDeleteRisk: (itemId: string) => Promise<void>
+  onClose: () => void
   onCreateItem: () => Promise<void>
   onCreateItemFieldChange: (
     field: 'id' | 'isActive' | 'labelEn' | 'labelZh' | 'sortOrder',
@@ -67,34 +69,43 @@ export function DictionaryEditorPanel({
 }): ReactElement {
   if (!draft) {
     return (
-      <Card className="border-[var(--dp-border-hairline)] bg-white/90">
-        <CardContent className="p-6 text-sm leading-6 text-muted-foreground">
-          当前还没有可编辑的字典。
-        </CardContent>
-      </Card>
+      <div className="flex h-full flex-col bg-white">
+        <div className="flex items-center justify-between border-b border-[var(--dp-border-subtle)] px-6 py-5">
+          <h2 className="display-font text-[2rem] leading-none tracking-[-0.03em] text-foreground">Edit Dictionary</h2>
+          <button className="text-muted-foreground hover:text-foreground" onClick={onClose} type="button">
+            <X className="size-5" />
+          </button>
+        </div>
+        <div className="p-6 text-sm leading-6 text-muted-foreground">当前还没有可编辑的字典。</div>
+      </div>
     )
   }
 
   return (
-    <Card className="border-[var(--dp-border-hairline)] bg-white/92">
-      <CardHeader>
-        <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">{draft.key}</p>
-        <CardTitle className="text-3xl">编辑字典</CardTitle>
-        <CardDescription className="text-sm">当前先开放字典标题、说明和条目标签编辑。</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-5 text-sm leading-6 text-foreground">
+    <div className="flex h-full flex-col bg-white">
+      <div className="flex items-start justify-between gap-4 border-b border-[var(--dp-border-subtle)] px-6 py-5">
+        <div className="space-y-2">
+          <p className="label-caps text-muted-foreground">{draft.key}</p>
+          <h2 className="display-font text-[2rem] leading-none tracking-[-0.03em] text-foreground">Edit Dictionary</h2>
+          <p className="text-sm text-muted-foreground">当前先开放字典标题、说明和条目标签编辑。</p>
+        </div>
+        <button className="text-muted-foreground hover:text-foreground" onClick={onClose} type="button">
+          <X className="size-5" />
+        </button>
+      </div>
+      <div className="flex-1 overflow-y-auto px-6 py-6 text-sm leading-6 text-foreground">
         {saveMessage ? (
-          <div className="rounded-[20px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          <div className="mb-6 border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
             {saveMessage}
           </div>
         ) : null}
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 border-b border-[var(--dp-border-subtle)] pb-8 md:grid-cols-2">
           <TextInput label="中文标题" onChange={(value) => onDictionaryFieldChange('labelZh', value)} value={draft.labelZh} />
           <TextInput label="英文标题" onChange={(value) => onDictionaryFieldChange('labelEn', value)} value={draft.labelEn} />
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 border-b border-[var(--dp-border-subtle)] py-8 md:grid-cols-2">
           <TextAreaInput
             label="中文说明"
             onChange={(value) => onDictionaryFieldChange('descriptionZh', value)}
@@ -107,20 +118,20 @@ export function DictionaryEditorPanel({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3 text-xs text-muted-foreground">
-          <div className="rounded-[18px] bg-[var(--dp-bg-page)] px-4 py-3">
-            <p className="uppercase tracking-[0.18em]">Selection Mode</p>
+        <div className="grid grid-cols-2 gap-3 border-b border-[var(--dp-border-subtle)] py-8 text-xs text-muted-foreground">
+          <div className="border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3">
+            <p className="label-caps">Selection Mode</p>
             <p className="mt-2 text-sm text-foreground">{draft.selectionMode}</p>
           </div>
-          <div className="rounded-[18px] bg-[var(--dp-bg-page)] px-4 py-3">
-            <p className="uppercase tracking-[0.18em]">Entity Scopes</p>
+          <div className="border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3">
+            <p className="label-caps">Entity Scopes</p>
             <p className="mt-2 text-sm text-foreground">{draft.entityScopes.join(', ')}</p>
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 border-b border-[var(--dp-border-subtle)] py-8">
           <SectionTitle>Field Mappings</SectionTitle>
-          <div className="space-y-2 rounded-[22px] bg-[var(--dp-bg-page)] p-4 text-sm text-muted-foreground">
+          <div className="space-y-2 border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] p-4 text-sm text-muted-foreground">
             {draft.fieldMappings.map((fieldMapping) => (
               <div key={`${fieldMapping.entity}-${fieldMapping.field}`} className="flex items-center justify-between gap-3">
                 <span>
@@ -132,9 +143,9 @@ export function DictionaryEditorPanel({
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 py-8">
           <SectionTitle>Items</SectionTitle>
-          <div className="space-y-3 rounded-[22px] border border-sky-200 bg-sky-50/70 p-4">
+          <div className="space-y-3 border border-sky-200 bg-sky-50/70 p-4">
             <div className="space-y-2">
               <SectionTitle>Create Item</SectionTitle>
               <p className="text-sm leading-6 text-foreground">当前先开放字典项新增的最小入口：ID、标签、启用状态和排序。</p>
@@ -146,7 +157,7 @@ export function DictionaryEditorPanel({
                 onChange={(value) => onCreateItemFieldChange('id', value)}
                 value={createItemDraft.id}
               />
-              <label className="flex items-center gap-2 rounded-[18px] border border-[var(--dp-border-hairline)] bg-white px-4 py-3 text-sm text-foreground md:self-end">
+              <label className="flex items-center gap-2 border border-[var(--dp-border-subtle)] bg-white px-4 py-3 text-sm text-foreground md:self-end">
                 <input
                   checked={createItemDraft.isActive}
                   className="size-4 accent-[var(--dp-fill-inverse)]"
@@ -168,7 +179,7 @@ export function DictionaryEditorPanel({
               <label className="space-y-2 md:max-w-[160px]">
                 <SectionTitle>Sort Order</SectionTitle>
                 <input
-                  className="w-full rounded-[18px] border border-[var(--dp-border-hairline)] bg-white px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-[var(--dp-fill-inverse)]"
+                  className="w-full border border-[var(--dp-border-subtle)] bg-white px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-[var(--dp-fill-inverse)]"
                   onChange={(event) => onCreateItemFieldChange('sortOrder', Number(event.target.value) || 0)}
                   type="number"
                   value={createItemDraft.sortOrder}
@@ -183,10 +194,10 @@ export function DictionaryEditorPanel({
 
           <div className="max-h-[52svh] space-y-3 overflow-y-auto pr-1">
             {draft.items.map((item) => (
-              <div key={item.id} className="space-y-3 rounded-[22px] border border-[var(--dp-border-hairline)] bg-[var(--dp-bg-page)] p-4">
+              <div key={item.id} className="space-y-3 border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{item.id}</p>
+                    <p className="label-caps text-muted-foreground">{item.id}</p>
                     <p className="text-sm text-muted-foreground">
                       aliases: {item.aliases?.length ? item.aliases.join(', ') : 'none'}
                     </p>
@@ -218,7 +229,7 @@ export function DictionaryEditorPanel({
                   <label className="space-y-2">
                     <SectionTitle>Sort Order</SectionTitle>
                     <input
-                      className="w-full rounded-[18px] border border-[var(--dp-border-hairline)] bg-white px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-[var(--dp-fill-inverse)]"
+                      className="w-full border border-[var(--dp-border-subtle)] bg-white px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-[var(--dp-fill-inverse)]"
                       onChange={(event) =>
                         onDictionaryItemFieldChange(item.id, 'sortOrder', Number(event.target.value) || 0)
                       }
@@ -228,7 +239,7 @@ export function DictionaryEditorPanel({
                   </label>
                 </div>
 
-                <div className="space-y-3 rounded-[18px] border border-amber-200 bg-amber-50/70 p-4">
+                <div className="space-y-3 border border-amber-200 bg-amber-50/70 p-4">
                   <SectionTitle>Delete Guard</SectionTitle>
                   <TextInput
                     label="删除原因"
@@ -238,11 +249,11 @@ export function DictionaryEditorPanel({
 
                   {deleteCheck?.itemId === item.id ? (
                     deleteCheck.canDelete ? (
-                      <div className="rounded-[18px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                      <div className="border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
                         当前未发现主数据引用，可以执行软删除。
                       </div>
                     ) : (
-                      <div className="space-y-3 rounded-[18px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                      <div className="space-y-3 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                         <p>当前字典项仍被以下记录引用，不能软删除：</p>
                         <div className="space-y-2 text-xs leading-5">
                           {deleteCheck.blockingReferences.map((reference) => (
@@ -265,7 +276,7 @@ export function DictionaryEditorPanel({
                       {isDeleteCheckingItemId === item.id ? '正在检查…' : '检查删除风险'}
                     </Button>
                     <Button
-                      className="w-full"
+                      className="w-full border-red-300 text-red-700 hover:bg-red-50"
                       disabled={
                         isDeleteCheckingItemId === item.id ||
                         isDeletingItemId === item.id ||
@@ -283,14 +294,14 @@ export function DictionaryEditorPanel({
           </div>
         </div>
 
-        <div className="space-y-3 rounded-[22px] border border-sky-200 bg-sky-50/70 p-4">
+        <div className="space-y-3 border border-sky-200 bg-sky-50/70 p-4">
           <div className="space-y-2">
             <SectionTitle>Archived Items</SectionTitle>
             <p className="text-sm leading-6 text-foreground">已软删除的字典项会显示在这里，恢复后会重新回到当前字典的可编辑列表。</p>
           </div>
 
           {archivedItems.length === 0 ? (
-            <div className="rounded-[18px] border border-sky-100 bg-white/70 px-4 py-3 text-sm text-muted-foreground">
+            <div className="border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3 text-sm text-muted-foreground">
               当前没有已归档的字典项。
             </div>
           ) : (
@@ -298,7 +309,7 @@ export function DictionaryEditorPanel({
               {archivedItems.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between gap-3 rounded-[18px] border border-sky-100 bg-white/80 px-4 py-3"
+                  className="flex items-center justify-between gap-3 border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3"
                 >
                   <div>
                     <p className="text-sm font-medium text-foreground">{item.labelZh || item.id}</p>
@@ -322,7 +333,7 @@ export function DictionaryEditorPanel({
         <Button className="w-full" disabled={isSaving} onClick={() => void onSave()} variant="primary">
           {isSaving ? '正在保存…' : '保存字典'}
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

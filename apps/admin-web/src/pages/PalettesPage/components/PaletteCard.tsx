@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 
-import { Card, CardContent } from '@/components/ui/card'
+import { cn } from '@/utils/cn'
 import type { PaletteCardModel } from '@/models/palettes'
 
 // Palette 列表卡片，负责在列表区展示单个 Palette 的摘要信息与选中态。
@@ -15,50 +15,44 @@ export function PaletteCard({
 }): ReactElement {
   return (
     <button className="block w-full text-left" onClick={() => onSelect(model.id)} type="button">
-      <Card
-        className={[
-          'min-h-[224px] overflow-hidden border transition-colors',
-          isSelected
-            ? 'border-transparent bg-[var(--dp-fill-inverse)] text-[var(--dp-text-on-inverse)] shadow-paper'
-            : 'border-[var(--dp-border-hairline)] bg-white/80 hover:bg-white',
-        ].join(' ')}
+      <div
+        className={cn(
+          'paper-card min-h-[260px] overflow-hidden bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_32px_-4px_rgba(26,26,26,0.04)]',
+          isSelected && 'border-[var(--dp-fill-inverse)] shadow-[0_8px_32px_-4px_rgba(26,26,26,0.08)]',
+        )}
       >
-        <CardContent className="space-y-4 p-5">
-          <div className="space-y-2">
-            <p
-              className={[
-                'text-xs uppercase tracking-[0.24em]',
-                isSelected ? 'text-white/70' : 'text-muted-foreground',
-              ].join(' ')}
-            >
-              {model.id}
-            </p>
-            <h3 className="display-font text-3xl tracking-[-0.04em]">{model.slug}</h3>
+        <div className="grid grid-cols-3 border-b border-[var(--dp-border-subtle)]">
+          {model.previewHexes.map((color, index) => (
+            <div key={`${model.id}-${index}`} className="h-28" style={{ backgroundColor: color }} />
+          ))}
+        </div>
+
+        <div className="space-y-5 p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="label-caps text-[var(--dp-text-muted)]">{model.id}</p>
+              <h3 className="display-font mt-3 truncate text-[1.9rem] leading-none tracking-[-0.03em] text-foreground">
+                {model.slug}
+              </h3>
+              <p className="mt-2 text-sm text-[var(--dp-text-muted)]">{model.occasionLabel}</p>
+            </div>
+            <div className="shrink-0 border border-[var(--dp-border-subtle)] px-3 py-1.5 label-caps text-[var(--dp-text-muted)]">
+              {model.status}
+            </div>
           </div>
 
-          <div className="space-y-3 text-sm leading-6">
+          <div className="grid gap-4 border-t border-[var(--dp-border-subtle)] pt-4 sm:grid-cols-2">
             <div>
-              <p className={isSelected ? 'text-white/70' : 'text-muted-foreground'}>Occasion</p>
-              <p>{model.occasionLabel}</p>
+              <p className="label-caps text-[var(--dp-text-muted)]">Sources</p>
+              <p className="mt-2 text-sm text-foreground">{model.sourceCountLabel}</p>
             </div>
             <div>
-              <p className={isSelected ? 'text-white/70' : 'text-muted-foreground'}>Color Trio</p>
-              <p>{model.trioSummary}</p>
-            </div>
-            <div className="flex items-center justify-between gap-3">
-              <span
-                className={[
-                  'rounded-full px-3 py-1 text-xs uppercase tracking-[0.18em]',
-                  isSelected ? 'bg-white/15 text-white/80' : 'bg-[var(--dp-fill-soft)] text-muted-foreground',
-                ].join(' ')}
-              >
-                {model.status}
-              </span>
-              <span className={isSelected ? 'text-white/70' : 'text-muted-foreground'}>{model.sourceCountLabel}</span>
+              <p className="label-caps text-[var(--dp-text-muted)]">Preview Trio</p>
+              <p className="mt-2 text-sm text-foreground">{model.trioSummary}</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </button>
   )
 }

@@ -22,11 +22,20 @@ function resolveOptionLabel(optionLabelMap: Map<string, string>, value: string):
   return optionLabelMap.get(value) ?? value
 }
 
+function buildBaseColorHexMap(baseColors?: BaseColorCollectionDto | null): Map<string, string> {
+  return new Map((baseColors?.items ?? []).map((item) => [item.id, item.hex]))
+}
+
+function resolvePreviewHex(baseColorHexMap: Map<string, string>, colorId: string): string {
+  return baseColorHexMap.get(colorId) ?? 'var(--dp-surface-high)'
+}
+
 // 把 Palette DTO 收敛成列表卡片模型，统一场景标签、状态和三色摘要展示。
 function toPaletteCardModel(
   palette: PaletteDto,
   optionMaps: {
     baseColorLabelMap: Map<string, string>
+    baseColorHexMap: Map<string, string>
     occasionLabelMap: Map<string, string>
     statusLabelMap: Map<string, string>
   },
@@ -34,6 +43,9 @@ function toPaletteCardModel(
   return {
     id: palette.id,
     occasionLabel: resolveOptionLabel(optionMaps.occasionLabelMap, palette.occasionId),
+    previewHexes: [palette.primaryColorId, palette.secondaryColorId, palette.accentColorId].map((colorId) =>
+      resolvePreviewHex(optionMaps.baseColorHexMap, colorId),
+    ),
     sourceCountLabel: `${palette.sourceCollectionIds.length} 个来源合集`,
     status: resolveOptionLabel(optionMaps.statusLabelMap, palette.status),
     trioSummary: [palette.primaryColorId, palette.secondaryColorId, palette.accentColorId]
@@ -72,11 +84,13 @@ function toPaletteDetailModel(palette: PaletteDto | null): PaletteDetailModel | 
 export function toPalettesPageModel(
   collection: PaletteCollectionDto,
   selectedPaletteId: string | null,
+  baseColors?: BaseColorCollectionDto | null,
   editorOptions?: PaletteEditorOptions | null,
 ): PalettesPageModel {
   const detailPalette = collection.items.find((item) => item.id === selectedPaletteId) ?? collection.items[0] ?? null
   const optionMaps = {
     baseColorLabelMap: buildOptionLabelMap(editorOptions?.baseColorOptions ?? []),
+    baseColorHexMap: buildBaseColorHexMap(baseColors),
     occasionLabelMap: buildOptionLabelMap(editorOptions?.occasionOptions ?? []),
     statusLabelMap: buildOptionLabelMap(editorOptions?.statusOptions ?? []),
   }
