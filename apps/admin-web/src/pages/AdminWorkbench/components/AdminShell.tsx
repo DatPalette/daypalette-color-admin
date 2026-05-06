@@ -9,10 +9,10 @@ import {
 } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
-import { navigationSections } from '../navigation'
+import { navigationItems } from '../navigation'
 
 function resolveNavigationIcon(to: string) {
-  if (to.startsWith('/dictionaries/')) {
+  if (to.startsWith('/dictionaries')) {
     return Tags
   }
 
@@ -41,37 +41,28 @@ export function AdminShell({ children }: PropsWithChildren): ReactElement {
           <p className="mt-1 label-caps text-[var(--dp-text-muted)]/70">资产管理系统</p>
         </div>
 
-        <nav className="scrollbar-hide flex-1 space-y-6 overflow-y-auto">
-          {navigationSections.map((section) => (
-            <div key={section.title} className="space-y-1">
-              <p className="px-6 label-caps text-[var(--dp-text-muted)]/70">{section.title}</p>
-              <div className="space-y-1">
-                {section.items.map((item) => (
-                  (() => {
-                    const ItemIcon = resolveNavigationIcon(item.to)
+        <nav className="scrollbar-hide flex-1 space-y-1 overflow-y-auto px-2">
+          {navigationItems.map((item) => {
+            const ItemIcon = resolveNavigationIcon(item.to)
 
-                    return (
-                      <NavLink
-                        key={item.to}
-                        className={({ isActive }) =>
-                          [
-                            'flex items-center border-r-2 px-6 py-3 text-[var(--dp-text-muted)] transition-colors duration-200',
-                            isActive
-                              ? 'border-[var(--dp-fill-inverse)] bg-[var(--dp-surface-soft)] font-semibold text-foreground'
-                              : 'border-transparent hover:bg-[var(--dp-surface-soft)] hover:text-foreground',
-                          ].join(' ')
-                        }
-                        to={item.to}
-                      >
-                        <ItemIcon className="mr-3 size-5 shrink-0" />
-                        <span className="truncate text-sm leading-6">{item.label}</span>
-                      </NavLink>
-                    )
-                  })()
-                ))}
-              </div>
-            </div>
-          ))}
+            return (
+              <NavLink
+                key={item.to}
+                className={({ isActive }) =>
+                  [
+                    'flex items-center border-r-2 px-4 py-3 text-[var(--dp-text-muted)] transition-colors duration-200',
+                    isActive
+                      ? 'border-[var(--dp-fill-inverse)] bg-[var(--dp-surface-soft)] font-semibold text-foreground'
+                      : 'border-transparent hover:bg-[var(--dp-surface-soft)] hover:text-foreground',
+                  ].join(' ')
+                }
+                to={item.to}
+              >
+                <ItemIcon className="mr-3 size-5 shrink-0" />
+                <span className="truncate text-sm leading-6">{item.label}</span>
+              </NavLink>
+            )
+          })}
         </nav>
       </aside>
 

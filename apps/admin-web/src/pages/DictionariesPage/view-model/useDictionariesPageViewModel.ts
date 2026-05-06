@@ -39,12 +39,12 @@ interface DictionariesPageViewModel {
   isSaving: boolean
   model: DictionariesPageModel | null
   onCheckDeleteRisk: (itemId: string) => Promise<void>
-  onCreateItem: () => Promise<void>
+  onCreateItem: (payload?: DictionaryItemCreateDto) => Promise<boolean>
   onCreateItemFieldChange: (
     field: 'id' | 'isActive' | 'labelEn' | 'labelZh' | 'sortOrder',
     value: boolean | number | string,
   ) => void
-  onDeleteItem: (itemId: string) => Promise<void>
+  onDeleteItem: (itemId: string, deleteReasonOverride?: string) => Promise<boolean>
   onDictionaryFieldChange: (
     field: 'descriptionEn' | 'descriptionZh' | 'labelEn' | 'labelZh',
     value: string,
@@ -57,7 +57,7 @@ interface DictionariesPageViewModel {
   ) => void
   onRefresh: () => Promise<void>
   onRestoreItem: (itemId: string) => Promise<void>
-  onSave: () => Promise<void>
+  onSave: (nextDraftOverride?: DictionaryNodeDto) => Promise<boolean>
   onSelectDictionary: (key: string) => void
   saveMessage: string | null
 }
@@ -223,9 +223,9 @@ export function useDictionariesPageViewModel({
     }
   }
 
-  async function onDeleteItem(itemId: string): Promise<void> {
+  async function onDeleteItem(itemId: string, deleteReasonOverride?: string): Promise<boolean> {
     if (!draft) {
-      return
+      return false
     }
 
     setIsDeletingItemId(itemId)
@@ -242,11 +242,12 @@ export function useDictionariesPageViewModel({
 
       if (!latestDeleteCheck.canDelete) {
         setErrorMessage('当前字典项仍被主数据引用，不能软删除。')
-        return
+
+        return false
       }
 
       const nextCollection = await deleteDictionaryItem(draft.key, itemId, {
-        deleteReason: deleteReasonByItemId[itemId] ?? '',
+        deleteReason: deleteReasonOverride ?? deleteReasonByItemId[itemId] ?? '',
       })
       const nextAllCollection = await getDictionariesCollection({ includeDeleted: true })
       const nextSelectedDictionary = findSelectedDictionary(nextCollection, draft.key)
@@ -265,16 +266,20 @@ export function useDictionariesPageViewModel({
         return nextReasons
       })
       setSaveMessage('已软删除字典项，并写回 dictionaries.v1.json。')
+
+      return true
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : '字典项软删除失败。')
+
+      return false
     } finally {
       setIsDeletingItemId(null)
     }
   }
 
-  async function onCreateItem(): Promise<void> {
+  async function onCreateItem(payload?: DictionaryItemCreateDto): Promise<boolean> {
     if (!draft) {
-      return
+      return false
     }
 
     setIsCreatingItem(true)
@@ -282,7 +287,7 @@ export function useDictionariesPageViewModel({
     setSaveMessage(null)
 
     try {
-      const nextCollection = await createDictionaryItem(draft.key, createItemDraft)
+      const nextCollection = await createDictionaryItem(draft.key, payload ?? createItemDraft)
       const nextAllCollection = await getDictionariesCollection({ includeDeleted: true })
       const nextSelectedDictionary = findSelectedDictionary(nextCollection, draft.key)
 
@@ -292,8 +297,12 @@ export function useDictionariesPageViewModel({
       setDraft(cloneDictionaryNode(nextSelectedDictionary))
       setCreateItemDraft(buildNewDictionaryItemDraft(nextSelectedDictionary))
       setSaveMessage('已新增字典项，并写回 dictionaries.v1.json。')
+
+      return true
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : '字典项新增失败。')
+
+      return false
     } finally {
       setIsCreatingItem(false)
     }
@@ -326,9 +335,11 @@ export function useDictionariesPageViewModel({
     }
   }
 
-  async function onSave(): Promise<void> {
-    if (!draft) {
-      return
+  async function onSave(nextDraftOverride?: DictionaryNodeDto): Promise<boolean> {
+    const draftToSave = nextDraftOverride ?? draft
+
+    if (!draftToSave) {
+      return false
     }
 
     setIsSaving(true)
@@ -336,9 +347,9 @@ export function useDictionariesPageViewModel({
     setSaveMessage(null)
 
     try {
-      const nextCollection = await updateDictionary(draft.key, draft)
+      const nextCollection = await updateDictionary(draftToSave.key, draftToSave)
       const nextAllCollection = await getDictionariesCollection({ includeDeleted: true })
-      const nextSelectedDictionary = findSelectedDictionary(nextCollection, draft.key)
+      const nextSelectedDictionary = findSelectedDictionary(nextCollection, draftToSave.key)
 
       setCollection(nextCollection)
       setAllCollection(nextAllCollection)
@@ -346,8 +357,12 @@ export function useDictionariesPageViewModel({
       setDraft(cloneDictionaryNode(nextSelectedDictionary))
       setCreateItemDraft(buildNewDictionaryItemDraft(nextSelectedDictionary))
       setSaveMessage('已写回 dictionaries.v1.json。')
+
+      return true
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : '字典保存失败。')
+
+      return false
     } finally {
       setIsSaving(false)
     }
