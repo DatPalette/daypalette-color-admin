@@ -1,7 +1,8 @@
 import { useState, type ReactElement } from 'react'
-import { RefreshCcw, Search } from 'lucide-react'
+import { RefreshCcw } from 'lucide-react'
 
 import { DetailDrawer } from '@/components/workbench/DetailDrawer'
+import { WorkbenchPageHeader } from '@/components/workbench/WorkbenchPageHeader'
 import { Button } from '@/components/ui/button'
 import { CollectionDetailPanel } from './components/CollectionDetailPanel'
 import { useCollectionsPageViewModel } from './view-model/useCollectionsPageViewModel'
@@ -54,40 +55,22 @@ export function CollectionsPage(): ReactElement {
 
   return (
     <div className="space-y-10 pb-12">
-      <section className="max-w-3xl space-y-4">
-        <p className="label-caps text-[var(--dp-text-muted)]">Collections</p>
-        <h1 className="display-font text-[clamp(3.5rem,7vw,6.25rem)] leading-[0.92] tracking-[-0.05em] text-foreground">
-          Collections
-        </h1>
-        <p className="max-w-2xl text-lg leading-8 text-[var(--dp-text-muted)]">
-          以列表方式整理合集封面、主题方向与成员顺序，快速判断哪些结构已经适合进入正式发布流。
-        </p>
-        <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm text-[var(--dp-text-muted)]">
-          <span>{model?.totalLabel ?? '读取中'}</span>
-          <span>最近更新：{model?.updatedAtLabel ?? '等待返回'}</span>
-          <span>{archivedCollections.length} archived</span>
-        </div>
-      </section>
-
-      <section className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <label className="flex w-full max-w-[420px] items-center gap-3 border-b border-[var(--dp-border-subtle)] pb-3 text-sm text-foreground">
-          <Search className="size-4 text-[var(--dp-text-muted)]" />
-          <input
-            className="w-full border-none bg-transparent p-0 text-sm text-foreground outline-none placeholder:text-[var(--dp-text-muted)]"
-            onChange={(event) => setSearchValue(event.target.value)}
-            placeholder="Search collections"
-            value={searchValue}
-          />
-        </label>
-
-        <div className="flex items-center gap-4 self-end lg:self-auto">
-          <p className="label-caps text-[var(--dp-text-muted)]">{filteredCards.length} visible</p>
+      <WorkbenchPageHeader
+        actions={
           <Button onClick={() => void onRefresh()} size="sm" variant="ghost">
             <RefreshCcw className="size-4" />
             Refresh
           </Button>
-        </div>
-      </section>
+        }
+        archivedLabel={`${archivedCollections.length} archived`}
+        description="以列表方式整理合集封面、主题方向与成员顺序，快速判断哪些结构已经适合进入正式发布流。"
+        onSearchChange={setSearchValue}
+        searchPlaceholder="Search collections"
+        searchValue={searchValue}
+        title="Collections"
+        totalLabel={model?.totalLabel ?? '读取中'}
+        updatedAtLabel={model?.updatedAtLabel ?? '等待返回'}
+      />
 
       {errorMessage ? (
         <div className="paper-card border-red-200 bg-red-50 px-5 py-4 text-sm leading-6 text-red-700">{errorMessage}</div>

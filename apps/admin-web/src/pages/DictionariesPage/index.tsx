@@ -1,7 +1,8 @@
 import { useEffect, useState, type ReactElement } from 'react'
-import { RefreshCcw, Search } from 'lucide-react'
+import { RefreshCcw } from 'lucide-react'
 
 import { DetailDrawer } from '@/components/workbench/DetailDrawer'
+import { WorkbenchPageHeader } from '@/components/workbench/WorkbenchPageHeader'
 import { Button } from '@/components/ui/button'
 import { DictionaryEditorPanel } from './components/DictionaryEditorPanel'
 import { useDictionariesPageViewModel } from './view-model/useDictionariesPageViewModel'
@@ -65,40 +66,22 @@ export function DictionariesPage({
 
   return (
     <div className="space-y-10 pb-12">
-      <section className="max-w-3xl space-y-4">
-        <p className="label-caps text-[var(--dp-text-muted)]">Dictionaries</p>
-        <h1 className="display-font text-[clamp(3.5rem,7vw,6.25rem)] leading-[0.92] tracking-[-0.05em] text-foreground">
-          Dictionaries
-        </h1>
-        <p className="max-w-2xl text-lg leading-8 text-[var(--dp-text-muted)]">
-          管理受控词汇与选择模式，避免基础色、Palette 与合集在不同页面里产生不一致的业务口径。
-        </p>
-        <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm text-[var(--dp-text-muted)]">
-          <span>{model?.totalLabel ?? '读取中'}</span>
-          <span>最近更新：{model?.updatedAtLabel ?? '等待返回'}</span>
-          <span>{archivedItems.length} archived items</span>
-        </div>
-      </section>
-
-      <section className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <label className="flex w-full max-w-[420px] items-center gap-3 border-b border-[var(--dp-border-subtle)] pb-3 text-sm text-foreground">
-          <Search className="size-4 text-[var(--dp-text-muted)]" />
-          <input
-            className="w-full border-none bg-transparent p-0 text-sm text-foreground outline-none placeholder:text-[var(--dp-text-muted)]"
-            onChange={(event) => setSearchValue(event.target.value)}
-            placeholder="Search dictionaries"
-            value={searchValue}
-          />
-        </label>
-
-        <div className="flex items-center gap-4 self-end lg:self-auto">
-          <p className="label-caps text-[var(--dp-text-muted)]">{filteredCards.length} visible</p>
+      <WorkbenchPageHeader
+        actions={
           <Button onClick={() => void onRefresh()} size="sm" variant="ghost">
             <RefreshCcw className="size-4" />
             Refresh
           </Button>
-        </div>
-      </section>
+        }
+        archivedLabel={`${archivedItems.length} archived items`}
+        description="管理受控词汇与选择模式，避免基础色、Palette 与合集在不同页面里产生不一致的业务口径。"
+        onSearchChange={setSearchValue}
+        searchPlaceholder="Search dictionaries"
+        searchValue={searchValue}
+        title="Dictionaries"
+        totalLabel={model?.totalLabel ?? '读取中'}
+        updatedAtLabel={model?.updatedAtLabel ?? '等待返回'}
+      />
 
       {errorMessage ? (
         <div className="paper-card border-red-200 bg-red-50 px-5 py-4 text-sm leading-6 text-red-700">{errorMessage}</div>

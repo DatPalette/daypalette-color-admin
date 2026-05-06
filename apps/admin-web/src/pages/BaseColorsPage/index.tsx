@@ -1,7 +1,8 @@
 import { useState, type ReactElement } from 'react'
-import { Plus, RefreshCcw, Search } from 'lucide-react'
+import { Plus, RefreshCcw } from 'lucide-react'
 
 import { DetailDrawer } from '@/components/workbench/DetailDrawer'
+import { WorkbenchPageHeader } from '@/components/workbench/WorkbenchPageHeader'
 import { Button } from '@/components/ui/button'
 import { BaseColorCard } from './components/BaseColorCard'
 import { BaseColorDetailPanel } from './components/BaseColorDetailPanel'
@@ -53,54 +54,35 @@ export function BaseColorsPage(): ReactElement {
 
   return (
     <div className="space-y-10 pb-12">
-      <section className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-        <div className="max-w-3xl space-y-4">
-          <p className="label-caps text-[var(--dp-text-muted)]">Base Colors</p>
-          <h1 className="display-font text-[clamp(3.5rem,7vw,6.25rem)] leading-[0.92] tracking-[-0.05em] text-foreground">
-            Base Colors
-          </h1>
-          <p className="max-w-2xl text-lg leading-8 text-[var(--dp-text-muted)]">
-            定义品牌与内容系统的基础色资产，先把单色样本整理准确，再把它们拼成可复用的三色结构。
-          </p>
-          <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm text-[var(--dp-text-muted)]">
-            <span>{model?.totalLabel ?? '读取中'}</span>
-            <span>最近更新：{model?.updatedAtLabel ?? '等待返回'}</span>
-            <span>{archivedBaseColors.length} archived</span>
-          </div>
-        </div>
-
-        <button
-          className="inline-flex h-14 items-center justify-center gap-2 border border-transparent bg-[var(--dp-fill-inverse)] px-8 label-caps text-[var(--dp-text-on-inverse)] transition-opacity hover:opacity-92"
-          onClick={() => {
-            onCreateDraft()
-            setIsDrawerOpen(true)
-          }}
-          type="button"
-        >
-          <Plus className="size-4" />
-          添加颜色
-        </button>
-      </section>
-
-      <section className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <label className="flex w-full max-w-[420px] items-center gap-3 border-b border-[var(--dp-border-subtle)] pb-3 text-sm text-foreground">
-          <Search className="size-4 text-[var(--dp-text-muted)]" />
-          <input
-            className="w-full border-none bg-transparent p-0 text-sm text-foreground outline-none placeholder:text-[var(--dp-text-muted)]"
-            onChange={(event) => setSearchValue(event.target.value)}
-            placeholder="Search base colors"
-            value={searchValue}
-          />
-        </label>
-
-        <div className="flex items-center gap-4 self-end lg:self-auto">
-          <p className="label-caps text-[var(--dp-text-muted)]">{filteredCards.length} visible</p>
-          <Button onClick={() => void onRefresh()} size="sm" variant="ghost">
-            <RefreshCcw className="size-4" />
-            Refresh
-          </Button>
-        </div>
-      </section>
+      <WorkbenchPageHeader
+        actions={
+          <>
+            <Button onClick={() => void onRefresh()} size="sm" variant="ghost">
+              <RefreshCcw className="size-4" />
+              Refresh
+            </Button>
+            <button
+              className="inline-flex h-11 items-center justify-center gap-2 border border-transparent bg-[var(--dp-fill-inverse)] px-5 label-caps text-[var(--dp-text-on-inverse)] transition-opacity hover:opacity-92"
+              onClick={() => {
+                onCreateDraft()
+                setIsDrawerOpen(true)
+              }}
+              type="button"
+            >
+              <Plus className="size-4" />
+              添加颜色
+            </button>
+          </>
+        }
+        archivedLabel={`${archivedBaseColors.length} archived`}
+        description="定义品牌与内容系统的基础色资产，先把单色样本整理准确，再把它们拼成可复用的三色结构。"
+        onSearchChange={setSearchValue}
+        searchPlaceholder="Search base colors"
+        searchValue={searchValue}
+        title="Base Colors"
+        totalLabel={model?.totalLabel ?? '读取中'}
+        updatedAtLabel={model?.updatedAtLabel ?? '等待返回'}
+      />
 
       {errorMessage ? (
         <div className="paper-card border-red-200 bg-red-50 px-5 py-4 text-sm leading-6 text-red-700">{errorMessage}</div>

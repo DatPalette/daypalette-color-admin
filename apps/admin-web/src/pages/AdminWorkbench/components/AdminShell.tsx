@@ -2,10 +2,7 @@ import type { PropsWithChildren, ReactElement } from 'react'
 
 import {
   BookMarked,
-  BookOpenText,
   FolderHeart,
-  FolderKanban,
-  HelpCircle,
   Palette,
   SwatchBook,
   Tags,
@@ -13,7 +10,6 @@ import {
 import { NavLink } from 'react-router-dom'
 
 import { navigationSections } from '../navigation'
-import { TopBar } from './TopBar'
 
 function resolveNavigationIcon(to: string) {
   if (to.startsWith('/dictionaries/')) {
@@ -77,37 +73,10 @@ export function AdminShell({ children }: PropsWithChildren): ReactElement {
             </div>
           ))}
         </nav>
-
-        <div className="mt-auto px-6">
-          <NavLink
-            className="inline-flex h-14 w-full items-center justify-center gap-2 border border-transparent bg-[var(--dp-fill-inverse)] px-6 label-caps text-[var(--dp-text-on-inverse)] transition-opacity hover:opacity-92"
-            to="/base-colors"
-          >
-            <Palette className="size-4" />
-            New Asset
-          </NavLink>
-
-          <div className="mt-6 space-y-3 border-t border-[var(--dp-outline-variant)]/20 pt-6 text-sm text-[var(--dp-text-muted)]">
-            <a className="flex items-center gap-2 hover:text-foreground" href="/README.md">
-              <BookOpenText className="size-4" />
-              Documentation
-            </a>
-            <div className="flex items-center gap-2">
-              <HelpCircle className="size-4" />
-              Support
-            </div>
-            <div className="flex items-center gap-2">
-              <FolderKanban className="size-4" />
-              frontend-module-playbook ready
-            </div>
-          </div>
-        </div>
       </aside>
 
-      <TopBar />
-
       <main className="min-h-screen lg:ml-[var(--dp-sidebar-width)]">
-        <div className="mx-auto min-h-screen max-w-[1600px] px-5 pb-10 pt-[88px] sm:px-8 lg:px-[var(--dp-page-margin)] lg:pt-[calc(var(--dp-header-height)+var(--dp-page-margin))]">
+        <div className="mx-auto min-h-screen max-w-[1600px] px-5 pb-10 pt-8 sm:px-8 sm:pt-10 lg:px-[var(--dp-page-margin)] lg:pt-[var(--dp-page-margin)]">
           {children}
         </div>
       </main>

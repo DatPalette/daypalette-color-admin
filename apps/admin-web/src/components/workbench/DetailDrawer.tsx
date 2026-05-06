@@ -1,4 +1,5 @@
 import { useEffect, useState, type PropsWithChildren, type ReactElement } from 'react'
+import { createPortal } from 'react-dom'
 
 import { cn } from '@/utils/cn'
 
@@ -9,38 +10,79 @@ interface DetailDrawerProps extends PropsWithChildren {
 
 export function DetailDrawer({ children, isOpen, onClose }: DetailDrawerProps): ReactElement | null {
   const [isMounted, setIsMounted] = useState(isOpen)
-  const [isVisible, setIsVisible] = useState(isOpen)
+  const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
+    let enterFrameId: number | undefined
+    let settleFrameId: number | undefined
+    let timeoutId: number | undefined
+
     if (isOpen) {
       setIsMounted(true)
+      setIsVisible(false)
 
-      const frameId = window.requestAnimationFrame(() => {
-        setIsVisible(true)
+      enterFrameId = window.requestAnimationFrame(() => {
+        settleFrameId = window.requestAnimationFrame(() => {
+          setIsVisible(true)
+        })
       })
 
-      return () => window.cancelAnimationFrame(frameId)
+      return () => {
+        if (enterFrameId !== undefined) {
+          window.cancelAnimationFrame(enterFrameId)
+        }
+
+        if (settleFrameId !== undefined) {
+          window.cancelAnimationFrame(settleFrameId)
+        }
+      }
+    } else {
+      setIsVisible(false)
+
+      timeoutId = window.setTimeout(() => {
+        setIsMounted(false)
+      }, 560)
     }
 
-    setIsVisible(false)
+    return () => {
+      if (enterFrameId !== undefined) {
+        window.cancelAnimationFrame(enterFrameId)
+      }
 
-    const timeoutId = window.setTimeout(() => {
-      setIsMounted(false)
-    }, 420)
+      if (settleFrameId !== undefined) {
+        window.cancelAnimationFrame(settleFrameId)
+      }
 
-    return () => window.clearTimeout(timeoutId)
+      if (timeoutId !== undefined) {
+        window.clearTimeout(timeoutId)
+      }
+    }
   }, [isOpen])
 
-  if (!isMounted) {
+  useEffect(() => {
+    if (!isMounted) {
+      return
+    }
+
+    const previousOverflow = document.body.style.overflow
+
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [isMounted])
+
+  if (!isMounted || typeof document === 'undefined') {
     return null
   }
 
-  return (
-    <div className="fixed inset-0 z-[70] flex justify-end">
+  return createPortal(
+    <div className="fixed inset-0 z-[90] overflow-hidden">
       <button
         aria-label="Close drawer"
         className={cn(
-          'flex-1 cursor-default bg-[rgba(26,26,26,0.08)] backdrop-blur-sm transition-opacity duration-300',
+          'absolute inset-0 cursor-pointer bg-[rgba(28,27,27,0.14)] backdrop-blur-[3px] transition-opacity duration-[560ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
           isVisible ? 'opacity-100' : 'opacity-0',
         )}
         onClick={onClose}
@@ -48,12 +90,13 @@ export function DetailDrawer({ children, isOpen, onClose }: DetailDrawerProps): 
       />
       <aside
         className={cn(
-          'relative h-full w-full max-w-[480px] border-l border-[var(--dp-outline-variant)]/30 bg-white shadow-2xl transition-transform duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)]',
-          isVisible ? 'translate-x-0' : 'translate-x-full',
+          'absolute inset-y-0 right-0 h-full w-full max-w-[480px] border-l border-[var(--dp-outline-variant)]/30 bg-white shadow-[0_32px_80px_-24px_rgba(0,0,0,0.3)] transition-[transform,opacity] duration-[560ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
+          isVisible ? 'translate-x-0 opacity-100' : 'translate-x-12 opacity-0',
         )}
       >
         {children}
       </aside>
-    </div>
+    </div>,
+    document.body,
   )
 }
