@@ -49,15 +49,15 @@ export function CollectionCard({
 
             <div className="grid gap-4 border-t border-[var(--dp-border-subtle)] pt-4 md:grid-cols-3">
               <div>
-                <p className="label-caps text-muted-foreground">Theme</p>
+                <p className="label-caps text-muted-foreground">主题</p>
                 <p className="mt-2 text-sm text-foreground">{model.themeType}</p>
               </div>
               <div>
-                <p className="label-caps text-muted-foreground">Cover Palette</p>
+                <p className="label-caps text-muted-foreground">封面配色盘</p>
                 <p className="mt-2 text-sm text-foreground">{model.coverPaletteSlug}</p>
               </div>
               <div>
-                <p className="label-caps text-muted-foreground">Members</p>
+                <p className="label-caps text-muted-foreground">成员数</p>
                 <p className="mt-2 text-sm text-foreground">{model.paletteCountLabel}</p>
               </div>
             </div>

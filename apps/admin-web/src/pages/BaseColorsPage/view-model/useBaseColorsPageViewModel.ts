@@ -97,6 +97,7 @@ export function useBaseColorsPageViewModel(): BaseColorsPageViewModel {
         getBaseColorCollection({ includeDeleted: true }),
         getBaseColorEditorDictionaries(),
       ])
+      const nextEditorOptions = toBaseColorEditorOptions(nextDictionaries)
       const nextSelectedBaseColorId = selectedBaseColorId ?? nextCollection.items[0]?.id ?? null
       const nextSelectedBaseColor =
         nextCollection.items.find((item) => item.id === nextSelectedBaseColorId) ??
@@ -105,10 +106,10 @@ export function useBaseColorsPageViewModel(): BaseColorsPageViewModel {
 
       setCollection(nextCollection)
       setAllCollection(nextAllCollection)
-      setEditorOptions(toBaseColorEditorOptions(nextDictionaries))
+      setEditorOptions(nextEditorOptions)
       setSelectedBaseColorId(nextSelectedBaseColorId)
       setIsCreating(false)
-      setModel(toBaseColorsPageModel(nextCollection, nextSelectedBaseColorId))
+      setModel(toBaseColorsPageModel(nextCollection, nextSelectedBaseColorId, nextEditorOptions))
       setDraft(cloneBaseColor(nextSelectedBaseColor))
     } catch {
       setErrorMessage('基础色列表加载失败。请先启动 admin-api，再刷新页面。')
@@ -128,7 +129,7 @@ export function useBaseColorsPageViewModel(): BaseColorsPageViewModel {
       return
     }
 
-    setModel(toBaseColorsPageModel(collection, id))
+    setModel(toBaseColorsPageModel(collection, id, editorOptions))
     setDraft(cloneBaseColor(findSelectedBaseColor(collection, id)))
   }
 
@@ -206,7 +207,7 @@ export function useBaseColorsPageViewModel(): BaseColorsPageViewModel {
       setAllCollection(nextAllCollection)
       setSelectedBaseColorId(nextSelectedBaseColorId)
       setIsCreating(false)
-      setModel(toBaseColorsPageModel(nextCollection, nextSelectedBaseColorId))
+      setModel(toBaseColorsPageModel(nextCollection, nextSelectedBaseColorId, editorOptions))
       setDraft(cloneBaseColor(nextSelectedBaseColor))
       setSaveMessage(isCreating ? '已新增基础色，并写回 base-colors.v1.json。' : '已写回 base-colors.v1.json。')
     } catch (error) {
@@ -251,7 +252,7 @@ export function useBaseColorsPageViewModel(): BaseColorsPageViewModel {
       setDeleteCheck(latestDeleteCheck)
 
       if (!latestDeleteCheck.canDelete) {
-        setErrorMessage('当前基础色仍被 palette 引用，不能执行软删除。')
+        setErrorMessage('当前基础色仍被配色盘引用，不能执行软删除。')
         return
       }
 
@@ -267,7 +268,7 @@ export function useBaseColorsPageViewModel(): BaseColorsPageViewModel {
       setSelectedBaseColorId(nextSelectedBaseColorId)
       setDeleteCheck(null)
       setDeleteReason('')
-      setModel(toBaseColorsPageModel(nextCollection, nextSelectedBaseColorId))
+      setModel(toBaseColorsPageModel(nextCollection, nextSelectedBaseColorId, editorOptions))
       setDraft(cloneBaseColor(nextSelectedBaseColor))
       setSaveMessage('已执行基础色软删除，并写回 base-colors.v1.json。')
     } catch (error) {
@@ -291,7 +292,7 @@ export function useBaseColorsPageViewModel(): BaseColorsPageViewModel {
       setAllCollection(nextAllCollection)
       setSelectedBaseColorId(nextSelectedBaseColor?.id ?? nextCollection.items[0]?.id ?? null)
       setIsCreating(false)
-      setModel(toBaseColorsPageModel(nextCollection, id))
+      setModel(toBaseColorsPageModel(nextCollection, id, editorOptions))
       setDraft(cloneBaseColor(nextSelectedBaseColor))
       setSaveMessage('已恢复基础色，并重新回到可编辑列表。')
     } catch (error) {

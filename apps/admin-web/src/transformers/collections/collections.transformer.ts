@@ -9,6 +9,7 @@ import type {
 import type { DictionariesDocumentDto, DictionaryNodeDto } from '@/models/dictionaries'
 import type { BaseColorCollectionDto } from '@/models/base-colors'
 import type { PaletteCollectionDto } from '@/models/palettes'
+import { buildOptionLabelMap, resolveOptionLabel } from '@/utils/asset-display'
 import { formatUpdatedAtLabel } from '@/utils/format-updated-at-label'
 
 // 为合集页面建立 paletteId 到 slug 的索引，供列表和详情区复用展示名回退规则。
@@ -39,16 +40,6 @@ function buildPalettePreviewMap(
   )
 }
 
-// 为编辑器选项建立 value 到 label 的索引，避免页面层反复线性查找。
-function buildOptionLabelMap(options: CollectionEditorOption[]): Map<string, string> {
-  return new Map(options.map((option) => [option.value, option.label]))
-}
-
-// 按统一回退策略把枚举值解析成展示文案。
-function resolveOptionLabel(optionLabelMap: Map<string, string>, value: string): string {
-  return optionLabelMap.get(value) ?? value
-}
-
 // 把合集 DTO 收敛成列表卡片模型，统一封面、状态和主题类型的展示字段。
 function toCollectionCardModel(
   collection: CollectionsDocumentDto['items'][number],
@@ -69,7 +60,7 @@ function toCollectionCardModel(
     id: collection.id,
     nameEn: collection.nameEn,
     nameZh: collection.nameZh,
-    paletteCountLabel: `${collection.paletteIds.length} 组 palettes`,
+    paletteCountLabel: `${collection.paletteIds.length} 组配色盘`,
     status: resolveOptionLabel(optionMaps.statusLabelMap, collection.status),
     themeType: resolveOptionLabel(optionMaps.themeTypeLabelMap, collection.themeType),
   }

@@ -291,7 +291,7 @@ export function useCollectionsPageViewModel(): CollectionsPageViewModel {
       setDraft(cloneCollection(nextSelectedCollection))
       setSaveMessage('已写回 collections.v1.json。')
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Collection 保存失败。')
+      setErrorMessage(error instanceof Error ? error.message : '合集保存失败。')
     } finally {
       setIsSaving(false)
     }
@@ -311,7 +311,7 @@ export function useCollectionsPageViewModel(): CollectionsPageViewModel {
 
       setDeleteCheck(nextDeleteCheck)
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Collection 删除检查失败。')
+      setErrorMessage(error instanceof Error ? error.message : '合集删除检查失败。')
     } finally {
       setIsDeleteChecking(false)
     }
@@ -332,7 +332,7 @@ export function useCollectionsPageViewModel(): CollectionsPageViewModel {
       setDeleteCheck(latestDeleteCheck)
 
       if (!latestDeleteCheck.canDelete) {
-        setErrorMessage('当前 Collection 仍被 Palette 引用，不能执行软删除。')
+        setErrorMessage('当前合集仍被配色盘引用，不能执行软删除。')
         return
       }
 
@@ -359,9 +359,9 @@ export function useCollectionsPageViewModel(): CollectionsPageViewModel {
         ),
       )
       setDraft(cloneCollection(nextSelectedCollection))
-      setSaveMessage('已执行 Collection 软删除，并写回 collections.v1.json。')
+      setSaveMessage('已执行合集软删除，并写回 collections.v1.json。')
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Collection 软删除失败。')
+      setErrorMessage(error instanceof Error ? error.message : '合集软删除失败。')
     } finally {
       setIsDeleting(false)
     }
@@ -388,9 +388,9 @@ export function useCollectionsPageViewModel(): CollectionsPageViewModel {
         toCollectionsPageModel(nextCollectionDocument, paletteCollection, id, baseColorCollection, editorOptions),
       )
       setDraft(cloneCollection(nextSelectedCollection))
-      setSaveMessage('已恢复 Collection，并重新回到可编辑列表。')
+      setSaveMessage('已恢复合集，并重新回到可编辑列表。')
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Collection 恢复失败。')
+      setErrorMessage(error instanceof Error ? error.message : '合集恢复失败。')
     } finally {
       setIsRestoringId(null)
     }

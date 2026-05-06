@@ -76,12 +76,12 @@ export function PaletteDetailPanel({
     return (
       <div className="flex h-full flex-col bg-white">
         <div className="flex items-center justify-between border-b border-[var(--dp-border-subtle)] px-6 py-5">
-          <h2 className="display-font text-[2rem] leading-none tracking-[-0.03em] text-foreground">Edit Palette</h2>
+          <h2 className="display-font text-[2rem] leading-none tracking-[-0.03em] text-foreground">编辑配色盘</h2>
           <button className="text-muted-foreground hover:text-foreground" onClick={onClose} type="button">
             <X className="size-5" />
           </button>
         </div>
-        <div className="p-6 text-sm leading-6 text-muted-foreground">当前没有可展示的 Palette，请先检查后端返回是否为空。</div>
+        <div className="p-6 text-sm leading-6 text-muted-foreground">当前没有可展示的配色盘，请先检查后端返回是否为空。</div>
       </div>
     )
   }
@@ -91,7 +91,7 @@ export function PaletteDetailPanel({
       <div className="flex items-start justify-between gap-4 border-b border-[var(--dp-border-subtle)] px-6 py-5">
         <div className="space-y-2">
           <p className="label-caps text-muted-foreground">{draft.id}</p>
-          <h2 className="display-font text-[2rem] leading-none tracking-[-0.03em] text-foreground">Edit Palette</h2>
+          <h2 className="display-font text-[2rem] leading-none tracking-[-0.03em] text-foreground">编辑配色盘</h2>
           <p className="text-sm text-muted-foreground">{draft.slug}</p>
         </div>
 
@@ -107,8 +107,8 @@ export function PaletteDetailPanel({
         </div>
         <p className="text-sm leading-6 text-muted-foreground">
           {isCreating
-            ? '保存会创建新 Palette 并直接写回 palettes.v1.json。'
-            : '当前已进入 Palette 编辑、删除保护与恢复链路，保存会直接回写 palettes.v1.json。'}
+            ? '保存会创建新配色盘并直接写回 palettes.v1.json。'
+            : '当前已进入配色盘编辑、删除保护与恢复链路，保存会直接回写 palettes.v1.json。'}
         </p>
       </div>
 

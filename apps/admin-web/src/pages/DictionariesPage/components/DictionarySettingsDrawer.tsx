@@ -4,6 +4,11 @@ import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { DictionaryNodeDto } from '@/models/dictionaries'
 
+import {
+  getDictionaryEntityScopeSummary,
+  getDictionaryFieldMappingLabel,
+  getDictionarySelectionModeLabel,
+} from '../display'
 import { SectionTitle, TextAreaInput, TextInput } from './DictionaryEditorControls'
 
 export interface DictionarySettingsFormValue {
@@ -111,24 +116,22 @@ export function DictionarySettingsDrawer({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-4">
-            <p className="label-caps text-[var(--dp-text-muted)]">Selection Mode</p>
-            <p className="mt-2 text-sm text-foreground">{dictionary.selectionMode}</p>
+            <p className="label-caps text-[var(--dp-text-muted)]">选择模式</p>
+            <p className="mt-2 text-sm text-foreground">{getDictionarySelectionModeLabel(dictionary.selectionMode)}</p>
           </div>
           <div className="border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-4">
-            <p className="label-caps text-[var(--dp-text-muted)]">Entity Scopes</p>
-            <p className="mt-2 text-sm text-foreground">{dictionary.entityScopes.join(' / ')}</p>
+            <p className="label-caps text-[var(--dp-text-muted)]">应用范围</p>
+            <p className="mt-2 text-sm text-foreground">{getDictionaryEntityScopeSummary(dictionary.entityScopes)}</p>
           </div>
         </div>
 
         <div className="space-y-3">
-          <SectionTitle>Field Mappings</SectionTitle>
+          <SectionTitle>字段映射</SectionTitle>
           <div className="space-y-2 border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] p-4 text-sm text-[var(--dp-text-muted)]">
             {dictionary.fieldMappings.map((fieldMapping) => (
               <div key={`${fieldMapping.entity}-${fieldMapping.field}`} className="flex items-center justify-between gap-3">
-                <span>
-                  {fieldMapping.entity}.{fieldMapping.field}
-                </span>
-                <span>{fieldMapping.selectionMode}</span>
+                <span>{getDictionaryFieldMappingLabel(fieldMapping.entity, fieldMapping.field)}</span>
+                <span>{getDictionarySelectionModeLabel(fieldMapping.selectionMode)}</span>
               </div>
             ))}
           </div>

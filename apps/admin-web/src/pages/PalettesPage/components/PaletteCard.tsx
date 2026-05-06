@@ -43,11 +43,11 @@ export function PaletteCard({
 
           <div className="grid gap-4 border-t border-[var(--dp-border-subtle)] pt-4 sm:grid-cols-2">
             <div>
-              <p className="label-caps text-[var(--dp-text-muted)]">Sources</p>
+              <p className="label-caps text-[var(--dp-text-muted)]">来源合集</p>
               <p className="mt-2 text-sm text-foreground">{model.sourceCountLabel}</p>
             </div>
             <div>
-              <p className="label-caps text-[var(--dp-text-muted)]">Preview Trio</p>
+              <p className="label-caps text-[var(--dp-text-muted)]">三色预览</p>
               <p className="mt-2 text-sm text-foreground">{model.trioSummary}</p>
             </div>
           </div>

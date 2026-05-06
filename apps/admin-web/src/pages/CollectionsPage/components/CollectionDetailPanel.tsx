@@ -77,12 +77,12 @@ export function CollectionDetailPanel({
     return (
       <div className="flex h-full flex-col bg-white">
         <div className="flex items-center justify-between border-b border-[var(--dp-border-subtle)] px-6 py-5">
-          <h2 className="display-font text-[2rem] leading-none tracking-[-0.03em] text-foreground">Edit Collection</h2>
+          <h2 className="display-font text-[2rem] leading-none tracking-[-0.03em] text-foreground">编辑合集</h2>
           <button className="text-muted-foreground hover:text-foreground" onClick={onClose} type="button">
             <X className="size-5" />
           </button>
         </div>
-        <div className="p-6 text-sm leading-6 text-muted-foreground">当前没有可展示的 Collection，请先检查后端返回是否为空。</div>
+        <div className="p-6 text-sm leading-6 text-muted-foreground">当前没有可展示的合集，请先检查后端返回是否为空。</div>
       </div>
     )
   }
@@ -92,7 +92,7 @@ export function CollectionDetailPanel({
       <div className="flex items-start justify-between gap-4 border-b border-[var(--dp-border-subtle)] px-6 py-5">
         <div className="space-y-2">
           <p className="label-caps text-muted-foreground">{draft.id}</p>
-          <h2 className="display-font text-[2rem] leading-none tracking-[-0.03em] text-foreground">Edit Collection</h2>
+          <h2 className="display-font text-[2rem] leading-none tracking-[-0.03em] text-foreground">编辑合集</h2>
           <p className="text-sm text-muted-foreground">{draft.nameZh} / {draft.nameEn}</p>
         </div>
 
@@ -100,7 +100,7 @@ export function CollectionDetailPanel({
           <X className="size-5" />
         </button>
         <p className="text-sm leading-6 text-muted-foreground">
-          当前已支持合集详情编辑、Palette 来源引用检查、软删除与恢复，保存会直接回写 `collections.v1.json`。
+          当前已支持合集详情编辑、配色盘来源引用检查、软删除与恢复，保存会直接回写 `collections.v1.json`。
         </p>
       </div>
 

@@ -2,11 +2,8 @@ import type { ReactElement } from 'react'
 
 import { Button } from '@/components/ui/button'
 import type { CollectionEditorOption } from '@/models/collections'
+import { buildOptionLabelMap } from '@/utils/asset-display'
 import { SectionTitle } from './CollectionEditorControls'
-
-function buildPaletteLabelMap(options: CollectionEditorOption[]): Map<string, string> {
-  return new Map(options.map((option) => [option.value, option.label]))
-}
 
 // Collection 成员编排区，负责排序、封面切换、移除和新增 Palette 成员。
 export function CollectionPaletteArrangement({
@@ -26,21 +23,21 @@ export function CollectionPaletteArrangement({
   paletteIds: string[]
   paletteOptions: CollectionEditorOption[]
 }): ReactElement {
-  const paletteLabelMap = buildPaletteLabelMap(paletteOptions)
+  const paletteLabelMap = buildOptionLabelMap(paletteOptions)
   const availablePaletteOptions = paletteOptions.filter((option) => !paletteIds.includes(option.value))
 
   return (
     <div className="space-y-4 border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] p-4">
       <div className="space-y-2">
-        <SectionTitle>Member Arrangement</SectionTitle>
+        <SectionTitle>成员编排</SectionTitle>
         <p className="text-sm leading-6 text-foreground">
-          当前顺序会按 `paletteIds` 直接写回，封面 palette 也必须同时属于成员列表。可以在这里做显式排序、设为封面和移除成员。
+          当前顺序会按 `paletteIds` 直接写回，封面配色盘也必须同时属于成员列表。可以在这里做显式排序、设为封面和移除成员。
         </p>
       </div>
 
       {paletteIds.length === 0 ? (
         <div className="border border-[var(--dp-border-subtle)] bg-white/70 px-4 py-3 text-sm text-muted-foreground">
-          当前还没有成员 palette，请先从下方加入。
+          当前还没有成员配色盘，请先从下方加入。
         </div>
       ) : (
         <div className="space-y-3">
@@ -101,10 +98,10 @@ export function CollectionPaletteArrangement({
       )}
 
       <div className="space-y-3">
-        <SectionTitle>Add Palette</SectionTitle>
+        <SectionTitle>添加配色盘</SectionTitle>
         {availablePaletteOptions.length === 0 ? (
           <div className="rounded-[18px] border border-[var(--dp-border-hairline)] bg-white/70 px-4 py-3 text-sm text-muted-foreground">
-            当前可用 palette 已全部加入这个 collection。
+            当前可用配色盘已全部加入这个合集。
           </div>
         ) : (
           <div className="flex flex-wrap gap-2">

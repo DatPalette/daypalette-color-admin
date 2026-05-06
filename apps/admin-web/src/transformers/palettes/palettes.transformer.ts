@@ -10,17 +10,8 @@ import type {
 import type { BaseColorCollectionDto } from '@/models/base-colors'
 import type { CollectionsDocumentDto } from '@/models/collections'
 import type { DictionariesDocumentDto, DictionaryNodeDto } from '@/models/dictionaries'
+import { buildOptionLabelMap, resolveOptionLabel } from '@/utils/asset-display'
 import { formatUpdatedAtLabel } from '@/utils/format-updated-at-label'
-
-// 为编辑器选项建立 value 到 label 的索引，供列表与详情统一做展示名回退。
-function buildOptionLabelMap(options: PaletteEditorOption[]): Map<string, string> {
-  return new Map(options.map((option) => [option.value, option.label]))
-}
-
-// 按统一回退策略把枚举值解析成展示文案。
-function resolveOptionLabel(optionLabelMap: Map<string, string>, value: string): string {
-  return optionLabelMap.get(value) ?? value
-}
 
 function buildBaseColorHexMap(baseColors?: BaseColorCollectionDto | null): Map<string, string> {
   return new Map((baseColors?.items ?? []).map((item) => [item.id, item.hex]))

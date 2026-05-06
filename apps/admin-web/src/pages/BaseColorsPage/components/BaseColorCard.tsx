@@ -41,18 +41,18 @@ export function BaseColorCard({
 
           <div className="grid gap-4 border-t border-[var(--dp-border-subtle)] pt-4 sm:grid-cols-2">
             <div>
-              <p className="label-caps text-[var(--dp-text-muted)]">Family</p>
+              <p className="label-caps text-[var(--dp-text-muted)]">色系</p>
               <p className="mt-2 text-sm text-foreground">{model.colorFamily}</p>
             </div>
             <div>
-              <p className="label-caps text-[var(--dp-text-muted)]">Profile</p>
+              <p className="label-caps text-[var(--dp-text-muted)]">属性摘要</p>
               <p className="mt-2 text-sm text-foreground">{model.tagSummary}</p>
             </div>
           </div>
 
           <div className="flex items-center justify-between border-t border-[var(--dp-border-subtle)] pt-4 text-sm">
             <span className="text-[var(--dp-text-muted)]">{model.status}</span>
-            <span className="label-caps text-foreground">Edit</span>
+            <span className="label-caps text-foreground">编辑</span>
           </div>
         </div>
       </div>

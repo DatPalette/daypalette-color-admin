@@ -1,6 +1,8 @@
 import type { ReactElement } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { WorkbenchInfoRow } from '@/components/workbench/WorkbenchInfoRow'
+import { buildOptionLabelMap, getBooleanLabel, resolveOptionLabel } from '@/utils/asset-display'
 import { CollectionPaletteArrangement } from './CollectionPaletteArrangement'
 import {
   MultiSelectChips,
@@ -12,26 +14,8 @@ import {
 import type {
   CollectionDeleteCheckDto,
   CollectionDto,
-  CollectionEditorOption,
   CollectionEditorOptions,
 } from '@/models/collections'
-
-function buildOptionLabelMap(options: CollectionEditorOption[]): Map<string, string> {
-  return new Map(options.map((option) => [option.value, option.label]))
-}
-
-function resolveOptionLabel(optionLabelMap: Map<string, string>, value: string): string {
-  return optionLabelMap.get(value) ?? value
-}
-
-function InfoRow({ label, value }: { label: string; value: string }): ReactElement {
-  return (
-    <div className="flex items-start justify-between gap-4 border-b border-[var(--dp-border-subtle)] py-3 text-sm last:border-b-0">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="text-right text-foreground">{value}</span>
-    </div>
-  )
-}
 
 // Collection 摘要区，负责展示只读元信息和关键封面配置。
 export function CollectionSummarySection({
@@ -55,12 +39,12 @@ export function CollectionSummarySection({
         ))}
       </div>
       <div className="border border-[var(--dp-border-subtle)] bg-white px-5 py-3">
-        <InfoRow label="Collection ID" value={draft.id} />
-        <InfoRow label="Theme Type" value={resolveOptionLabel(themeTypeLabelMap, draft.themeType)} />
-        <InfoRow label="Cover Palette" value={resolveOptionLabel(paletteLabelMap, draft.coverPaletteId)} />
-        <InfoRow label="Release Mode" value={resolveOptionLabel(releaseModeLabelMap, draft.releaseMode)} />
-        <InfoRow label="Status" value={resolveOptionLabel(statusLabelMap, draft.status)} />
-        <InfoRow label="Pro" value={draft.isPro ? 'Yes' : 'No'} />
+        <WorkbenchInfoRow label="合集 ID" value={draft.id} />
+        <WorkbenchInfoRow label="主题类型" value={resolveOptionLabel(themeTypeLabelMap, draft.themeType)} />
+        <WorkbenchInfoRow label="封面配色盘" value={resolveOptionLabel(paletteLabelMap, draft.coverPaletteId)} />
+        <WorkbenchInfoRow label="发布模式" value={resolveOptionLabel(releaseModeLabelMap, draft.releaseMode)} />
+        <WorkbenchInfoRow label="状态" value={resolveOptionLabel(statusLabelMap, draft.status)} />
+        <WorkbenchInfoRow label="专业版" value={getBooleanLabel(draft.isPro)} />
       </div>
     </div>
   )
@@ -108,25 +92,25 @@ export function CollectionFormSection({
         <TextInput label="中文名" onChange={(value) => onDraftFieldChange('nameZh', value)} value={draft.nameZh} />
         <TextInput label="英文名" onChange={(value) => onDraftFieldChange('nameEn', value)} value={draft.nameEn} />
         <SelectInput
-          label="Theme Type"
+          label="主题类型"
           onChange={(value) => onDraftFieldChange('themeType', value)}
           options={editorOptions.themeTypeOptions}
           value={draft.themeType}
         />
         <SelectInput
-          label="Release Mode"
+          label="发布模式"
           onChange={(value) => onDraftFieldChange('releaseMode', value)}
           options={editorOptions.releaseModeOptions}
           value={draft.releaseMode}
         />
         <SelectInput
-          label="Status"
+          label="状态"
           onChange={(value) => onDraftFieldChange('status', value)}
           options={editorOptions.statusOptions}
           value={draft.status}
         />
         <SelectInput
-          label="Cover Palette"
+          label="封面配色盘"
           onChange={(value) => onDraftFieldChange('coverPaletteId', value)}
           options={editorOptions.paletteOptions}
           value={draft.coverPaletteId}
@@ -135,7 +119,7 @@ export function CollectionFormSection({
 
       <label className="flex items-center justify-between gap-3 border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3">
         <div>
-          <SectionTitle>Pro Flag</SectionTitle>
+          <SectionTitle>专业版标记</SectionTitle>
           <p className="mt-1 text-sm text-muted-foreground">用于标记高优先级合集。</p>
         </div>
         <input
@@ -169,14 +153,14 @@ export function CollectionFormSection({
       />
 
       <MultiSelectChips
-        label="Occasion Tags"
+        label="场合标签"
         onToggle={(value) => onDraftTagToggle('occasionTags', value)}
         options={editorOptions.occasionOptions}
         selectedValues={draft.occasionTags}
       />
 
       <MultiSelectChips
-        label="Style Tags"
+        label="风格标签"
         onToggle={(value) => onDraftTagToggle('styleTags', value)}
         options={editorOptions.styleTagOptions}
         selectedValues={draft.styleTags}
@@ -184,7 +168,7 @@ export function CollectionFormSection({
 
       <div className="border-b border-[var(--dp-border-subtle)] pb-8">
         <Button className="w-full" disabled={isSaving} onClick={() => void onSave()} variant="primary">
-          {isSaving ? '正在保存…' : '保存 Collection'}
+          {isSaving ? '正在保存…' : '保存合集'}
         </Button>
       </div>
     </>
@@ -212,9 +196,9 @@ export function CollectionDeleteGuardSection({
   return (
     <div className="space-y-4 border border-amber-200 bg-amber-50/70 p-4">
       <div className="space-y-2">
-        <SectionTitle>Delete Guard</SectionTitle>
+        <SectionTitle>删除保护</SectionTitle>
         <p className="text-sm leading-6 text-foreground">
-          删除前会先检查 Palette 的来源引用。只有当前 Collection 不再被任何 active palette 作为 source collection 使用时，才允许软删除。
+          删除前会先检查配色盘的来源引用。只有当前合集不再被任何启用中的配色盘作为来源合集使用时，才允许软删除。
         </p>
       </div>
 
@@ -223,11 +207,11 @@ export function CollectionDeleteGuardSection({
       {deleteCheck ? (
         deleteCheck.canDelete ? (
           <div className="border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-            当前未发现 Palette 引用，可以执行软删除。
+            当前未发现配色盘引用，可以执行软删除。
           </div>
         ) : (
           <div className="space-y-3 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            <p>当前 Collection 仍被以下 Palette 引用，不能软删除：</p>
+            <p>当前合集仍被以下配色盘引用，不能软删除：</p>
             <div className="space-y-2 text-xs leading-5">
               {deleteCheck.blockingReferences.map((reference) => (
                 <div key={`${reference.id}-${reference.referenceField}`}>
@@ -254,7 +238,7 @@ export function CollectionDeleteGuardSection({
           onClick={() => void onDelete()}
           variant="outline"
         >
-          {isDeleting ? '正在软删除…' : '软删除 Collection'}
+          {isDeleting ? '正在软删除…' : '软删除合集'}
         </Button>
       </div>
     </div>
@@ -274,13 +258,13 @@ export function ArchivedCollectionsSection({
   return (
     <div className="space-y-3 border border-sky-200 bg-sky-50/70 p-4">
       <div className="space-y-2">
-        <SectionTitle>Archived Collections</SectionTitle>
-        <p className="text-sm leading-6 text-foreground">已软删除的 Collection 会出现在这里，恢复后会重新回到可编辑列表。</p>
+        <SectionTitle>已归档合集</SectionTitle>
+        <p className="text-sm leading-6 text-foreground">已软删除的合集会出现在这里，恢复后会重新回到可编辑列表。</p>
       </div>
 
       {archivedCollections.length === 0 ? (
         <div className="border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3 text-sm text-muted-foreground">
-          当前没有已归档的 Collection。
+          当前没有已归档的合集。
         </div>
       ) : (
         <div className="space-y-3">

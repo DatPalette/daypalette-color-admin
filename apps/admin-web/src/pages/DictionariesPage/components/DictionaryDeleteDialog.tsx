@@ -5,6 +5,7 @@ import { WorkbenchModal } from '@/components/workbench/WorkbenchModal'
 import { Button } from '@/components/ui/button'
 import type { DictionaryItemDeleteCheckDto, DictionaryItemDto } from '@/models/dictionaries'
 
+import { getDictionaryEntityLabel } from '../display'
 import { SectionTitle } from './DictionaryEditorControls'
 
 interface DictionaryDeleteDialogProps {
@@ -53,7 +54,7 @@ export function DictionaryDeleteDialog({
     <WorkbenchModal isOpen={isOpen} onClose={onClose} panelClassName="max-w-[560px]">
       <div className="flex items-start justify-between gap-4 border-b border-[var(--dp-border-subtle)] px-6 py-5">
         <div className="space-y-2">
-          <p className="label-caps text-[var(--dp-text-muted)]">Delete Item</p>
+          <p className="label-caps text-[var(--dp-text-muted)]">删除条目</p>
           <h2 className="display-font text-[1.75rem] leading-none tracking-[-0.03em] text-foreground">软删除确认</h2>
           <p className="text-sm text-[var(--dp-text-muted)]">{item ? `${item.labelZh} (${item.id})` : '未选择条目'}</p>
         </div>
@@ -88,7 +89,7 @@ export function DictionaryDeleteDialog({
               <div className="space-y-2 text-xs leading-5">
                 {activeDeleteCheck.blockingReferences.map((reference) => (
                   <div key={`${reference.resource}-${reference.id}-${reference.referenceField}`}>
-                    {reference.resource} / {reference.id} / {reference.displayLabel} / {reference.referenceField}
+                    {getDictionaryEntityLabel(reference.resource)} / {reference.id} / {reference.displayLabel} / {reference.referenceField}
                   </div>
                 ))}
               </div>

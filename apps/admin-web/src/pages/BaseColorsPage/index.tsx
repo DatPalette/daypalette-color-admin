@@ -59,7 +59,7 @@ export function BaseColorsPage(): ReactElement {
           <>
             <Button onClick={() => void onRefresh()} size="sm" variant="ghost">
               <RefreshCcw className="size-4" />
-              Refresh
+              刷新
             </Button>
             <button
               className="inline-flex h-11 items-center justify-center gap-2 border border-transparent bg-[var(--dp-fill-inverse)] px-5 label-caps text-[var(--dp-text-on-inverse)] transition-opacity hover:opacity-92"
@@ -70,16 +70,16 @@ export function BaseColorsPage(): ReactElement {
               type="button"
             >
               <Plus className="size-4" />
-              添加颜色
+              新增基础色
             </button>
           </>
         }
-        archivedLabel={`${archivedBaseColors.length} archived`}
+        archivedLabel={`${archivedBaseColors.length} 项已归档`}
         description="定义品牌与内容系统的基础色资产，先把单色样本整理准确，再把它们拼成可复用的三色结构。"
         onSearchChange={setSearchValue}
-        searchPlaceholder="Search base colors"
+        searchPlaceholder="搜索基础色"
         searchValue={searchValue}
-        title="Base Colors"
+        title="基础色"
         totalLabel={model?.totalLabel ?? '读取中'}
         updatedAtLabel={model?.updatedAtLabel ?? '等待返回'}
       />
@@ -91,10 +91,8 @@ export function BaseColorsPage(): ReactElement {
       <section className="space-y-5">
         <div className="flex items-center justify-between border-b border-[var(--dp-border-subtle)] pb-4">
           <div>
-            <p className="label-caps text-[var(--dp-text-muted)]">Color Grid</p>
-            <h2 className="display-font mt-2 text-[2rem] leading-none tracking-[-0.03em] text-foreground">
-              Catalog View
-            </h2>
+            <p className="label-caps text-[var(--dp-text-muted)]">色卡列表</p>
+            <h2 className="display-font mt-2 text-[2rem] leading-none tracking-[-0.03em] text-foreground">颜色资产</h2>
           </div>
           <p className="text-sm text-[var(--dp-text-muted)]">{draft?.nameZh ?? '选择一张色卡以编辑'}</p>
         </div>

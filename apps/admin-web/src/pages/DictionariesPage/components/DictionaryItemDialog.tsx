@@ -81,7 +81,7 @@ export function DictionaryItemDialog({
             />
           </label>
           <label className="space-y-2">
-            <SectionTitle>Sort Order</SectionTitle>
+            <SectionTitle>排序值</SectionTitle>
             <input
               className="w-full border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-[var(--dp-fill-inverse)]"
               onChange={(event) =>

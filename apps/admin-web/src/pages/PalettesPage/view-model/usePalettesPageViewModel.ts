@@ -208,9 +208,9 @@ export function usePalettesPageViewModel(): PalettesPageViewModel {
       setIsCreating(false)
       setModel(toPalettesPageModel(nextCollection, draft.id, baseColorCollection, editorOptions))
       setDraft(clonePalette(nextSelectedPalette))
-      setSaveMessage(isCreating ? '已新增 Palette，并写回 palettes.v1.json。' : '已写回 palettes.v1.json。')
+      setSaveMessage(isCreating ? '已新增配色盘，并写回 palettes.v1.json。' : '已写回 palettes.v1.json。')
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : isCreating ? 'Palette 新增失败。' : 'Palette 保存失败。')
+      setErrorMessage(error instanceof Error ? error.message : isCreating ? '配色盘新增失败。' : '配色盘保存失败。')
     } finally {
       setIsSaving(false)
     }
@@ -230,7 +230,7 @@ export function usePalettesPageViewModel(): PalettesPageViewModel {
 
       setDeleteCheck(nextDeleteCheck)
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Palette 删除检查失败。')
+      setErrorMessage(error instanceof Error ? error.message : '配色盘删除检查失败。')
     } finally {
       setIsDeleteChecking(false)
     }
@@ -251,7 +251,7 @@ export function usePalettesPageViewModel(): PalettesPageViewModel {
       setDeleteCheck(latestDeleteCheck)
 
       if (!latestDeleteCheck.canDelete) {
-        setErrorMessage('当前 Palette 仍被 Collection 引用，不能执行软删除。')
+        setErrorMessage('当前配色盘仍被合集引用，不能执行软删除。')
         return
       }
 
@@ -268,9 +268,9 @@ export function usePalettesPageViewModel(): PalettesPageViewModel {
       setDeleteReason('')
       setModel(toPalettesPageModel(nextCollection, nextSelectedPaletteId, baseColorCollection, editorOptions))
       setDraft(clonePalette(nextSelectedPalette))
-      setSaveMessage('已执行 Palette 软删除，并写回 palettes.v1.json。')
+      setSaveMessage('已执行配色盘软删除，并写回 palettes.v1.json。')
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Palette 软删除失败。')
+      setErrorMessage(error instanceof Error ? error.message : '配色盘软删除失败。')
     } finally {
       setIsDeleting(false)
     }
@@ -292,9 +292,9 @@ export function usePalettesPageViewModel(): PalettesPageViewModel {
       setIsCreating(false)
       setModel(toPalettesPageModel(nextCollection, id, baseColorCollection, editorOptions))
       setDraft(clonePalette(nextSelectedPalette))
-      setSaveMessage('已恢复 Palette，并重新回到可编辑列表。')
+      setSaveMessage('已恢复配色盘，并重新回到可编辑列表。')
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Palette 恢复失败。')
+      setErrorMessage(error instanceof Error ? error.message : '配色盘恢复失败。')
     } finally {
       setIsRestoringId(null)
     }

@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 
 import { cn } from '@/utils/cn'
 import type { DictionaryCardModel } from '@/models/dictionaries'
+import { getDictionarySelectionModeLabel, shouldShowEnglishLabel } from '../display'
 
 interface DictionaryTabCardProps {
   isActive: boolean
@@ -20,10 +21,12 @@ export function DictionaryTabCard({ isActive, model, onSelect }: DictionaryTabCa
       type="button"
     >
       <p className="truncate text-[15px] font-semibold text-foreground">{model.labelZh}</p>
-      <p className="mt-0.5 truncate text-[13px] text-[var(--dp-text-muted)]">{model.labelEn}</p>
+      {shouldShowEnglishLabel(model.key, model.labelEn) ? (
+        <p className="mt-0.5 truncate text-[13px] text-[var(--dp-text-muted)]">{model.labelEn}</p>
+      ) : null}
       <div className="mt-3 flex items-center justify-between gap-3 text-xs text-[var(--dp-text-muted)]">
         <span>{model.itemCountLabel}</span>
-        <span>{model.selectionModeLabel}</span>
+        <span>{getDictionarySelectionModeLabel(model.selectionModeLabel)}</span>
       </div>
     </button>
   )

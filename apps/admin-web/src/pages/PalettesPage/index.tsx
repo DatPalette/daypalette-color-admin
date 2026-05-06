@@ -59,7 +59,7 @@ export function PalettesPage(): ReactElement {
           <>
             <Button onClick={() => void onRefresh()} size="sm" variant="ghost">
               <RefreshCcw className="size-4" />
-              Refresh
+              刷新
             </Button>
             <button
               className="inline-flex h-11 items-center justify-center gap-2 border border-transparent bg-[var(--dp-fill-inverse)] px-5 label-caps text-[var(--dp-text-on-inverse)] transition-opacity hover:opacity-92"
@@ -70,16 +70,16 @@ export function PalettesPage(): ReactElement {
               type="button"
             >
               <Plus className="size-4" />
-              新增 Palette
+              新增配色盘
             </button>
           </>
         }
-        archivedLabel={`${archivedPalettes.length} archived`}
+        archivedLabel={`${archivedPalettes.length} 项已归档`}
         description="组合三色关系，校验场景、来源与状态，再把可用结构投放到合集与后续内容编排里。"
         onSearchChange={setSearchValue}
-        searchPlaceholder="Search palettes"
+        searchPlaceholder="搜索配色盘"
         searchValue={searchValue}
-        title="Palettes"
+        title="配色盘"
         totalLabel={model?.totalLabel ?? '读取中'}
         updatedAtLabel={model?.updatedAtLabel ?? '等待返回'}
       />
@@ -91,12 +91,10 @@ export function PalettesPage(): ReactElement {
       <section className="space-y-5">
         <div className="flex items-center justify-between border-b border-[var(--dp-border-subtle)] pb-4">
           <div>
-            <p className="label-caps text-[var(--dp-text-muted)]">Palette Grid</p>
-            <h2 className="display-font mt-2 text-[2rem] leading-none tracking-[-0.03em] text-foreground">
-              Relationship View
-            </h2>
+            <p className="label-caps text-[var(--dp-text-muted)]">配色盘列表</p>
+            <h2 className="display-font mt-2 text-[2rem] leading-none tracking-[-0.03em] text-foreground">关系视图</h2>
           </div>
-          <p className="text-sm text-[var(--dp-text-muted)]">{draft?.slug ?? '选择一组 Palette 以编辑'}</p>
+          <p className="text-sm text-[var(--dp-text-muted)]">{draft?.slug ?? '选择一组配色盘以编辑'}</p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
@@ -120,7 +118,7 @@ export function PalettesPage(): ReactElement {
 
           {!isLoading && filteredCards.length === 0 ? (
             <div className="paper-card md:col-span-2 xl:col-span-3 2xl:col-span-4 px-8 py-10 text-center text-sm leading-7 text-[var(--dp-text-muted)]">
-              没有匹配当前搜索词的 Palette。调整关键词后重试。
+              没有匹配当前搜索词的配色盘。调整关键词后重试。
             </div>
           ) : null}
         </div>

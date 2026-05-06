@@ -3,6 +3,7 @@ import { X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import type { BaseColorDeleteCheckDto, BaseColorDto, BaseColorEditorOptions } from '@/models/base-colors'
+import { buildOptionLabelMap, resolveOptionLabel } from '@/utils/asset-display'
 
 import { MultiSelectChips, SectionTitle, SelectInput, TextInput } from './BaseColorEditorControls'
 
@@ -67,7 +68,7 @@ export function BaseColorDetailPanel({
     return (
       <div className="flex h-full flex-col bg-white">
         <div className="flex items-center justify-between border-b border-[var(--dp-border-subtle)] px-6 py-5">
-          <h2 className="display-font text-[2rem] leading-none tracking-[-0.03em] text-foreground">编辑颜色资产</h2>
+          <h2 className="display-font text-[2rem] leading-none tracking-[-0.03em] text-foreground">编辑基础色</h2>
           <button className="text-muted-foreground hover:text-foreground" onClick={onClose} type="button">
             <X className="size-5" />
           </button>
@@ -77,14 +78,21 @@ export function BaseColorDetailPanel({
     )
   }
 
-  const summary = [draft.tone, draft.colorFamily, draft.status].join(' · ')
+  const colorFamilyLabelMap = buildOptionLabelMap(editorOptions.colorFamilies)
+  const statusLabelMap = buildOptionLabelMap(editorOptions.statuses)
+  const toneLabelMap = buildOptionLabelMap(editorOptions.tones)
+  const summary = [
+    resolveOptionLabel(toneLabelMap, draft.tone),
+    resolveOptionLabel(colorFamilyLabelMap, draft.colorFamily),
+    resolveOptionLabel(statusLabelMap, draft.status),
+  ].join(' · ')
 
   return (
     <div className="flex h-full flex-col bg-white">
       <div className="flex items-start justify-between gap-4 border-b border-[var(--dp-border-subtle)] px-6 py-5">
         <div className="space-y-2">
-          <p className="label-caps text-muted-foreground">{draft.id || 'new-base-color'}</p>
-          <h2 className="display-font text-[2rem] leading-none tracking-[-0.03em] text-foreground">编辑颜色资产</h2>
+          <p className="label-caps text-muted-foreground">{draft.id || '新建基础色'}</p>
+          <h2 className="display-font text-[2rem] leading-none tracking-[-0.03em] text-foreground">编辑基础色</h2>
           <p className="text-sm text-muted-foreground">
             {isCreating ? '保存会创建新记录并写回 raw JSON 文件。' : '保存会直接回写到 raw JSON 文件。'}
           </p>
@@ -110,7 +118,7 @@ export function BaseColorDetailPanel({
         ) : null}
 
         <section className="space-y-3 border-b border-[var(--dp-border-subtle)] pb-8">
-          <SectionTitle>Color Value</SectionTitle>
+          <SectionTitle>颜色值</SectionTitle>
           <div className="grid gap-4 sm:grid-cols-[96px_minmax(0,1fr)]">
             <div className="h-24 border border-black/5" style={{ backgroundColor: draft.hex }} />
             <div className="space-y-2">
@@ -119,24 +127,24 @@ export function BaseColorDetailPanel({
                 onChange={(event) => onDraftFieldChange('hex', event.target.value)}
                 value={draft.hex}
               />
-              <p className="text-xs italic text-muted-foreground">Ref: curated base color sample</p>
+              <p className="text-xs italic text-muted-foreground">参考：精选基础色样本</p>
             </div>
           </div>
         </section>
 
         <div className="grid gap-4 border-b border-[var(--dp-border-subtle)] py-8 sm:grid-cols-2">
           <div>
-            <SectionTitle>Chinese Name</SectionTitle>
+            <SectionTitle>中文名</SectionTitle>
             <p className="mt-2 text-[1.9rem] leading-none tracking-[-0.03em] text-foreground">{draft.nameZh}</p>
           </div>
           <div>
-            <SectionTitle>English Name</SectionTitle>
+            <SectionTitle>英文名</SectionTitle>
             <p className="mt-2 text-lg text-muted-foreground">{draft.nameEn}</p>
           </div>
         </div>
 
         <div className="space-y-2 border-b border-[var(--dp-border-subtle)] py-8">
-          <SectionTitle>Summary</SectionTitle>
+          <SectionTitle>摘要</SectionTitle>
           <p className="text-sm leading-7 text-muted-foreground">{summary}</p>
         </div>
 
@@ -149,33 +157,33 @@ export function BaseColorDetailPanel({
           />
           <TextInput label="中文名" onChange={(value) => onDraftFieldChange('nameZh', value)} value={draft.nameZh} />
           <TextInput label="英文名" onChange={(value) => onDraftFieldChange('nameEn', value)} value={draft.nameEn} />
-          <TextInput label="Hex" onChange={(value) => onDraftFieldChange('hex', value)} value={draft.hex} />
+          <TextInput label="HEX 色值" onChange={(value) => onDraftFieldChange('hex', value)} value={draft.hex} />
           <SelectInput
-            label="Tone"
+            label="冷暖"
             onChange={(value) => onDraftFieldChange('tone', value)}
             options={editorOptions.tones}
             value={draft.tone}
           />
           <SelectInput
-            label="Color Family"
+            label="色系"
             onChange={(value) => onDraftFieldChange('colorFamily', value)}
             options={editorOptions.colorFamilies}
             value={draft.colorFamily}
           />
           <SelectInput
-            label="Status"
+            label="状态"
             onChange={(value) => onDraftFieldChange('status', value)}
             options={editorOptions.statuses}
             value={draft.status}
           />
           <SelectInput
-            label="Saturation"
+            label="饱和度"
             onChange={(value) => onDraftFieldChange('saturationLevel', value)}
             options={editorOptions.saturationLevels}
             value={draft.saturationLevel}
           />
           <SelectInput
-            label="Lightness"
+            label="明度"
             onChange={(value) => onDraftFieldChange('lightnessLevel', value)}
             options={editorOptions.lightnessLevels}
             value={draft.lightnessLevel}
@@ -184,7 +192,7 @@ export function BaseColorDetailPanel({
 
         <label className="my-8 flex items-center justify-between gap-3 border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3">
           <div>
-            <SectionTitle>Neutral Core</SectionTitle>
+            <SectionTitle>中性色核心</SectionTitle>
             <p className="mt-1 text-sm text-muted-foreground">用于保留基础中性色，不随普通色卡一同淘汰。</p>
           </div>
           <input
@@ -197,21 +205,21 @@ export function BaseColorDetailPanel({
 
         <div className="space-y-6 border-b border-[var(--dp-border-subtle)] pb-8">
           <MultiSelectChips
-            label="Style Tags"
+            label="风格标签"
             onToggle={(value) => onDraftTagToggle('styleTags', value)}
             options={editorOptions.styleTags}
             selectedValues={draft.styleTags}
           />
 
           <MultiSelectChips
-            label="Occasion Tags"
+            label="场合标签"
             onToggle={(value) => onDraftTagToggle('occasionTags', value)}
             options={editorOptions.occasionTags}
             selectedValues={draft.occasionTags}
           />
 
           <MultiSelectChips
-            label="Season Tags"
+            label="季节标签"
             onToggle={(value) => onDraftTagToggle('seasonTags', value)}
             options={editorOptions.seasonTags}
             selectedValues={draft.seasonTags}
@@ -221,9 +229,9 @@ export function BaseColorDetailPanel({
         {!isCreating ? (
           <div className="space-y-4 border-b border-[var(--dp-border-subtle)] py-8">
             <div className="space-y-2">
-              <SectionTitle>Delete Guard</SectionTitle>
+              <SectionTitle>删除保护</SectionTitle>
               <p className="text-sm leading-6 text-foreground">
-                删除前会先检查 palette 引用。只有当前基础色不再被任何 active palette 使用时，才允许软删除。
+                删除前会先检查配色盘引用。只有当前基础色不再被任何启用中的配色盘使用时，才允许软删除。
               </p>
             </div>
 
@@ -232,11 +240,11 @@ export function BaseColorDetailPanel({
             {deleteCheck ? (
               deleteCheck.canDelete ? (
                 <div className="border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-                  当前未发现 palette 引用，可以执行软删除。
+                  当前未发现配色盘引用，可以执行软删除。
                 </div>
               ) : (
                 <div className="space-y-3 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                  <p>当前基础色仍被以下 palette 引用，不能软删除：</p>
+                  <p>当前基础色仍被以下配色盘引用，不能软删除：</p>
                   <div className="space-y-2 text-xs leading-5">
                     {deleteCheck.blockingReferences.map((reference) => (
                       <div key={`${reference.id}-${reference.referenceField}`}>
@@ -271,7 +279,7 @@ export function BaseColorDetailPanel({
 
         <div className="space-y-3 py-8">
           <div className="space-y-2">
-            <SectionTitle>Archived Base Colors</SectionTitle>
+            <SectionTitle>已归档基础色</SectionTitle>
             <p className="text-sm leading-6 text-foreground">已软删除的基础色会出现在这里，恢复后会重新回到可编辑列表。</p>
           </div>
 

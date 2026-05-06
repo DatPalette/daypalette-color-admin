@@ -10,7 +10,11 @@ import { DictionaryItemCard } from './components/DictionaryItemCard'
 import { DictionaryItemDialog, type DictionaryItemFormValue } from './components/DictionaryItemDialog'
 import { DictionarySettingsDrawer, type DictionarySettingsFormValue } from './components/DictionarySettingsDrawer'
 import { DictionaryTabCard } from './components/DictionaryTabCard'
-import { shouldShowEnglishLabel } from './display'
+import {
+  getDictionaryEntityScopeSummary,
+  getDictionarySelectionModeLabel,
+  shouldShowEnglishLabel,
+} from './display'
 import { useDictionariesPageViewModel } from './view-model/useDictionariesPageViewModel'
 import { buildNewDictionaryItemDraft } from './view-model/helpers'
 
@@ -224,7 +228,7 @@ export function DictionariesPage({
             <div className="paper-card bg-white px-4 py-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="label-caps text-[var(--dp-text-muted)]">{draft.key}</p>
+                  <p className="label-caps text-[var(--dp-text-muted)]">字典概览</p>
                   <h2 className="mt-2 text-lg font-semibold text-foreground">{draft.labelZh}</h2>
                   {shouldShowEnglishLabel(draft.key, draft.labelEn) ? (
                     <p className="mt-0.5 text-sm text-[var(--dp-text-muted)]">{draft.labelEn}</p>
@@ -238,23 +242,24 @@ export function DictionariesPage({
               <p className="mt-3 max-w-[58ch] text-sm leading-6 text-[var(--dp-text-muted)]">
                 {draft.descriptionZh || draft.descriptionEn || '当前字典还没有补充说明。'}
               </p>
+              <p className="mt-3 text-xs text-[var(--dp-text-muted)]">字典标识：{draft.key}</p>
             </div>
 
             <div className="paper-card grid gap-x-4 gap-y-3 bg-white px-4 py-4 sm:grid-cols-2 xl:grid-cols-2">
               <div>
-                <p className="label-caps text-[var(--dp-text-muted)]">Selection Mode</p>
-                <p className="mt-1.5 text-sm text-foreground">{draft.selectionMode}</p>
+                <p className="label-caps text-[var(--dp-text-muted)]">选择模式</p>
+                <p className="mt-1.5 text-sm text-foreground">{getDictionarySelectionModeLabel(draft.selectionMode)}</p>
               </div>
               <div>
-                <p className="label-caps text-[var(--dp-text-muted)]">Entity Scopes</p>
-                <p className="mt-1.5 text-sm leading-6 text-foreground">{draft.entityScopes.join(' / ')}</p>
+                <p className="label-caps text-[var(--dp-text-muted)]">应用范围</p>
+                <p className="mt-1.5 text-sm leading-6 text-foreground">{getDictionaryEntityScopeSummary(draft.entityScopes)}</p>
               </div>
               <div>
-                <p className="label-caps text-[var(--dp-text-muted)]">Field Mappings</p>
+                <p className="label-caps text-[var(--dp-text-muted)]">字段映射</p>
                 <p className="mt-1.5 text-sm text-foreground">{draft.fieldMappings.length} 项映射</p>
               </div>
               <div>
-                <p className="label-caps text-[var(--dp-text-muted)]">Items</p>
+                <p className="label-caps text-[var(--dp-text-muted)]">条目数</p>
                 <p className="mt-1.5 text-sm text-foreground">{activeTab.itemCountLabel}</p>
               </div>
             </div>
@@ -263,10 +268,10 @@ export function DictionariesPage({
 
         <div className="flex items-center justify-between border-b border-[var(--dp-border-subtle)] pb-4">
           <div>
-            <p className="label-caps text-[var(--dp-text-muted)]">Items</p>
+            <p className="label-caps text-[var(--dp-text-muted)]">字典条目</p>
             <p className="mt-2 text-sm text-[var(--dp-text-muted)]">当前字典项以卡片视图展示，编辑与删除通过独立界面承载。</p>
           </div>
-          <p className="text-sm text-[var(--dp-text-muted)]">{filteredItems.length} visible items</p>
+          <p className="text-sm text-[var(--dp-text-muted)]">{filteredItems.length} 项可见</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
@@ -299,10 +304,10 @@ export function DictionariesPage({
         <div className="space-y-4 border-t border-[var(--dp-border-subtle)] pt-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="label-caps text-[var(--dp-text-muted)]">Archived Items</p>
-              <p className="mt-2 text-sm text-[var(--dp-text-muted)]">已软删除条目单独列出，避免和当前编辑中的 active items 混在一起。</p>
+              <p className="label-caps text-[var(--dp-text-muted)]">已归档条目</p>
+              <p className="mt-2 text-sm text-[var(--dp-text-muted)]">已软删除条目单独列出，避免和当前编辑中的当前条目混在一起。</p>
             </div>
-            <p className="text-sm text-[var(--dp-text-muted)]">{archivedItems.length} archived</p>
+            <p className="text-sm text-[var(--dp-text-muted)]">{archivedItems.length} 项已归档</p>
           </div>
 
           {archivedItems.length === 0 ? (

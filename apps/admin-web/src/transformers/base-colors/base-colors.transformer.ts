@@ -8,19 +8,33 @@ import type {
   BaseColorEditorOptions,
   BaseColorsPageModel,
 } from '@/models/base-colors'
+import { buildOptionLabelMap, resolveOptionLabel } from '@/utils/asset-display'
 import { formatUpdatedAtLabel } from '@/utils/format-updated-at-label'
 
 // 把基础色 DTO 收敛为列表卡片所需字段，避免页面重复拼展示摘要。
-function toBaseColorCardModel(item: BaseColorCollectionDto['items'][number]): BaseColorCardModel {
-  const tagSummary = [item.tone, item.lightnessLevel, item.saturationLevel].join(' / ')
+function toBaseColorCardModel(
+  item: BaseColorCollectionDto['items'][number],
+  optionMaps: {
+    colorFamilyLabelMap: Map<string, string>
+    lightnessLevelLabelMap: Map<string, string>
+    saturationLevelLabelMap: Map<string, string>
+    statusLabelMap: Map<string, string>
+    toneLabelMap: Map<string, string>
+  },
+): BaseColorCardModel {
+  const tagSummary = [
+    resolveOptionLabel(optionMaps.toneLabelMap, item.tone),
+    resolveOptionLabel(optionMaps.lightnessLevelLabelMap, item.lightnessLevel),
+    resolveOptionLabel(optionMaps.saturationLevelLabelMap, item.saturationLevel),
+  ].join(' / ')
 
   return {
-    colorFamily: item.colorFamily,
+    colorFamily: resolveOptionLabel(optionMaps.colorFamilyLabelMap, item.colorFamily),
     hex: item.hex,
     id: item.id,
     nameEn: item.nameEn,
     nameZh: item.nameZh,
-    status: item.status,
+    status: resolveOptionLabel(optionMaps.statusLabelMap, item.status),
     tagSummary,
   }
 }
@@ -28,26 +42,37 @@ function toBaseColorCardModel(item: BaseColorCollectionDto['items'][number]): Ba
 // 把当前选中的基础色 DTO 收敛为详情面板模型，统一 mood summary 等展示字段。
 function toBaseColorDetailModel(
   item: BaseColorCollectionDto['items'][number] | null,
+  optionMaps: {
+    colorFamilyLabelMap: Map<string, string>
+    lightnessLevelLabelMap: Map<string, string>
+    saturationLevelLabelMap: Map<string, string>
+    statusLabelMap: Map<string, string>
+    toneLabelMap: Map<string, string>
+  },
 ): BaseColorDetailModel | null {
   if (!item) {
     return null
   }
 
   return {
-    colorFamily: item.colorFamily,
+    colorFamily: resolveOptionLabel(optionMaps.colorFamilyLabelMap, item.colorFamily),
     hex: item.hex,
     id: item.id,
     isNeutralCore: item.isNeutralCore,
-    lightnessLevel: item.lightnessLevel,
-    moodSummary: [item.tone, item.colorFamily, item.status].join(' · '),
+    lightnessLevel: resolveOptionLabel(optionMaps.lightnessLevelLabelMap, item.lightnessLevel),
+    moodSummary: [
+      resolveOptionLabel(optionMaps.toneLabelMap, item.tone),
+      resolveOptionLabel(optionMaps.colorFamilyLabelMap, item.colorFamily),
+      resolveOptionLabel(optionMaps.statusLabelMap, item.status),
+    ].join(' · '),
     nameEn: item.nameEn,
     nameZh: item.nameZh,
     occasionTags: item.occasionTags,
-    saturationLevel: item.saturationLevel,
+    saturationLevel: resolveOptionLabel(optionMaps.saturationLevelLabelMap, item.saturationLevel),
     seasonTags: item.seasonTags,
-    status: item.status,
+    status: resolveOptionLabel(optionMaps.statusLabelMap, item.status),
     styleTags: item.styleTags,
-    tone: item.tone,
+    tone: resolveOptionLabel(optionMaps.toneLabelMap, item.tone),
   }
 }
 
@@ -65,12 +90,20 @@ function toEditorOptions(dictionary: BaseColorDictionaryDto): BaseColorEditorOpt
 export function toBaseColorsPageModel(
   collection: BaseColorCollectionDto,
   selectedId: string | null,
+  editorOptions?: BaseColorEditorOptions | null,
 ): BaseColorsPageModel {
   const selectedItem = collection.items.find((item) => item.id === selectedId) ?? collection.items[0] ?? null
+  const optionMaps = {
+    colorFamilyLabelMap: buildOptionLabelMap(editorOptions?.colorFamilies ?? []),
+    lightnessLevelLabelMap: buildOptionLabelMap(editorOptions?.lightnessLevels ?? []),
+    saturationLevelLabelMap: buildOptionLabelMap(editorOptions?.saturationLevels ?? []),
+    statusLabelMap: buildOptionLabelMap(editorOptions?.statuses ?? []),
+    toneLabelMap: buildOptionLabelMap(editorOptions?.tones ?? []),
+  }
 
   return {
-    cards: collection.items.map(toBaseColorCardModel),
-    detail: toBaseColorDetailModel(selectedItem),
+    cards: collection.items.map((item) => toBaseColorCardModel(item, optionMaps)),
+    detail: toBaseColorDetailModel(selectedItem, optionMaps),
     totalLabel: `${collection.items.length} 个基础色`,
     updatedAtLabel: formatUpdatedAtLabel(collection.updatedAt),
   }

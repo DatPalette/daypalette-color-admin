@@ -59,15 +59,15 @@ export function CollectionsPage(): ReactElement {
         actions={
           <Button onClick={() => void onRefresh()} size="sm" variant="ghost">
             <RefreshCcw className="size-4" />
-            Refresh
+            刷新
           </Button>
         }
-        archivedLabel={`${archivedCollections.length} archived`}
+        archivedLabel={`${archivedCollections.length} 项已归档`}
         description="以列表方式整理合集封面、主题方向与成员顺序，快速判断哪些结构已经适合进入正式发布流。"
         onSearchChange={setSearchValue}
-        searchPlaceholder="Search collections"
+        searchPlaceholder="搜索合集"
         searchValue={searchValue}
-        title="Collections"
+        title="合集"
         totalLabel={model?.totalLabel ?? '读取中'}
         updatedAtLabel={model?.updatedAtLabel ?? '等待返回'}
       />
@@ -79,21 +79,19 @@ export function CollectionsPage(): ReactElement {
       <section className="space-y-5">
         <div className="flex items-center justify-between border-b border-[var(--dp-border-subtle)] pb-4">
           <div>
-            <p className="label-caps text-[var(--dp-text-muted)]">Collection List</p>
-            <h2 className="display-font mt-2 text-[2rem] leading-none tracking-[-0.03em] text-foreground">
-              Curation View
-            </h2>
+            <p className="label-caps text-[var(--dp-text-muted)]">合集列表</p>
+            <h2 className="display-font mt-2 text-[2rem] leading-none tracking-[-0.03em] text-foreground">编排视图</h2>
           </div>
           <p className="text-sm text-[var(--dp-text-muted)]">{draft?.nameZh ?? '选择一条合集记录以编辑'}</p>
         </div>
 
         <div className="paper-card overflow-hidden bg-white">
           <div className="hidden grid-cols-[minmax(0,1.4fr)_180px_180px_140px_120px] gap-4 border-b border-[var(--dp-border-subtle)] px-6 py-4 lg:grid">
-            <span className="label-caps text-[var(--dp-text-muted)]">Collection</span>
-            <span className="label-caps text-[var(--dp-text-muted)]">Theme</span>
-            <span className="label-caps text-[var(--dp-text-muted)]">Cover Palette</span>
-            <span className="label-caps text-[var(--dp-text-muted)]">Members</span>
-            <span className="label-caps text-[var(--dp-text-muted)]">Status</span>
+            <span className="label-caps text-[var(--dp-text-muted)]">合集</span>
+            <span className="label-caps text-[var(--dp-text-muted)]">主题</span>
+            <span className="label-caps text-[var(--dp-text-muted)]">封面配色盘</span>
+            <span className="label-caps text-[var(--dp-text-muted)]">成员数</span>
+            <span className="label-caps text-[var(--dp-text-muted)]">状态</span>
           </div>
 
           <div>
@@ -137,7 +135,7 @@ export function CollectionsPage(): ReactElement {
 
           {!isLoading && filteredCards.length === 0 ? (
             <div className="px-8 py-10 text-center text-sm leading-7 text-[var(--dp-text-muted)]">
-              没有匹配当前搜索词的 Collection。调整关键词后重试。
+              没有匹配当前搜索词的合集。调整关键词后重试。
             </div>
           ) : null}
         </div>
