@@ -29,6 +29,7 @@ import {
   type EditableReferenceSourceField,
   findSelectedPalette,
   findSelectedPaletteId,
+  getPaletteOperationalValidationMessages,
   getArchivedPalettes,
   type EditableScalarField,
   type EditableTagField,
@@ -294,6 +295,14 @@ export function usePalettesPageViewModel(): PalettesPageViewModel {
 
   async function onSave(): Promise<void> {
     if (!draft) {
+      return
+    }
+
+    const operationalValidationMessages = getPaletteOperationalValidationMessages(draft)
+
+    if (operationalValidationMessages.length > 0) {
+      setErrorMessage(operationalValidationMessages.join(' '))
+      setSaveMessage(null)
       return
     }
 

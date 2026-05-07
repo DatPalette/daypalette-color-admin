@@ -7,9 +7,13 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "prebuild": "pnpm --dir ../.. build:packages",
+    "predev": "pnpm --dir ../.. build:packages",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@daypalette-color-admin/contracts": "workspace:*",
+    "@daypalette-color-admin/validation": "workspace:*",
     "antd": "^6.3.7",
     "lucide-react": "^0.542.0",
     "react": "^19.2.5",

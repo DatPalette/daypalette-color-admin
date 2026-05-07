@@ -7,7 +7,10 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
+    "dev": "pnpm run start:dev",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "prebuild": "pnpm --dir ../.. build:packages",
+    "prestart:dev": "pnpm --dir ../.. build:packages",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
@@ -20,6 +23,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@daypalette-color-admin/contracts": "workspace:*",
+    "@daypalette-color-admin/validation": "workspace:*",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",

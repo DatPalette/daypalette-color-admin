@@ -5,6 +5,9 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "dependencies": {
+    "@daypalette-color-admin/contracts": "workspace:*"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json"
   }

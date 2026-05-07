@@ -22,7 +22,13 @@ import type {
   PaletteEditorOptions,
   PaletteReferenceSourceDto,
 } from '@/models/palettes'
-import type { EditableReferenceSourceField, EditableScalarField, EditableTagField } from '../view-model/helpers'
+import {
+  getReferenceSourceMissingFields,
+  getReferenceSourceSectionState,
+  type EditableReferenceSourceField,
+  type EditableScalarField,
+  type EditableTagField,
+} from '../view-model/helpers'
 
 function resolveOptionalLabel(value: string | undefined): string {
   return value && value.trim() ? value : '未填写'
@@ -43,6 +49,7 @@ export function PaletteSummarySection({
   const baseColorLabelMap = buildOptionLabelMap(editorOptions.baseColorOptions)
   const occasionLabelMap = buildOptionLabelMap(editorOptions.occasionOptions)
   const referenceMethodLabelMap = buildOptionLabelMap(editorOptions.referenceMethodOptions)
+  const referenceSourceState = getReferenceSourceSectionState(draft)
   const reviewStatusLabelMap = buildOptionLabelMap(editorOptions.reviewStatusOptions)
   const statusLabelMap = buildOptionLabelMap(editorOptions.statusOptions)
   const paletteRows = [
@@ -82,6 +89,12 @@ export function PaletteSummarySection({
         />
         <WorkbenchInfoRow label="生产批次" value={resolveOptionalLabel(draft.productionBatchId)} />
         <WorkbenchInfoRow label="参考来源数" value={`${draft.referenceSources?.length ?? 0} 条`} />
+        <WorkbenchInfoRow
+          label="参考来源完整度"
+          value={`${referenceSourceState.completedSources} / ${referenceSourceState.totalSources}`}
+        />
+        <WorkbenchInfoRow label="平台覆盖" value={`${referenceSourceState.uniquePlatformCount} 个`} />
+        <WorkbenchInfoRow label="品牌覆盖" value={`${referenceSourceState.uniqueBrandCount} 个`} />
         <WorkbenchInfoRow label="状态" value={resolveOptionLabel(statusLabelMap, draft.status)} />
         <WorkbenchInfoRow label="专业版" value={getBooleanLabel(draft.isPro)} />
         <WorkbenchInfoRow label="适配拍照场景" value={getBooleanLabel(draft.fitPhotoScenario)} />
@@ -121,6 +134,8 @@ export function PaletteFormSection({
   onRemoveReferenceSource: (index: number) => void
   onSave: () => Promise<void>
 }): ReactElement {
+  const referenceSourceState = getReferenceSourceSectionState(draft)
+
   return (
     <>
       <div className="grid gap-4 border-t border-[var(--dp-border-subtle)] pt-8 md:grid-cols-2">
@@ -291,6 +306,36 @@ export function PaletteFormSection({
             </Button>
           </div>
 
+          <div className="grid gap-3 md:grid-cols-4">
+            <div className="border border-[var(--dp-border-subtle)] bg-white px-4 py-3">
+              <p className="label-caps text-muted-foreground">已录入来源</p>
+              <p className="mt-2 text-lg text-foreground">{referenceSourceState.totalSources}</p>
+            </div>
+            <div className="border border-[var(--dp-border-subtle)] bg-white px-4 py-3">
+              <p className="label-caps text-muted-foreground">完整来源</p>
+              <p className="mt-2 text-lg text-foreground">{referenceSourceState.completedSources}</p>
+            </div>
+            <div className="border border-[var(--dp-border-subtle)] bg-white px-4 py-3">
+              <p className="label-caps text-muted-foreground">平台覆盖</p>
+              <p className="mt-2 text-lg text-foreground">{referenceSourceState.uniquePlatformCount}</p>
+            </div>
+            <div className="border border-[var(--dp-border-subtle)] bg-white px-4 py-3">
+              <p className="label-caps text-muted-foreground">品牌覆盖</p>
+              <p className="mt-2 text-lg text-foreground">{referenceSourceState.uniqueBrandCount}</p>
+            </div>
+          </div>
+
+          {referenceSourceState.blockingMessages.length > 0 ? (
+            <div className="space-y-2 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <p className="font-medium">当前状态下，这些问题会阻止保存：</p>
+              <div className="space-y-1">
+                {referenceSourceState.blockingMessages.map((message, index) => (
+                  <div key={`${message}-${index}`}>{message}</div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
           {(draft.referenceSources ?? []).length === 0 ? (
             <div className="border border-dashed border-[var(--dp-border-subtle)] bg-white px-4 py-3 text-sm text-muted-foreground">
               当前还没有参考来源。若该配色来自公开市场采样，请至少补 3 条来源记录。
@@ -308,6 +353,16 @@ export function PaletteFormSection({
                       移除
                     </Button>
                   </div>
+
+                  {getReferenceSourceMissingFields(source).length > 0 ? (
+                    <div className="border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                      需补齐：{getReferenceSourceMissingFields(source).join('、')}
+                    </div>
+                  ) : (
+                    <div className="border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                      当前来源字段已完整。
+                    </div>
+                  )}
 
                   <div className="grid gap-4 md:grid-cols-2">
                     <TextInput

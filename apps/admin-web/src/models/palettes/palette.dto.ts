@@ -1,36 +1,22 @@
-export interface PaletteReferenceSourceDto {
-  brandName: string
-  channelType: string
-  colorSummary: string[]
-  itemCategory: string
-  notes: string
-  observedAt: string
-  platform: string
-  sourceId: string
-  sourceUrl: string
-}
+import type {
+  PaletteOperationalMetadata,
+  PaletteReferenceSource,
+} from '@daypalette-color-admin/contracts'
 
-export interface PaletteDto {
+export type PaletteReferenceSourceDto = PaletteReferenceSource
+
+export interface PaletteDto extends PaletteOperationalMetadata {
   accentColorId: string
-  archiveReason?: string
-  archivedAt?: string
   deleteReason?: string
   deletedAt?: string
   fitPhotoScenario: boolean
   id: string
   isPro: boolean
-  marketSignalSummary?: string
   moodTags: string[]
   occasionId: string
   previousStatus?: string
   primaryColorId: string
-  productionBatchId?: string
-  referenceMethod?: string
   referenceSources?: PaletteReferenceSourceDto[]
-  reviewNotes?: string
-  reviewStatus?: string
-  reviewedAt?: string
-  reviewer?: string
   safetyLevel: string
   seasonTags: string[]
   secondaryColorId: string

@@ -4,6 +4,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import type { PaletteReferenceSource } from '@daypalette-color-admin/contracts';
+import { validatePaletteOperationalMetadata } from '@daypalette-color-admin/validation';
 import { readPaletteDataFile } from '../../common/files/palette-data-reader';
 import { writePaletteDataFile } from '../../common/files/palette-data-reader';
 import type {
@@ -13,7 +15,6 @@ import type {
   PaletteDataCollectionDocument,
   PaletteDeleteCheckReference,
   PaletteDeleteCheckResult,
-  PaletteReferenceSource,
   PaletteRecord,
 } from '../../common/types/palette-data.types';
 import type { CreatePaletteDto } from './dto/create-palette.dto';
@@ -117,44 +118,10 @@ function normalizeReferenceSources(value: unknown): PaletteReferenceSource[] {
 }
 
 function assertPaletteOperationalMetadata(nextRecord: PaletteRecord): void {
-  const isPublishableStatus = nextRecord.status === 'approved' || nextRecord.status === 'published';
-  const referenceSources = nextRecord.referenceSources ?? [];
+  const issues = validatePaletteOperationalMetadata(nextRecord);
 
-  if (
-    isPublishableStatus &&
-    nextRecord.reviewStatus !== undefined &&
-    nextRecord.reviewStatus !== 'approved'
-  ) {
-    throw new BadRequestException(
-      'reviewStatus must be approved before a palette can enter approved or published status.',
-    );
-  }
-
-  if (nextRecord.referenceMethod === 'market-sampled' && isPublishableStatus && referenceSources.length > 0) {
-    if (referenceSources.length < 3) {
-      throw new BadRequestException(
-        'Market-sampled palette requires at least 3 referenceSources before approval or publish.',
-      );
-    }
-
-    const distinctPlatforms = new Set(referenceSources.map((item) => item.platform));
-    const distinctBrands = new Set(referenceSources.map((item) => item.brandName));
-
-    if (distinctPlatforms.size < 2) {
-      throw new BadRequestException(
-        'Market-sampled palette requires references from at least 2 distinct platforms.',
-      );
-    }
-
-    if (distinctBrands.size < 2) {
-      throw new BadRequestException(
-        'Market-sampled palette requires references from at least 2 distinct brands.',
-      );
-    }
-  }
-
-  if (nextRecord.status === 'archived' && !nextRecord.archivedAt) {
-    throw new BadRequestException('archivedAt is required when status is archived.');
+  if (issues.length > 0) {
+    throw new BadRequestException(issues.map((issue) => issue.message).join(' '));
   }
 }
 

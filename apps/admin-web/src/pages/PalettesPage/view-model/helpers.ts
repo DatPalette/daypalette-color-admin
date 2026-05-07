@@ -1,8 +1,10 @@
+import { validatePaletteOperationalMetadata } from '@daypalette-color-admin/validation'
 import type {
   PaletteCreateDto,
   PaletteCollectionDto,
   PaletteDto,
   PaletteEditorOptions,
+  PaletteReferenceSourceDto,
   PaletteUpdateDto,
 } from '@/models/palettes'
 
@@ -43,6 +45,89 @@ export type EditableReferenceSourceField =
 
 // 标记 Palette 页面按标签切换方式维护的数组字段。
 export type EditableTagField = 'moodTags' | 'seasonTags' | 'sourceCollectionIds' | 'styleTags'
+
+export interface ReferenceSourceIssue {
+  index: number
+  missingFields: string[]
+}
+
+export interface ReferenceSourceSectionState {
+  blockingMessages: string[]
+  completedSources: number
+  sourceIssues: ReferenceSourceIssue[]
+  totalSources: number
+  uniqueBrandCount: number
+  uniquePlatformCount: number
+}
+
+function hasText(value: string | undefined): boolean {
+  return Boolean(value?.trim())
+}
+
+function getPreferredInitialStatus(editorOptions: PaletteEditorOptions): string {
+  return editorOptions.statusOptions.find((option) => option.value === 'draft')?.value ?? editorOptions.statusOptions[0]?.value ?? 'approved'
+}
+
+export function getPaletteOperationalValidationMessages(draft: PaletteDto): string[] {
+  return validatePaletteOperationalMetadata(draft).map((issue) => issue.message)
+}
+
+export function getReferenceSourceMissingFields(source: PaletteReferenceSourceDto): string[] {
+  const missingFields: string[] = []
+
+  if (!hasText(source.sourceId)) {
+    missingFields.push('来源 ID')
+  }
+
+  if (!hasText(source.platform)) {
+    missingFields.push('平台')
+  }
+
+  if (!hasText(source.channelType)) {
+    missingFields.push('渠道类型')
+  }
+
+  if (!hasText(source.brandName)) {
+    missingFields.push('品牌')
+  }
+
+  if (!hasText(source.sourceUrl)) {
+    missingFields.push('公开链接')
+  }
+
+  if (!hasText(source.observedAt)) {
+    missingFields.push('采样时间')
+  }
+
+  if (!hasText(source.itemCategory)) {
+    missingFields.push('服饰品类')
+  }
+
+  if (source.colorSummary.filter((item) => item.trim()).length === 0) {
+    missingFields.push('颜色摘要')
+  }
+
+  return missingFields
+}
+
+export function getReferenceSourceSectionState(draft: PaletteDto): ReferenceSourceSectionState {
+  const sources = draft.referenceSources ?? []
+  const sourceIssues = sources
+    .map((source, index) => ({
+      index,
+      missingFields: getReferenceSourceMissingFields(source),
+    }))
+    .filter((issue) => issue.missingFields.length > 0)
+
+  return {
+    blockingMessages: getPaletteOperationalValidationMessages(draft),
+    completedSources: sources.length - sourceIssues.length,
+    sourceIssues,
+    totalSources: sources.length,
+    uniqueBrandCount: new Set(sources.map((source) => source.brandName.trim()).filter(Boolean)).size,
+    uniquePlatformCount: new Set(sources.map((source) => source.platform.trim()).filter(Boolean)).size,
+  }
+}
 
 // 为当前选中 Palette 生成可安全编辑的深拷贝，避免草稿态污染列表源数据。
 export function clonePalette(item: PaletteDto | null): PaletteDto | null {
@@ -93,11 +178,23 @@ export function getArchivedPalettes(collection: PaletteCollectionDto | null): Pa
   return collection.items.filter((item) => item.status === 'deleted')
 }
 
-// 收敛更新接口不接收的运行时字段，供保存流程复用。
-export function toUpdatePayload(draft: PaletteDto): PaletteUpdateDto {
-  const { deleteReason, deletedAt, id, previousStatus, ...payload } = draft
+function omitPaletteRuntimeFields(draft: PaletteDto): Partial<PaletteDto> {
+  const payload: Partial<PaletteDto> = { ...draft }
+
+  delete payload.deleteReason
+  delete payload.deletedAt
+  delete payload.previousStatus
 
   return payload
+}
+
+// 收敛更新接口不接收的运行时字段，供保存流程复用。
+export function toUpdatePayload(draft: PaletteDto): PaletteUpdateDto {
+  const payload = omitPaletteRuntimeFields(draft)
+
+  delete payload.id
+
+  return payload as PaletteUpdateDto
 }
 
 // 基于编辑器选项生成新增 Palette 草稿，统一默认三色位和字段回退顺序。
@@ -130,16 +227,14 @@ export function buildNewPaletteDraft(editorOptions: PaletteEditorOptions): Palet
     slug: '',
     sourceCollectionIds: [],
     sourceType: 'curated',
-    status: editorOptions.statusOptions[0]?.value ?? 'approved',
+    status: getPreferredInitialStatus(editorOptions),
     styleTags: [],
   }
 }
 
 // 收敛创建接口不接收的运行时字段，供新增流程复用。
 export function toCreatePayload(draft: PaletteDto): PaletteCreateDto {
-  const { deleteReason, deletedAt, previousStatus, ...payload } = draft
-
-  return payload
+  return omitPaletteRuntimeFields(draft) as PaletteCreateDto
 }
 
 // 统一 Palette 列表刷新后的选中项回退规则，优先命中当前 id，否则回落首项。

@@ -5,6 +5,7 @@ export type {
   PaletteDeleteCheckReferenceDto,
   PaletteDeleteDto,
   PaletteDto,
+  PaletteReferenceSourceDto,
   PaletteUpdateDto,
 } from './palette.dto'
 export type { PaletteEditorOption, PaletteEditorOptions } from './palette-editor'

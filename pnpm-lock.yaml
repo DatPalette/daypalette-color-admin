@@ -17,6 +17,12 @@ importers:
 
   apps/admin-api:
     dependencies:
+      '@daypalette-color-admin/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@daypalette-color-admin/validation':
+        specifier: workspace:*
+        version: link:../../packages/validation
       '@nestjs/common':
         specifier: ^11.0.1
         version: 11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -105,6 +111,12 @@ importers:
 
   apps/admin-web:
     dependencies:
+      '@daypalette-color-admin/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@daypalette-color-admin/validation':
+        specifier: workspace:*
+        version: link:../../packages/validation
       antd:
         specifier: ^6.3.7
         version: 6.3.7(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -174,7 +186,11 @@ importers:
 
   packages/file-store: {}
 
-  packages/validation: {}
+  packages/validation:
+    dependencies:
+      '@daypalette-color-admin/contracts':
+        specifier: workspace:*
+        version: link:../contracts
 
 packages:
 
