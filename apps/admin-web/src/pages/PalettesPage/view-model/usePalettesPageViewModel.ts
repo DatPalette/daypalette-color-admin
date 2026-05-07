@@ -26,6 +26,7 @@ import {
 import {
   buildNewPaletteDraft,
   clonePalette,
+  type EditableReferenceSourceField,
   findSelectedPalette,
   findSelectedPaletteId,
   getArchivedPalettes,
@@ -54,8 +55,16 @@ interface PalettesPageViewModel {
   onDelete: () => Promise<void>
   onDeleteReasonChange: (value: string) => void
   onDraftFieldChange: <TField extends EditableScalarField>(field: TField, value: PaletteDto[TField]) => void
+  onDraftReferenceSourceColorSummaryChange: (index: number, value: string) => void
+  onDraftReferenceSourceFieldChange: (
+    index: number,
+    field: EditableReferenceSourceField,
+    value: string,
+  ) => void
   onDraftTagToggle: (field: EditableTagField, value: string) => void
+  onAddReferenceSource: () => void
   onRefresh: () => Promise<void>
+  onRemoveReferenceSource: (index: number) => void
   onRestore: (id: string) => Promise<void>
   onSave: () => Promise<void>
   onSelectPalette: (id: string) => void
@@ -181,6 +190,103 @@ export function usePalettesPageViewModel(): PalettesPageViewModel {
         [field]: hasValue
           ? currentDraft[field].filter((currentValue) => currentValue !== value)
           : [...currentDraft[field], value],
+      }
+    })
+    setSaveMessage(null)
+  }
+
+  function onDraftReferenceSourceFieldChange(
+    index: number,
+    field: EditableReferenceSourceField,
+    value: string,
+  ): void {
+    setDraft((currentDraft) => {
+      if (!currentDraft) {
+        return currentDraft
+      }
+
+      const currentSources = currentDraft.referenceSources ?? []
+
+      return {
+        ...currentDraft,
+        referenceSources: currentSources.map((source, currentIndex) =>
+          currentIndex === index
+            ? {
+                ...source,
+                [field]: value,
+              }
+            : source,
+        ),
+      }
+    })
+    setSaveMessage(null)
+  }
+
+  function onDraftReferenceSourceColorSummaryChange(index: number, value: string): void {
+    setDraft((currentDraft) => {
+      if (!currentDraft) {
+        return currentDraft
+      }
+
+      const currentSources = currentDraft.referenceSources ?? []
+      const colorSummary = value
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean)
+
+      return {
+        ...currentDraft,
+        referenceSources: currentSources.map((source, currentIndex) =>
+          currentIndex === index
+            ? {
+                ...source,
+                colorSummary,
+              }
+            : source,
+        ),
+      }
+    })
+    setSaveMessage(null)
+  }
+
+  function onAddReferenceSource(): void {
+    setDraft((currentDraft) => {
+      if (!currentDraft) {
+        return currentDraft
+      }
+
+      return {
+        ...currentDraft,
+        referenceSources: [
+          ...(currentDraft.referenceSources ?? []),
+          {
+            brandName: '',
+            channelType: '',
+            colorSummary: [],
+            itemCategory: '',
+            notes: '',
+            observedAt: '',
+            platform: '',
+            sourceId: '',
+            sourceUrl: '',
+          },
+        ],
+      }
+    })
+    setSaveMessage(null)
+  }
+
+  function onRemoveReferenceSource(index: number): void {
+    setDraft((currentDraft) => {
+      if (!currentDraft) {
+        return currentDraft
+      }
+
+      return {
+        ...currentDraft,
+        referenceSources: (currentDraft.referenceSources ?? []).filter(
+          (_, currentIndex) => currentIndex !== index,
+        ),
       }
     })
     setSaveMessage(null)
@@ -319,8 +425,12 @@ export function usePalettesPageViewModel(): PalettesPageViewModel {
     onDelete,
     onDeleteReasonChange,
     onDraftFieldChange,
+    onDraftReferenceSourceColorSummaryChange,
+    onDraftReferenceSourceFieldChange,
     onDraftTagToggle,
+    onAddReferenceSource,
     onRefresh,
+    onRemoveReferenceSource,
     onRestore,
     onSave,
     onSelectPalette,

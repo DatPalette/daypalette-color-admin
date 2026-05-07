@@ -1,14 +1,36 @@
+export interface PaletteReferenceSourceDto {
+  brandName: string
+  channelType: string
+  colorSummary: string[]
+  itemCategory: string
+  notes: string
+  observedAt: string
+  platform: string
+  sourceId: string
+  sourceUrl: string
+}
+
 export interface PaletteDto {
   accentColorId: string
+  archiveReason?: string
+  archivedAt?: string
   deleteReason?: string
   deletedAt?: string
   fitPhotoScenario: boolean
   id: string
   isPro: boolean
+  marketSignalSummary?: string
   moodTags: string[]
   occasionId: string
   previousStatus?: string
   primaryColorId: string
+  productionBatchId?: string
+  referenceMethod?: string
+  referenceSources?: PaletteReferenceSourceDto[]
+  reviewNotes?: string
+  reviewStatus?: string
+  reviewedAt?: string
+  reviewer?: string
   safetyLevel: string
   seasonTags: string[]
   secondaryColorId: string

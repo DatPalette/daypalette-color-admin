@@ -13,13 +13,24 @@ import {
   MultiSelectChips,
   SectionTitle,
   SelectInput,
+  TextAreaInput,
   TextInput,
 } from './PaletteEditorControls'
 import type {
   PaletteDeleteCheckDto,
   PaletteDto,
   PaletteEditorOptions,
+  PaletteReferenceSourceDto,
 } from '@/models/palettes'
+import type { EditableReferenceSourceField, EditableScalarField, EditableTagField } from '../view-model/helpers'
+
+function resolveOptionalLabel(value: string | undefined): string {
+  return value && value.trim() ? value : '未填写'
+}
+
+function toColorSummaryText(source: PaletteReferenceSourceDto): string {
+  return source.colorSummary.join(', ')
+}
 
 // Palette 摘要区，负责展示当前三色结果与只读元信息。
 export function PaletteSummarySection({
@@ -31,6 +42,8 @@ export function PaletteSummarySection({
 }): ReactElement {
   const baseColorLabelMap = buildOptionLabelMap(editorOptions.baseColorOptions)
   const occasionLabelMap = buildOptionLabelMap(editorOptions.occasionOptions)
+  const referenceMethodLabelMap = buildOptionLabelMap(editorOptions.referenceMethodOptions)
+  const reviewStatusLabelMap = buildOptionLabelMap(editorOptions.reviewStatusOptions)
   const statusLabelMap = buildOptionLabelMap(editorOptions.statusOptions)
   const paletteRows = [
     { label: '主色', value: resolveOptionLabel(baseColorLabelMap, draft.primaryColorId), color: 'var(--dp-palette-main)' },
@@ -59,9 +72,20 @@ export function PaletteSummarySection({
         <WorkbenchInfoRow label="场合" value={resolveOptionLabel(occasionLabelMap, draft.occasionId)} />
         <WorkbenchInfoRow label="安全等级" value={getPaletteSafetyLevelLabel(draft.safetyLevel)} />
         <WorkbenchInfoRow label="来源类型" value={getPaletteSourceTypeLabel(draft.sourceType)} />
+        <WorkbenchInfoRow
+          label="参考方法"
+          value={draft.referenceMethod ? resolveOptionLabel(referenceMethodLabelMap, draft.referenceMethod) : '未填写'}
+        />
+        <WorkbenchInfoRow
+          label="审核状态"
+          value={draft.reviewStatus ? resolveOptionLabel(reviewStatusLabelMap, draft.reviewStatus) : '未填写'}
+        />
+        <WorkbenchInfoRow label="生产批次" value={resolveOptionalLabel(draft.productionBatchId)} />
+        <WorkbenchInfoRow label="参考来源数" value={`${draft.referenceSources?.length ?? 0} 条`} />
         <WorkbenchInfoRow label="状态" value={resolveOptionLabel(statusLabelMap, draft.status)} />
         <WorkbenchInfoRow label="专业版" value={getBooleanLabel(draft.isPro)} />
         <WorkbenchInfoRow label="适配拍照场景" value={getBooleanLabel(draft.fitPhotoScenario)} />
+        <WorkbenchInfoRow label="归档时间" value={resolveOptionalLabel(draft.archivedAt)} />
       </div>
     </>
   )
@@ -73,30 +97,28 @@ export function PaletteFormSection({
   editorOptions,
   isCreating,
   isSaving,
+  onAddReferenceSource,
   onDraftFieldChange,
+  onDraftReferenceSourceColorSummaryChange,
+  onDraftReferenceSourceFieldChange,
   onDraftTagToggle,
+  onRemoveReferenceSource,
   onSave,
 }: {
   draft: PaletteDto
   editorOptions: PaletteEditorOptions
   isCreating: boolean
   isSaving: boolean
-  onDraftFieldChange: (
-    field:
-      | 'accentColorId'
-      | 'fitPhotoScenario'
-      | 'id'
-      | 'isPro'
-      | 'occasionId'
-      | 'primaryColorId'
-      | 'safetyLevel'
-      | 'secondaryColorId'
-      | 'slug'
-      | 'sourceType'
-      | 'status',
-    value: boolean | string,
+  onAddReferenceSource: () => void
+  onDraftFieldChange: (field: EditableScalarField, value: boolean | string) => void
+  onDraftReferenceSourceColorSummaryChange: (index: number, value: string) => void
+  onDraftReferenceSourceFieldChange: (
+    index: number,
+    field: EditableReferenceSourceField,
+    value: string,
   ) => void
-  onDraftTagToggle: (field: 'moodTags' | 'seasonTags' | 'sourceCollectionIds' | 'styleTags', value: string) => void
+  onDraftTagToggle: (field: EditableTagField, value: string) => void
+  onRemoveReferenceSource: (index: number) => void
   onSave: () => Promise<void>
 }): ReactElement {
   return (
@@ -118,6 +140,18 @@ export function PaletteFormSection({
           label="来源类型"
           onChange={(value) => onDraftFieldChange('sourceType', value)}
           value={draft.sourceType}
+        />
+        <SelectInput
+          label="参考方法"
+          onChange={(value) => onDraftFieldChange('referenceMethod', value)}
+          options={editorOptions.referenceMethodOptions}
+          value={draft.referenceMethod ?? ''}
+        />
+        <SelectInput
+          label="审核状态"
+          onChange={(value) => onDraftFieldChange('reviewStatus', value)}
+          options={editorOptions.reviewStatusOptions}
+          value={draft.reviewStatus ?? ''}
         />
         <SelectInput
           label="场合"
@@ -148,6 +182,46 @@ export function PaletteFormSection({
           onChange={(value) => onDraftFieldChange('accentColorId', value)}
           options={editorOptions.baseColorOptions}
           value={draft.accentColorId}
+        />
+        <TextInput
+          label="生产批次"
+          onChange={(value) => onDraftFieldChange('productionBatchId', value)}
+          value={draft.productionBatchId ?? ''}
+        />
+        <TextInput
+          label="审核人"
+          onChange={(value) => onDraftFieldChange('reviewer', value)}
+          value={draft.reviewer ?? ''}
+        />
+        <TextInput
+          label="审核时间"
+          onChange={(value) => onDraftFieldChange('reviewedAt', value)}
+          value={draft.reviewedAt ?? ''}
+        />
+        <TextInput
+          label="归档时间"
+          onChange={(value) => onDraftFieldChange('archivedAt', value)}
+          value={draft.archivedAt ?? ''}
+        />
+        <TextInput
+          label="归档原因"
+          onChange={(value) => onDraftFieldChange('archiveReason', value)}
+          value={draft.archiveReason ?? ''}
+        />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <TextAreaInput
+          label="市场信号摘要"
+          onChange={(value) => onDraftFieldChange('marketSignalSummary', value)}
+          rows={4}
+          value={draft.marketSignalSummary ?? ''}
+        />
+        <TextAreaInput
+          label="审核备注"
+          onChange={(value) => onDraftFieldChange('reviewNotes', value)}
+          rows={4}
+          value={draft.reviewNotes ?? ''}
         />
       </div>
 
@@ -205,6 +279,91 @@ export function PaletteFormSection({
           options={editorOptions.sourceCollectionOptions}
           selectedValues={draft.sourceCollectionIds}
         />
+
+        <div className="space-y-4 border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] p-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <SectionTitle>市场参考来源</SectionTitle>
+              <p className="mt-1 text-sm text-muted-foreground">记录平台、品牌、链接和颜色摘要，支持后续审核与回看。</p>
+            </div>
+            <Button onClick={onAddReferenceSource} type="button" variant="outline">
+              新增参考来源
+            </Button>
+          </div>
+
+          {(draft.referenceSources ?? []).length === 0 ? (
+            <div className="border border-dashed border-[var(--dp-border-subtle)] bg-white px-4 py-3 text-sm text-muted-foreground">
+              当前还没有参考来源。若该配色来自公开市场采样，请至少补 3 条来源记录。
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {(draft.referenceSources ?? []).map((source, index) => (
+                <div key={`${draft.id || 'draft'}-reference-${index}`} className="space-y-4 border border-[var(--dp-border-subtle)] bg-white p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="label-caps text-muted-foreground">参考来源 {index + 1}</p>
+                      <p className="mt-1 text-sm text-foreground">{source.sourceId || '未填写 sourceId'}</p>
+                    </div>
+                    <Button onClick={() => onRemoveReferenceSource(index)} type="button" variant="ghost">
+                      移除
+                    </Button>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <TextInput
+                      label="来源 ID"
+                      onChange={(value) => onDraftReferenceSourceFieldChange(index, 'sourceId', value)}
+                      value={source.sourceId}
+                    />
+                    <TextInput
+                      label="平台"
+                      onChange={(value) => onDraftReferenceSourceFieldChange(index, 'platform', value)}
+                      value={source.platform}
+                    />
+                    <SelectInput
+                      label="渠道类型"
+                      onChange={(value) => onDraftReferenceSourceFieldChange(index, 'channelType', value)}
+                      options={editorOptions.referenceChannelTypeOptions}
+                      value={source.channelType}
+                    />
+                    <TextInput
+                      label="品牌"
+                      onChange={(value) => onDraftReferenceSourceFieldChange(index, 'brandName', value)}
+                      value={source.brandName}
+                    />
+                    <TextInput
+                      label="采样时间"
+                      onChange={(value) => onDraftReferenceSourceFieldChange(index, 'observedAt', value)}
+                      value={source.observedAt}
+                    />
+                    <TextInput
+                      label="服饰品类"
+                      onChange={(value) => onDraftReferenceSourceFieldChange(index, 'itemCategory', value)}
+                      value={source.itemCategory}
+                    />
+                  </div>
+
+                  <TextInput
+                    label="公开链接"
+                    onChange={(value) => onDraftReferenceSourceFieldChange(index, 'sourceUrl', value)}
+                    value={source.sourceUrl}
+                  />
+                  <TextInput
+                    label="颜色摘要（逗号分隔）"
+                    onChange={(value) => onDraftReferenceSourceColorSummaryChange(index, value)}
+                    value={toColorSummaryText(source)}
+                  />
+                  <TextAreaInput
+                    label="内部备注"
+                    onChange={(value) => onDraftReferenceSourceFieldChange(index, 'notes', value)}
+                    rows={3}
+                    value={source.notes}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         <Button className="w-full" disabled={isSaving} onClick={() => void onSave()} variant="primary">
           {isSaving ? '正在保存…' : isCreating ? '创建配色盘' : '保存配色盘'}
@@ -297,13 +456,13 @@ export function ArchivedPalettesSection({
   return (
     <div className="space-y-3 border border-sky-200 bg-sky-50/70 p-4">
       <div className="space-y-2">
-        <SectionTitle>已归档配色盘</SectionTitle>
-        <p className="text-sm leading-6 text-foreground">已软删除的配色盘会出现在这里，恢复后会重新回到可编辑列表。</p>
+        <SectionTitle>已软删除配色盘</SectionTitle>
+        <p className="text-sm leading-6 text-foreground">这里只展示 `status=deleted` 的记录；业务态 `archived` 仍会保留在主列表中。</p>
       </div>
 
       {archivedPalettes.length === 0 ? (
         <div className="border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-3 text-sm text-muted-foreground">
-          当前没有已归档的配色盘。
+          当前没有已软删除的配色盘。
         </div>
       ) : (
         <div className="space-y-3">

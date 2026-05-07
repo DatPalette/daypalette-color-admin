@@ -13,6 +13,7 @@ import type {
   PaletteDataCollectionDocument,
   PaletteDeleteCheckReference,
   PaletteDeleteCheckResult,
+  PaletteReferenceSource,
   PaletteRecord,
 } from '../../common/types/palette-data.types';
 import type { CreatePaletteDto } from './dto/create-palette.dto';
@@ -57,6 +58,12 @@ function normalizeOptionalString(value: unknown): string {
   return value.trim();
 }
 
+function normalizeOptionalStringOrUndefined(value: unknown): string | undefined {
+  const normalizedValue = normalizeOptionalString(value);
+
+  return normalizedValue ? normalizedValue : undefined;
+}
+
 function normalizeStringArray(value: unknown, fieldName: string): string[] {
   if (!Array.isArray(value)) {
     throw new BadRequestException(`${fieldName} must be an array of strings.`);
@@ -65,6 +72,90 @@ function normalizeStringArray(value: unknown, fieldName: string): string[] {
   return Array.from(
     new Set(value.map((item) => normalizeRequiredString(item, `${fieldName} item`))),
   );
+}
+
+function normalizeReferenceSources(value: unknown): PaletteReferenceSource[] {
+  if (value === undefined || value === null) {
+    return [];
+  }
+
+  if (!Array.isArray(value)) {
+    throw new BadRequestException('referenceSources must be an array.');
+  }
+
+  return value.map((item, index) => {
+    if (typeof item !== 'object' || item === null) {
+      throw new BadRequestException(`referenceSources[${index}] must be an object.`);
+    }
+
+    const source = item as Record<string, unknown>;
+
+    return {
+      brandName: normalizeRequiredString(source.brandName, `referenceSources[${index}].brandName`),
+      channelType: normalizeRequiredString(
+        source.channelType,
+        `referenceSources[${index}].channelType`,
+      ),
+      colorSummary: normalizeStringArray(
+        source.colorSummary,
+        `referenceSources[${index}].colorSummary`,
+      ),
+      itemCategory: normalizeRequiredString(
+        source.itemCategory,
+        `referenceSources[${index}].itemCategory`,
+      ),
+      notes: normalizeOptionalString(source.notes),
+      observedAt: normalizeRequiredString(
+        source.observedAt,
+        `referenceSources[${index}].observedAt`,
+      ),
+      platform: normalizeRequiredString(source.platform, `referenceSources[${index}].platform`),
+      sourceId: normalizeRequiredString(source.sourceId, `referenceSources[${index}].sourceId`),
+      sourceUrl: normalizeRequiredString(source.sourceUrl, `referenceSources[${index}].sourceUrl`),
+    };
+  });
+}
+
+function assertPaletteOperationalMetadata(nextRecord: PaletteRecord): void {
+  const isPublishableStatus = nextRecord.status === 'approved' || nextRecord.status === 'published';
+  const referenceSources = nextRecord.referenceSources ?? [];
+
+  if (
+    isPublishableStatus &&
+    nextRecord.reviewStatus !== undefined &&
+    nextRecord.reviewStatus !== 'approved'
+  ) {
+    throw new BadRequestException(
+      'reviewStatus must be approved before a palette can enter approved or published status.',
+    );
+  }
+
+  if (nextRecord.referenceMethod === 'market-sampled' && isPublishableStatus && referenceSources.length > 0) {
+    if (referenceSources.length < 3) {
+      throw new BadRequestException(
+        'Market-sampled palette requires at least 3 referenceSources before approval or publish.',
+      );
+    }
+
+    const distinctPlatforms = new Set(referenceSources.map((item) => item.platform));
+    const distinctBrands = new Set(referenceSources.map((item) => item.brandName));
+
+    if (distinctPlatforms.size < 2) {
+      throw new BadRequestException(
+        'Market-sampled palette requires references from at least 2 distinct platforms.',
+      );
+    }
+
+    if (distinctBrands.size < 2) {
+      throw new BadRequestException(
+        'Market-sampled palette requires references from at least 2 distinct brands.',
+      );
+    }
+  }
+
+  if (nextRecord.status === 'archived' && !nextRecord.archivedAt) {
+    throw new BadRequestException('archivedAt is required when status is archived.');
+  }
 }
 
 function getAllowedDictionaryIds(
@@ -151,21 +242,36 @@ function buildUpdatedPaletteRecord(
   dictionaries: DictionariesDocument,
   collectionsDocument: PaletteDataCollectionDocument<CollectionRecord>,
 ): PaletteRecord {
+  const nextStatus = normalizeRequiredString(payload.status, 'status');
   const nextRecord: PaletteRecord = {
     accentColorId: normalizeRequiredString(payload.accentColorId, 'accentColorId'),
+    archiveReason:
+      nextStatus === 'archived' ? normalizeOptionalStringOrUndefined(payload.archiveReason) : undefined,
+    archivedAt:
+      nextStatus === 'archived'
+        ? normalizeOptionalStringOrUndefined(payload.archivedAt) ?? new Date().toISOString()
+        : undefined,
     fitPhotoScenario: Boolean(payload.fitPhotoScenario),
     id,
     isPro: Boolean(payload.isPro),
+    marketSignalSummary: normalizeOptionalStringOrUndefined(payload.marketSignalSummary),
     moodTags: normalizeStringArray(payload.moodTags, 'moodTags'),
     occasionId: normalizeRequiredString(payload.occasionId, 'occasionId'),
     primaryColorId: normalizeRequiredString(payload.primaryColorId, 'primaryColorId'),
+    productionBatchId: normalizeOptionalStringOrUndefined(payload.productionBatchId),
+    referenceMethod: normalizeOptionalStringOrUndefined(payload.referenceMethod),
+    referenceSources: normalizeReferenceSources(payload.referenceSources),
+    reviewNotes: normalizeOptionalStringOrUndefined(payload.reviewNotes),
+    reviewStatus: normalizeOptionalStringOrUndefined(payload.reviewStatus),
+    reviewedAt: normalizeOptionalStringOrUndefined(payload.reviewedAt),
+    reviewer: normalizeOptionalStringOrUndefined(payload.reviewer),
     safetyLevel: normalizeRequiredString(payload.safetyLevel, 'safetyLevel'),
     seasonTags: normalizeStringArray(payload.seasonTags, 'seasonTags'),
     secondaryColorId: normalizeRequiredString(payload.secondaryColorId, 'secondaryColorId'),
     slug: normalizeRequiredString(payload.slug, 'slug'),
     sourceCollectionIds: normalizeStringArray(payload.sourceCollectionIds, 'sourceCollectionIds'),
     sourceType: normalizeRequiredString(payload.sourceType, 'sourceType'),
-    status: normalizeRequiredString(payload.status, 'status'),
+    status: nextStatus,
     styleTags: normalizeStringArray(payload.styleTags, 'styleTags'),
   };
 
@@ -182,6 +288,8 @@ function buildUpdatedPaletteRecord(
   if (nextRecord.status === 'deleted') {
     throw new BadRequestException('status cannot be deleted when creating or updating a palette.');
   }
+
+  assertPaletteOperationalMetadata(nextRecord);
 
   return nextRecord;
 }

@@ -11,16 +11,35 @@ import type {
 // 标记 Palette 页面允许直接改写的标量字段。
 export type EditableScalarField =
   | 'accentColorId'
+  | 'archiveReason'
+  | 'archivedAt'
   | 'fitPhotoScenario'
   | 'id'
   | 'isPro'
+  | 'marketSignalSummary'
   | 'occasionId'
   | 'primaryColorId'
+  | 'productionBatchId'
+  | 'referenceMethod'
+  | 'reviewNotes'
+  | 'reviewStatus'
+  | 'reviewedAt'
+  | 'reviewer'
   | 'safetyLevel'
   | 'secondaryColorId'
   | 'slug'
   | 'sourceType'
   | 'status'
+
+export type EditableReferenceSourceField =
+  | 'brandName'
+  | 'channelType'
+  | 'itemCategory'
+  | 'notes'
+  | 'observedAt'
+  | 'platform'
+  | 'sourceId'
+  | 'sourceUrl'
 
 // 标记 Palette 页面按标签切换方式维护的数组字段。
 export type EditableTagField = 'moodTags' | 'seasonTags' | 'sourceCollectionIds' | 'styleTags'
@@ -33,7 +52,20 @@ export function clonePalette(item: PaletteDto | null): PaletteDto | null {
 
   return {
     ...item,
+    archiveReason: item.archiveReason ?? '',
+    archivedAt: item.archivedAt ?? '',
+    marketSignalSummary: item.marketSignalSummary ?? '',
     moodTags: [...item.moodTags],
+    productionBatchId: item.productionBatchId ?? '',
+    referenceMethod: item.referenceMethod ?? '',
+    referenceSources: (item.referenceSources ?? []).map((source) => ({
+      ...source,
+      colorSummary: [...source.colorSummary],
+    })),
+    reviewNotes: item.reviewNotes ?? '',
+    reviewStatus: item.reviewStatus ?? '',
+    reviewedAt: item.reviewedAt ?? '',
+    reviewer: item.reviewer ?? '',
     seasonTags: [...item.seasonTags],
     sourceCollectionIds: [...item.sourceCollectionIds],
     styleTags: [...item.styleTags],
@@ -76,12 +108,22 @@ export function buildNewPaletteDraft(editorOptions: PaletteEditorOptions): Palet
 
   return {
     accentColorId,
+    archiveReason: '',
+    archivedAt: '',
     fitPhotoScenario: false,
     id: '',
     isPro: false,
+    marketSignalSummary: '',
     moodTags: [],
     occasionId: editorOptions.occasionOptions[0]?.value ?? '',
     primaryColorId,
+    productionBatchId: '',
+    referenceMethod: 'market-sampled',
+    referenceSources: [],
+    reviewNotes: '',
+    reviewStatus: 'pending',
+    reviewedAt: '',
+    reviewer: '',
     safetyLevel: 'safe',
     seasonTags: [],
     secondaryColorId,

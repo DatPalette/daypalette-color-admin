@@ -31,8 +31,12 @@ export function PalettesPage(): ReactElement {
     onDelete,
     onDeleteReasonChange,
     onDraftFieldChange,
+    onDraftReferenceSourceColorSummaryChange,
+    onDraftReferenceSourceFieldChange,
     onDraftTagToggle,
+    onAddReferenceSource,
     onRefresh,
+    onRemoveReferenceSource,
     onRestore,
     onSave,
     onSelectPalette,
@@ -74,7 +78,7 @@ export function PalettesPage(): ReactElement {
             </button>
           </>
         }
-        archivedLabel={`${archivedPalettes.length} 项已归档`}
+        archivedLabel={`${archivedPalettes.length} 项已软删除`}
         description="组合三色关系，校验场景、来源与状态，再把可用结构投放到合集与后续内容编排里。"
         onSearchChange={setSearchValue}
         searchPlaceholder="搜索配色盘"
@@ -147,8 +151,12 @@ export function PalettesPage(): ReactElement {
           }}
           onDelete={onDelete}
           onDeleteReasonChange={onDeleteReasonChange}
+          onAddReferenceSource={onAddReferenceSource}
           onDraftFieldChange={onDraftFieldChange}
+          onDraftReferenceSourceColorSummaryChange={onDraftReferenceSourceColorSummaryChange}
+          onDraftReferenceSourceFieldChange={onDraftReferenceSourceFieldChange}
           onDraftTagToggle={onDraftTagToggle}
+          onRemoveReferenceSource={onRemoveReferenceSource}
           onRestore={onRestore}
           onSave={onSave}
           saveMessage={saveMessage}

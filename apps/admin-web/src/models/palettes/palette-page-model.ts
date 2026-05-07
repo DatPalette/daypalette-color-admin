@@ -1,3 +1,5 @@
+import type { PaletteReferenceSourceDto } from './palette.dto'
+
 export interface PaletteCardModel {
   id: string
   occasionLabel: string
@@ -10,12 +12,22 @@ export interface PaletteCardModel {
 
 export interface PaletteDetailModel {
   accentColorId: string
+  archiveReason?: string
+  archivedAt?: string
   fitPhotoScenario: boolean
   id: string
   isPro: boolean
+  marketSignalSummary?: string
   moodTags: string[]
   occasionId: string
   primaryColorId: string
+  productionBatchId?: string
+  referenceMethod?: string
+  referenceSources?: PaletteReferenceSourceDto[]
+  reviewNotes?: string
+  reviewStatus?: string
+  reviewedAt?: string
+  reviewer?: string
   safetyLevel: string
   seasonTags: string[]
   secondaryColorId: string

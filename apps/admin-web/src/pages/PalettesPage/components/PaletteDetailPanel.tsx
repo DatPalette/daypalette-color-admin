@@ -13,6 +13,7 @@ import type {
   PaletteDto,
   PaletteEditorOptions,
 } from '@/models/palettes'
+import type { EditableReferenceSourceField, EditableScalarField, EditableTagField } from '../view-model/helpers'
 
 // Palette 详情面板，负责编排摘要、编辑、删除保护和归档恢复四个区块。
 export function PaletteDetailPanel({
@@ -52,22 +53,16 @@ export function PaletteDetailPanel({
   onClose: () => void
   onDelete: () => Promise<void>
   onDeleteReasonChange: (value: string) => void
-  onDraftFieldChange: (
-    field:
-      | 'accentColorId'
-      | 'fitPhotoScenario'
-      | 'id'
-      | 'isPro'
-      | 'occasionId'
-      | 'primaryColorId'
-      | 'safetyLevel'
-      | 'secondaryColorId'
-      | 'slug'
-      | 'sourceType'
-      | 'status',
-    value: boolean | string,
+  onDraftFieldChange: (field: EditableScalarField, value: boolean | string) => void
+  onDraftReferenceSourceColorSummaryChange: (index: number, value: string) => void
+  onDraftReferenceSourceFieldChange: (
+    index: number,
+    field: EditableReferenceSourceField,
+    value: string,
   ) => void
-  onDraftTagToggle: (field: 'moodTags' | 'seasonTags' | 'sourceCollectionIds' | 'styleTags', value: string) => void
+  onDraftTagToggle: (field: EditableTagField, value: string) => void
+  onAddReferenceSource: () => void
+  onRemoveReferenceSource: (index: number) => void
   onRestore: (id: string) => Promise<void>
   onSave: () => Promise<void>
   saveMessage: string | null
@@ -127,8 +122,12 @@ export function PaletteDetailPanel({
             editorOptions={editorOptions}
             isCreating={isCreating}
             isSaving={isSaving}
+            onAddReferenceSource={onAddReferenceSource}
             onDraftFieldChange={onDraftFieldChange}
+            onDraftReferenceSourceColorSummaryChange={onDraftReferenceSourceColorSummaryChange}
+            onDraftReferenceSourceFieldChange={onDraftReferenceSourceFieldChange}
             onDraftTagToggle={onDraftTagToggle}
+            onRemoveReferenceSource={onRemoveReferenceSource}
             onSave={onSave}
           />
 
