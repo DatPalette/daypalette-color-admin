@@ -31,6 +31,20 @@
 $ pnpm install
 ```
 
+## LLM configuration
+
+The candidate generation enhancement reads its model settings from `apps/admin-api/.env`.
+
+1. Copy `apps/admin-api/.env.example` to `apps/admin-api/.env`.
+2. Fill in one active provider block only.
+3. Restart `admin-api` after changing the file.
+
+Supported variables:
+
+- `DAYPALETTE_LLM_API_KEY`
+- `DAYPALETTE_LLM_MODEL`
+- `DAYPALETTE_LLM_BASE_URL` (optional, defaults to `https://api.openai.com/v1`)
+
 ## Compile and run the project
 
 ```bash

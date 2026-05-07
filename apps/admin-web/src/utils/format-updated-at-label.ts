@@ -1,5 +1,13 @@
 export function formatUpdatedAtLabel(updatedAt: string): string {
+  if (!updatedAt) {
+    return '未同步'
+  }
+
   const date = new Date(updatedAt)
+
+  if (Number.isNaN(date.getTime())) {
+    return '未同步'
+  }
 
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
     date.getDate(),

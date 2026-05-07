@@ -9,7 +9,14 @@
 1. 运营方案：[`../../daypalette-docs/operations/color-asset-operations/palette-market-reference-production-plan.md`](../../daypalette-docs/operations/color-asset-operations/palette-market-reference-production-plan.md)
 2. 首轮矩阵：[`../../daypalette-docs/operations/color-asset-operations/palette-phase-1-target-matrix.md`](../../daypalette-docs/operations/color-asset-operations/palette-phase-1-target-matrix.md)
 3. 采样台账模板：[`../../daypalette-docs/operations/color-asset-operations/palette-market-sampling-ledger-template.md`](../../daypalette-docs/operations/color-asset-operations/palette-market-sampling-ledger-template.md)
-4. 数据合同：[`../../daypalette-docs/architecture/color-asset-admin-data-contract.md`](../../daypalette-docs/architecture/color-asset-admin-data-contract.md)
+4. `workday` 来源白名单与搜索词矩阵：[`../../daypalette-docs/operations/color-asset-operations/workday-source-whitelist-and-query-matrix.md`](../../daypalette-docs/operations/color-asset-operations/workday-source-whitelist-and-query-matrix.md)
+5. 数据合同：[`../../daypalette-docs/architecture/color-asset-admin-data-contract.md`](../../daypalette-docs/architecture/color-asset-admin-data-contract.md)
+
+## 本仓执行计划
+
+采样助手的本仓分步执行计划见：[`./palette-sampling-assistant-phased-plan.md`](./palette-sampling-assistant-phased-plan.md)
+
+采样批次的当前存储与合同草案见：[`./palette-sampling-assistant-storage-contract.md`](./palette-sampling-assistant-storage-contract.md)
 
 ## 本仓的落地含义
 

@@ -5,6 +5,7 @@ interface WorkbenchPageHeaderProps {
   actions?: ReactNode
   archivedLabel: string
   description: string
+  hideSearch?: boolean
   onSearchChange: (value: string) => void
   searchPlaceholder: string
   searchValue: string
@@ -17,6 +18,7 @@ export function WorkbenchPageHeader({
   actions,
   archivedLabel,
   description,
+  hideSearch = false,
   onSearchChange,
   searchPlaceholder,
   searchValue,
@@ -43,17 +45,19 @@ export function WorkbenchPageHeader({
 
         <div className="flex w-full flex-col gap-3 xl:max-w-[720px] xl:items-end">
           <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-            <label className="flex min-w-0 flex-1 items-center gap-3 border-b border-[var(--dp-border-subtle)] pb-3 text-sm text-foreground sm:max-w-[380px]">
-              <Search className="size-4 shrink-0 text-[var(--dp-text-muted)]" />
-              <input
-                className="w-full border-none bg-transparent p-0 text-sm text-foreground outline-none placeholder:text-[var(--dp-text-muted)]"
-                onChange={(event) => onSearchChange(event.target.value)}
-                placeholder={searchPlaceholder}
-                value={searchValue}
-              />
-            </label>
+            {!hideSearch ? (
+              <label className="flex min-w-0 flex-1 items-center gap-3 border-b border-[var(--dp-border-subtle)] pb-3 text-sm text-foreground sm:max-w-[380px]">
+                <Search className="size-4 shrink-0 text-[var(--dp-text-muted)]" />
+                <input
+                  className="w-full border-none bg-transparent p-0 text-sm text-foreground outline-none placeholder:text-[var(--dp-text-muted)]"
+                  onChange={(event) => onSearchChange(event.target.value)}
+                  placeholder={searchPlaceholder}
+                  value={searchValue}
+                />
+              </label>
+            ) : null}
 
-            {actions ? <div className="flex items-center justify-end gap-3">{actions}</div> : null}
+            {actions ? <div className="flex items-center justify-end gap-3 sm:ml-auto">{actions}</div> : null}
           </div>
         </div>
       </div>

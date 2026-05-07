@@ -7,6 +7,14 @@ export interface PaletteDataFilePaths {
   palettes: string
 }
 
+export function resolvePaletteSamplingDataRoot(adminRoot: string): string {
+  return path.join(adminRoot, 'data/palette-sampling')
+}
+
+export function resolvePaletteSamplingBatchFilePath(adminRoot: string, batchId: string): string {
+  return path.join(resolvePaletteSamplingDataRoot(adminRoot), `${batchId}.v1.json`)
+}
+
 export function resolvePaletteDataFilePaths(dayPaletteRoot: string): PaletteDataFilePaths {
   const paletteDataRoot = path.join(
     dayPaletteRoot,

@@ -6,6 +6,7 @@ export const workbenchPaths = {
   dictionaries: (dictionaryKey = DEFAULT_DICTIONARY_KEY): string => `/dictionaries/${dictionaryKey}`,
   dictionariesRoot: '/dictionaries',
   palettes: '/palettes',
+  samplingBatches: '/sampling-batches',
 } as const
 
 export interface WorkbenchNavigationItem {
@@ -29,6 +30,11 @@ export const navigationItems: WorkbenchNavigationItem[] = [
     label: '配色盘',
     description: '查看三色配色盘的真实列表与详情',
     to: workbenchPaths.palettes,
+  },
+  {
+    label: '采样助手',
+    description: '查看采样批次、来源完整度与白名单覆盖',
+    to: workbenchPaths.samplingBatches,
   },
   {
     label: '合集',

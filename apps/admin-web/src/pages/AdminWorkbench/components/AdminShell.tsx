@@ -24,6 +24,10 @@ function resolveNavigationIcon(to: string) {
     return SwatchBook
   }
 
+  if (to === '/sampling-batches') {
+    return BookMarked
+  }
+
   if (to === '/collections') {
     return FolderHeart
   }
