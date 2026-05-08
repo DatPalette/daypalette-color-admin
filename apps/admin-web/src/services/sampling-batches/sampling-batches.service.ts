@@ -11,6 +11,8 @@ export interface GenerateSamplingBatchCandidatesPayload {
   audience?: 'mixed' | 'womenswear'
   mode?: 'hybrid' | 'model-only' | 'rules-only'
   overwriteExisting?: boolean
+  resetExisting?: boolean
+  targetCount?: number
 }
 
 export async function getSamplingBatchCollection(): Promise<SamplingBatchCollectionDto> {

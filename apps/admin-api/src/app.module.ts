@@ -5,6 +5,7 @@ import { DictionariesModule } from './modules/dictionaries/dictionaries.module';
 import { HealthModule } from './modules/health/health.module';
 import { PalettesModule } from './modules/palettes/palettes.module';
 import { SamplingBatchesModule } from './modules/sampling-batches/sampling-batches.module';
+import { SamplingRunsModule } from './modules/sampling-runs/sampling-runs.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -16,6 +17,7 @@ import { AppService } from './app.service';
     PalettesModule,
     CollectionsModule,
     SamplingBatchesModule,
+    SamplingRunsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

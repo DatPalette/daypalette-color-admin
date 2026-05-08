@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import type {
   SamplingBatchCollectionDto,
@@ -7,16 +7,24 @@ import type {
   SamplingCandidateGenerationCapabilitiesDto,
   SamplingRecordDto,
 } from '@/models/sampling-batches'
+import type {
+  SamplingRunDto,
+  SamplingRunEventDto,
+} from '@/models/sampling-runs'
 import type { SamplingBatchStatus } from '@daypalette-color-admin/contracts'
 
 import {
   deleteSamplingBatch,
-  generateSamplingBatchCandidates,
   getSamplingBatchCapabilities,
   getSamplingBatchCollection,
   updateSamplingBatch,
   updateSamplingBatchStatus,
 } from '@/services/sampling-batches/sampling-batches.service'
+import {
+  createSamplingRun,
+  getSamplingRun,
+  subscribeToSamplingRunStream,
+} from '@/services/sampling-runs/sampling-runs.service'
 import { toSamplingBatchesPageModel } from '@/transformers/sampling-batches/sampling-batches.transformer'
 import {
   buildCollectionWithDraft,
@@ -68,6 +76,7 @@ interface SamplingBatchesPageViewModel {
   onDraftSourceWhitelistToggle: (channelType: string) => void
   onDraftThemeKeysChange: (value: string) => void
   onGenerateCandidates: () => Promise<void>
+  onRegenerateBatchToTarget: (targetCount: number) => Promise<void>
   onRefresh: () => Promise<void>
   onReviewRecord: (samplingId: string, status: SamplingRecordDto['digestionStatus']) => Promise<void>
   onSave: () => Promise<void>
@@ -76,10 +85,36 @@ interface SamplingBatchesPageViewModel {
   onStartSampling: () => void
   onUpdateStatus: () => Promise<void>
   saveMessage: string | null
+  samplingRun: SamplingRunDto | null
+  samplingRunEvents: SamplingRunEventDto[]
   selectedRecord: SamplingRecordDto | null
   selectedBatchId: string | null
   selectedRecordId: string | null
   validationMessages: string[]
+}
+
+function mergeSamplingRunEvent(run: SamplingRunDto, event: SamplingRunEventDto): SamplingRunDto {
+  const nextStatus =
+    event.type === 'run-finished'
+      ? event.level === 'error'
+        ? 'failed'
+        : 'succeeded'
+      : event.type === 'run-created'
+        ? 'queued'
+        : event.type === 'error'
+          ? 'failed'
+          : 'running'
+
+  return {
+    ...run,
+    currentStage: event.stage ?? run.currentStage,
+    errorCount: run.errorCount + (event.level === 'error' ? 1 : 0),
+    finishedAt: event.type === 'run-finished' ? event.createdAt : run.finishedAt,
+    progressPercent: event.progressPercent ?? run.progressPercent,
+    status: nextStatus,
+    summary: event.type === 'run-finished' || event.type === 'error' ? event.message : run.summary,
+    warningCount: run.warningCount + (event.level === 'warning' ? 1 : 0),
+  }
 }
 
 export function useSamplingBatchesPageViewModel(): SamplingBatchesPageViewModel {
@@ -96,10 +131,68 @@ export function useSamplingBatchesPageViewModel(): SamplingBatchesPageViewModel 
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [saveMessage, setSaveMessage] = useState<string | null>(null)
+  const [samplingRun, setSamplingRun] = useState<SamplingRunDto | null>(null)
+  const [samplingRunEvents, setSamplingRunEvents] = useState<SamplingRunEventDto[]>([])
+  const samplingRunStreamRef = useRef<EventSource | null>(null)
+  const samplingRunEventIdsRef = useRef<Set<string>>(new Set())
 
   useEffect(() => {
     void onRefresh()
   }, [])
+
+  useEffect(() => {
+    return () => {
+      samplingRunStreamRef.current?.close()
+      samplingRunStreamRef.current = null
+    }
+  }, [])
+
+  function closeSamplingRunStream(): void {
+    samplingRunStreamRef.current?.close()
+    samplingRunStreamRef.current = null
+  }
+
+  async function finalizeSamplingRun(runId: string): Promise<void> {
+    try {
+      const nextRun = await getSamplingRun(runId)
+
+      setSamplingRun(nextRun)
+
+      if (nextRun.status === 'succeeded') {
+        await onRefresh()
+        setSaveMessage(nextRun.summary ?? '已完成候选生成。')
+        setErrorMessage(null)
+      } else if (nextRun.status === 'failed') {
+        setErrorMessage(nextRun.summary ?? '自动生成候选失败。')
+      }
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : '采样运行状态读取失败。')
+    } finally {
+      setIsGeneratingCandidates(false)
+    }
+  }
+
+  async function recoverSamplingRun(runId: string, fallbackMessage: string): Promise<void> {
+    try {
+      const nextRun = await getSamplingRun(runId)
+
+      setSamplingRun(nextRun)
+
+      if (nextRun.status === 'succeeded') {
+        await onRefresh()
+        setSaveMessage(nextRun.summary ?? '已完成候选生成。')
+        setErrorMessage(null)
+      } else if (nextRun.status === 'failed') {
+        setErrorMessage(nextRun.summary ?? fallbackMessage)
+      } else {
+        setErrorMessage(fallbackMessage)
+      }
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : fallbackMessage)
+    } finally {
+      setIsGeneratingCandidates(false)
+    }
+  }
 
   function syncPageState(
     nextCollection: SamplingBatchCollectionDto,
@@ -161,32 +254,75 @@ export function useSamplingBatchesPageViewModel(): SamplingBatchesPageViewModel 
     }
   }
 
-  async function onGenerateCandidates(): Promise<void> {
-    if (!draft || !collection) {
+  async function startSamplingGeneration(options?: { resetExisting?: boolean; targetCount?: number }): Promise<void> {
+    if (!draft) {
       return
     }
 
     setIsGeneratingCandidates(true)
     setErrorMessage(null)
     setSaveMessage(null)
+    closeSamplingRunStream()
+    samplingRunEventIdsRef.current.clear()
+    setSamplingRunEvents([])
 
     try {
-      const nextBatch = await generateSamplingBatchCandidates(draft.batch.id, {
-        audience: 'womenswear',
-        mode: generationCapabilities?.defaultMode ?? 'rules-only',
-        overwriteExisting: false,
+      const nextRun = await createSamplingRun({
+        batchId: draft.batch.id,
+        generateCandidates: {
+          audience: 'womenswear',
+          mode: generationCapabilities?.defaultMode ?? 'rules-only',
+          overwriteExisting: options?.resetExisting ? true : false,
+          resetExisting: options?.resetExisting,
+          targetCount: options?.targetCount,
+        },
+        operationType: 'generate-candidates',
       })
-      const nextCollection = upsertSamplingBatchInCollection(collection, nextBatch)
-      const nextDraft = cloneSamplingBatch(nextBatch)
-      const nextSelectedRecordId = findFirstPendingReviewRecordId(nextDraft) ?? findSelectedRecordId(nextDraft, null)
 
-      syncPageState(nextCollection, nextBatch.batch.id, nextDraft, nextSelectedRecordId)
-      setSaveMessage('已为当前批次自动生成女装候选；若后端配置模型环境变量，颜色摘要也会一并深化。')
+      setSamplingRun(nextRun)
+      samplingRunStreamRef.current = subscribeToSamplingRunStream(nextRun.runId, {
+        onError: (error) => {
+          if (!samplingRunStreamRef.current) {
+            return
+          }
+
+          closeSamplingRunStream()
+          void recoverSamplingRun(nextRun.runId, error instanceof Error ? error.message : '流式日志连接已中断。')
+        },
+        onEvent: (event) => {
+          if (samplingRunEventIdsRef.current.has(event.eventId)) {
+            return
+          }
+
+          samplingRunEventIdsRef.current.add(event.eventId)
+          setSamplingRunEvents((current) => [...current, event])
+          setSamplingRun((current) => (current ? mergeSamplingRunEvent(current, event) : current))
+
+          if (event.type === 'run-finished') {
+            closeSamplingRunStream()
+            void finalizeSamplingRun(nextRun.runId)
+          }
+        },
+      })
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : '自动生成候选失败。')
-    } finally {
+      setSamplingRun(null)
+      setSamplingRunEvents([])
+      samplingRunEventIdsRef.current.clear()
+      closeSamplingRunStream()
       setIsGeneratingCandidates(false)
     }
+  }
+
+  async function onGenerateCandidates(): Promise<void> {
+    await startSamplingGeneration()
+  }
+
+  async function onRegenerateBatchToTarget(targetCount: number): Promise<void> {
+    await startSamplingGeneration({
+      resetExisting: true,
+      targetCount,
+    })
   }
 
   function onSelectBatch(id: string): void {
@@ -546,6 +682,7 @@ export function useSamplingBatchesPageViewModel(): SamplingBatchesPageViewModel 
     onDraftSourceWhitelistToggle,
     onDraftThemeKeysChange,
     onGenerateCandidates,
+    onRegenerateBatchToTarget,
     onRefresh,
     onReviewRecord,
     onSave,
@@ -554,6 +691,8 @@ export function useSamplingBatchesPageViewModel(): SamplingBatchesPageViewModel 
     onStartSampling,
     onUpdateStatus,
     saveMessage,
+    samplingRun,
+    samplingRunEvents,
     selectedRecord: findSelectedRecord(draft, selectedRecordId),
     selectedBatchId,
     selectedRecordId,

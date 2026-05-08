@@ -36,6 +36,17 @@ interface ModelCandidateEnhancement {
   secondaryColorSummary?: string;
 }
 
+interface PreparedGenerationRecordOptions {
+  index: number;
+  itemCategory: string;
+  occasionId: string;
+  productionBatchId: string;
+  samplingId: string;
+  sourceWhitelistIds: string[];
+  themeKey: string;
+  themeLabelZh: string;
+}
+
 const categorySearchTerms: Record<string, { en: string; zh: string }> = {
   blazer: { en: 'women blazer', zh: '女装 西装外套' },
   blouse: { en: 'women blouse', zh: '女装 衬衫' },
@@ -47,6 +58,27 @@ const categorySearchTerms: Record<string, { en: string; zh: string }> = {
   skirt: { en: 'women skirt', zh: '女装 半裙' },
   trench: { en: 'women trench coat', zh: '女装 风衣' },
   trousers: { en: 'women trousers', zh: '女装 西裤' },
+};
+
+const defaultThemeLabelMap: Record<string, string> = {
+  'mist-cool-commute': '雾感冷静通勤',
+  'polished-light-commute': '轻正式通勤',
+  'soft-tone-lift': '柔和提气通勤',
+  'urban-minimal-foundation': '都市极简基底',
+  'warm-grounded-commute': '暖稳秋冬通勤',
+};
+
+const seasonalHintByCategory: Record<string, string> = {
+  blazer: 'spring',
+  blouse: 'spring',
+  cardigan: 'autumn',
+  coat: 'winter',
+  dress: 'spring',
+  knitwear: 'winter',
+  shirt: 'spring',
+  skirt: 'spring',
+  trench: 'autumn',
+  trousers: 'all',
 };
 
 const themeCandidateProfiles: Record<string, ThemeCandidateProfile> = {
@@ -127,6 +159,30 @@ const themeCandidateProfileVariants: Record<string, ThemeCandidateProfile[]> = {
       reviewCue: '奶油米、雾石蓝与浅焦糖的成熟轻商务平衡',
       secondaryColorSummary: '雾石蓝',
     },
+    {
+      accentColorSummary: '柔沙卡其',
+      colorSummary: ['雾米白', '银蓝灰', '柔沙卡其'],
+      marketSignal: '轻正式通勤也会用更柔和的米白、银蓝灰和沙卡其去拉开清爽层次，适合衬衫与薄西装。',
+      primaryColorSummary: '雾米白',
+      reviewCue: '雾米白、银蓝灰与柔沙卡其之间是否足够清爽且职业',
+      secondaryColorSummary: '银蓝灰',
+    },
+    {
+      accentColorSummary: '浅榛卡其',
+      colorSummary: ['珍珠白', '冷雾蓝', '浅榛卡其'],
+      marketSignal: '成熟通勤品牌会把珍珠白和冷雾蓝作为骨架，再用浅榛卡其把轻商务氛围压稳。',
+      primaryColorSummary: '珍珠白',
+      reviewCue: '珍珠白、冷雾蓝与浅榛卡其的稳定轻商务关系',
+      secondaryColorSummary: '冷雾蓝',
+    },
+    {
+      accentColorSummary: '淡驼灰',
+      colorSummary: ['暖壳白', '雾钢蓝', '淡驼灰'],
+      marketSignal: '轻正式路线会用暖壳白和雾钢蓝降低距离感，再以淡驼灰提升成熟感。',
+      primaryColorSummary: '暖壳白',
+      reviewCue: '暖壳白、雾钢蓝和淡驼灰是否形成柔和但不松散的秩序',
+      secondaryColorSummary: '雾钢蓝',
+    },
   ],
   'urban-minimal-foundation': [
     themeCandidateProfiles['urban-minimal-foundation']!,
@@ -161,6 +217,30 @@ const themeCandidateProfileVariants: Record<string, ThemeCandidateProfile[]> = {
       primaryColorSummary: '暖白灰',
       reviewCue: '暖白灰、深石墨和夜蓝黑的高级低对比',
       secondaryColorSummary: '深石墨',
+    },
+    {
+      accentColorSummary: '岩青灰',
+      colorSummary: ['霜白灰', '深雾灰', '岩青灰'],
+      marketSignal: '都市极简也会把青灰放进无彩基底里，让整体更冷静但不死板。',
+      primaryColorSummary: '霜白灰',
+      reviewCue: '霜白灰、深雾灰与岩青灰的安静层次',
+      secondaryColorSummary: '深雾灰',
+    },
+    {
+      accentColorSummary: '冷墨蓝',
+      colorSummary: ['米灰白', '铅石灰', '冷墨蓝'],
+      marketSignal: '女装极简通勤会用米灰白和铅石灰保持柔和，再用冷墨蓝补足边界感。',
+      primaryColorSummary: '米灰白',
+      reviewCue: '米灰白、铅石灰与冷墨蓝的低对比专业感',
+      secondaryColorSummary: '铅石灰',
+    },
+    {
+      accentColorSummary: '深松烟灰',
+      colorSummary: ['云灰白', '铁灰', '深松烟灰'],
+      marketSignal: '高频极简通勤会用云灰白和铁灰搭配更深一点的松烟灰，建立稳而不闷的基底。',
+      primaryColorSummary: '云灰白',
+      reviewCue: '云灰白、铁灰与深松烟灰是否兼顾干净和重量',
+      secondaryColorSummary: '铁灰',
     },
   ],
   'soft-tone-lift': [
@@ -197,6 +277,30 @@ const themeCandidateProfileVariants: Record<string, ThemeCandidateProfile[]> = {
       reviewCue: '柔米白、淡杏灰与烟紫灰是否保留通勤温度',
       secondaryColorSummary: '淡杏灰',
     },
+    {
+      accentColorSummary: '灰豆粉',
+      colorSummary: ['云奶白', '浅藕粉', '灰豆粉'],
+      marketSignal: '成熟通勤提气会把豆粉压到灰感区间，再配云奶白和浅藕粉去保持轻盈。',
+      primaryColorSummary: '云奶白',
+      reviewCue: '云奶白、浅藕粉与灰豆粉是否柔和提气但不甜腻',
+      secondaryColorSummary: '浅藕粉',
+    },
+    {
+      accentColorSummary: '烟杏棕',
+      colorSummary: ['暖米白', '柔桃杏', '烟杏棕'],
+      marketSignal: '柔和提气路线也会把杏色往成熟棕感推进，适合针织和衬衫的通勤表达。',
+      primaryColorSummary: '暖米白',
+      reviewCue: '暖米白、柔桃杏与烟杏棕的成熟温柔关系',
+      secondaryColorSummary: '柔桃杏',
+    },
+    {
+      accentColorSummary: '雾玫灰',
+      colorSummary: ['奶雾白', '淡莓粉', '雾玫灰'],
+      marketSignal: '更克制的通勤提气路线会把玫调压进灰感，避免出现甜美断层。',
+      primaryColorSummary: '奶雾白',
+      reviewCue: '奶雾白、淡莓粉与雾玫灰是否形成低饱和提气',
+      secondaryColorSummary: '淡莓粉',
+    },
   ],
   'mist-cool-commute': [
     themeCandidateProfiles['mist-cool-commute']!,
@@ -232,6 +336,30 @@ const themeCandidateProfileVariants: Record<string, ThemeCandidateProfile[]> = {
       reviewCue: '浅雾灰、海雾蓝与冷石墨的通勤清醒感',
       secondaryColorSummary: '海雾蓝',
     },
+    {
+      accentColorSummary: '墨蓝灰',
+      colorSummary: ['冷雾白', '银雾蓝', '墨蓝灰'],
+      marketSignal: '冷静通勤常用更轻的白灰与银雾蓝做前景，再用墨蓝灰拉回专业重心。',
+      primaryColorSummary: '冷雾白',
+      reviewCue: '冷雾白、银雾蓝与墨蓝灰是否形成明确但不压迫的冷调层次',
+      secondaryColorSummary: '银雾蓝',
+    },
+    {
+      accentColorSummary: '冷杉灰',
+      colorSummary: ['浅米灰', '雾青蓝', '冷杉灰'],
+      marketSignal: '雾青蓝与冷杉灰能让冷静路线更现代，尤其适合外套和衬衫的都市通勤。',
+      primaryColorSummary: '浅米灰',
+      reviewCue: '浅米灰、雾青蓝与冷杉灰的现代冷静度',
+      secondaryColorSummary: '雾青蓝',
+    },
+    {
+      accentColorSummary: '板岩灰',
+      colorSummary: ['冰米白', '薄烟蓝', '板岩灰'],
+      marketSignal: '更轻的冰米白和薄烟蓝适合春夏冷静通勤，再以板岩灰收住边界。',
+      primaryColorSummary: '冰米白',
+      reviewCue: '冰米白、薄烟蓝与板岩灰是否足够清醒且实穿',
+      secondaryColorSummary: '薄烟蓝',
+    },
   ],
   'warm-grounded-commute': [
     themeCandidateProfiles['warm-grounded-commute']!,
@@ -266,6 +394,30 @@ const themeCandidateProfileVariants: Record<string, ThemeCandidateProfile[]> = {
       primaryColorSummary: '浅燕麦',
       reviewCue: '浅燕麦、烟褐灰与可可棕的实穿暖稳关系',
       secondaryColorSummary: '烟褐灰',
+    },
+    {
+      accentColorSummary: '栗棕',
+      colorSummary: ['暖燕麦', '烟咖灰', '栗棕'],
+      marketSignal: '暖稳通勤会用暖燕麦和烟咖灰做实穿底，再用栗棕建立秋冬层次。',
+      primaryColorSummary: '暖燕麦',
+      reviewCue: '暖燕麦、烟咖灰与栗棕的成熟暖感是否协调',
+      secondaryColorSummary: '烟咖灰',
+    },
+    {
+      accentColorSummary: '暖枣红',
+      colorSummary: ['驼米白', '炭咖棕', '暖枣红'],
+      marketSignal: '成熟暖色通勤会用更克制的枣红做点缀，而不是高亮酒红。',
+      primaryColorSummary: '驼米白',
+      reviewCue: '驼米白、炭咖棕与暖枣红的提气比例是否克制',
+      secondaryColorSummary: '炭咖棕',
+    },
+    {
+      accentColorSummary: '深焦糖棕',
+      colorSummary: ['奶茶米', '褐灰', '深焦糖棕'],
+      marketSignal: '暖稳秋冬路线也会用奶茶米和褐灰打底，再以深焦糖棕提升质感和分量。',
+      primaryColorSummary: '奶茶米',
+      reviewCue: '奶茶米、褐灰与深焦糖棕是否既温和又有秋冬分量',
+      secondaryColorSummary: '褐灰',
     },
   ],
 };
@@ -458,10 +610,149 @@ function buildStableVariantIndex(seed: string, poolLength: number): number {
   return Math.abs(hash) % Math.max(poolLength, 1);
 }
 
+function normalizePaletteSignatureToken(value: string | undefined): string {
+  return value?.trim().toLowerCase() ?? '';
+}
+
+function buildThemeProfileSignature(profile: ThemeCandidateProfile): string | null {
+  const tokens = [
+    normalizePaletteSignatureToken(profile.primaryColorSummary),
+    normalizePaletteSignatureToken(profile.secondaryColorSummary),
+    normalizePaletteSignatureToken(profile.accentColorSummary),
+    ...profile.colorSummary.map((item) => normalizePaletteSignatureToken(item)),
+  ].filter(Boolean);
+
+  return tokens.length > 0 ? tokens.slice(0, 6).join('|') : null;
+}
+
+function buildSamplingRecordPaletteSignature(record: SamplingRecord): string | null {
+  const tokens = [
+    normalizePaletteSignatureToken(record.primaryColorSummary),
+    normalizePaletteSignatureToken(record.secondaryColorSummary),
+    normalizePaletteSignatureToken(record.accentColorSummary),
+    ...record.colorSummary.map((item) => normalizePaletteSignatureToken(item)),
+  ].filter(Boolean);
+
+  return tokens.length > 0 ? tokens.slice(0, 6).join('|') : null;
+}
+
+function buildSamplingIdPrefix(batchId: string, occasionId: string): string {
+  const batchNumber = batchId.match(/batch(\d+)$/)?.[1];
+
+  return `sam_${occasionId}_${batchNumber ? `b${batchNumber}` : batchId.replace(/-/g, '_')}_`;
+}
+
+function buildThemeLabelMap(document: SamplingBatchDocument): Map<string, string> {
+  const labelMap = new Map<string, string>();
+
+  for (const item of document.items) {
+    if (item.themeKey.trim() && item.themeLabelZh.trim() && !labelMap.has(item.themeKey)) {
+      labelMap.set(item.themeKey, item.themeLabelZh);
+    }
+  }
+
+  for (const themeKey of document.batch.themeKeys) {
+    if (!labelMap.has(themeKey)) {
+      labelMap.set(themeKey, defaultThemeLabelMap[themeKey] ?? themeKey);
+    }
+  }
+
+  return labelMap;
+}
+
+function buildPreparedGenerationRecord({
+  index,
+  itemCategory,
+  occasionId,
+  productionBatchId,
+  samplingId,
+  sourceWhitelistIds,
+  themeKey,
+  themeLabelZh,
+}: PreparedGenerationRecordOptions): SamplingRecord {
+  return {
+    accentColorSummary: '',
+    brandName: '',
+    candidatePaletteIds: [],
+    channelType: sourceWhitelistIds[index % Math.max(sourceWhitelistIds.length, 1)] ?? '',
+    colorSummary: [],
+    digestionStatus: 'sampled',
+    finalPaletteIds: [],
+    itemCategory,
+    marketSignals: '',
+    notes: '',
+    observedAt: '',
+    occasionId,
+    platform: '',
+    primaryColorSummary: '',
+    productionBatchId,
+    samplingId,
+    seasonHint: seasonalHintByCategory[itemCategory] ?? 'all',
+    secondaryColorSummary: '',
+    sourceId: '',
+    sourceUrl: '',
+    styleSignals: [],
+    themeKey,
+    themeLabelZh,
+  };
+}
+
+function prepareBatchRecordsForGeneration(
+  document: SamplingBatchDocument,
+  payload: GenerateSamplingCandidatesDto,
+): SamplingRecord[] {
+  const targetCount = payload.targetCount;
+
+  if (targetCount !== undefined && (!Number.isInteger(targetCount) || targetCount <= 0)) {
+    throw new BadRequestException('targetCount must be a positive integer when provided.');
+  }
+
+  const shouldResetExisting = payload.resetExisting ?? false;
+  const baseItems = shouldResetExisting ? [] : document.items;
+  const desiredCount = Math.max(targetCount ?? baseItems.length, baseItems.length);
+
+  if (desiredCount <= baseItems.length) {
+    return baseItems;
+  }
+
+  const themeKeys = document.batch.themeKeys;
+
+  if (themeKeys.length === 0) {
+    throw new BadRequestException('batch.themeKeys must contain at least one theme key.');
+  }
+
+  const categoryKeys = Object.keys(categorySearchTerms);
+  const themeLabelMap = buildThemeLabelMap(document);
+  const idPrefix = buildSamplingIdPrefix(document.batch.id, document.batch.occasionId);
+  const nextItems = [...baseItems];
+
+  for (let index = baseItems.length; index < desiredCount; index += 1) {
+    const themeKey = themeKeys[index % themeKeys.length] ?? themeKeys[0]!;
+    const categoryIndex = Math.floor(index / themeKeys.length) % Math.max(categoryKeys.length, 1);
+    const itemCategory = categoryKeys[categoryIndex] ?? categoryKeys[0]!;
+
+    nextItems.push(
+      buildPreparedGenerationRecord({
+        index,
+        itemCategory,
+        occasionId: document.batch.occasionId,
+        productionBatchId: document.batch.id,
+        samplingId: `${idPrefix}${String(index + 1).padStart(3, '0')}`,
+        sourceWhitelistIds: document.batch.sourceWhitelistIds,
+        themeKey,
+        themeLabelZh: themeLabelMap.get(themeKey) ?? themeKey,
+      }),
+    );
+  }
+
+  return nextItems;
+}
+
 function pickThemeProfile(
   record: SamplingRecord,
   index: number,
   brandProfile: BrandCandidateProfile,
+  usedPaletteSignatures?: Set<string>,
 ): ThemeCandidateProfile {
   const profilePool = themeCandidateProfileVariants[record.themeKey] ?? [
     themeCandidateProfiles[record.themeKey] ?? fallbackThemeCandidateProfile,
@@ -470,6 +761,22 @@ function pickThemeProfile(
     `${record.samplingId}:${record.itemCategory}:${brandProfile.brandName}:${index}`,
     profilePool.length,
   );
+
+  if (usedPaletteSignatures && profilePool.length > 1) {
+    for (let offset = 0; offset < profilePool.length; offset += 1) {
+      const candidateProfile = profilePool[(variantIndex + offset) % profilePool.length];
+
+      if (!candidateProfile) {
+        continue;
+      }
+
+      const candidateSignature = buildThemeProfileSignature(candidateProfile);
+
+      if (!candidateSignature || !usedPaletteSignatures.has(candidateSignature)) {
+        return candidateProfile;
+      }
+    }
+  }
 
   return profilePool[variantIndex] ?? themeCandidateProfiles[record.themeKey] ?? fallbackThemeCandidateProfile;
 }
@@ -507,10 +814,24 @@ export class SamplingCandidateGenerationService {
     payload: GenerateSamplingCandidatesDto = {},
   ): Promise<SamplingRecord[]> {
     const mode = normalizeMode(payload.mode);
-    const overwriteExisting = payload.overwriteExisting ?? false;
-    const nextItems = document.items.map((record, index) =>
-      this.applyRuleBasedCandidate(record, index, overwriteExisting),
-    );
+    const sourceItems = prepareBatchRecordsForGeneration(document, payload);
+    const overwriteExisting = payload.resetExisting ? true : payload.overwriteExisting ?? false;
+    const usedPaletteSignatures = new Set<string>();
+    const nextItems = sourceItems.map((record, index) => {
+      const nextRecord = this.applyRuleBasedCandidate(
+        record,
+        index,
+        overwriteExisting,
+        usedPaletteSignatures,
+      );
+      const paletteSignature = buildSamplingRecordPaletteSignature(nextRecord);
+
+      if (paletteSignature) {
+        usedPaletteSignatures.add(paletteSignature);
+      }
+
+      return nextRecord;
+    });
 
     if (mode === 'rules-only') {
       return nextItems;
@@ -523,10 +844,16 @@ export class SamplingCandidateGenerationService {
     record: SamplingRecord,
     index: number,
     overwriteExisting: boolean,
+    usedPaletteSignatures: Set<string>,
   ): SamplingRecord {
     const brandProfile = pickBrandProfile(record, index);
-    const themeProfile = pickThemeProfile(record, index, brandProfile);
     const shouldRefreshGenerated = shouldRefreshGeneratedCandidate(record, overwriteExisting);
+    const themeProfile = pickThemeProfile(
+      record,
+      index,
+      brandProfile,
+      shouldRefreshGenerated ? usedPaletteSignatures : undefined,
+    );
     const generatedNote = `自动候选：优先审阅 ${brandProfile.brandName} 的 ${buildPlatformLabel(record, brandProfile.brandName)} 入口，重点看 ${themeProfile.reviewCue}。`;
 
     return {

@@ -6,5 +6,6 @@ import { SamplingBatchesService } from './sampling-batches.service';
 @Module({
   controllers: [SamplingBatchesController],
   providers: [SamplingBatchesService, SamplingCandidateGenerationService],
+  exports: [SamplingBatchesService],
 })
 export class SamplingBatchesModule {}

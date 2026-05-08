@@ -120,3 +120,78 @@ export interface SamplingBatchCollectionDocument {
   updatedAt: string
   version: number
 }
+
+export type SamplingRunOperationType =
+  | 'generate-candidates'
+  | 'discover-sources'
+  | 'collect-evidence'
+  | 'extract-colors'
+  | 'cluster-palettes'
+
+export type SamplingRunStatus =
+  | 'queued'
+  | 'running'
+  | 'needsManualInput'
+  | 'succeeded'
+  | 'failed'
+  | 'cancelled'
+
+export type SamplingRunEventLevel = 'info' | 'warning' | 'error'
+
+export type SamplingRunEventType =
+  | 'run-created'
+  | 'stage-started'
+  | 'candidate-link-found'
+  | 'page-opened'
+  | 'page-skipped'
+  | 'auth-required'
+  | 'manual-evidence-requested'
+  | 'screenshot-captured'
+  | 'image-selected'
+  | 'colors-extracted'
+  | 'cluster-created'
+  | 'cluster-merged'
+  | 'model-analysis-started'
+  | 'model-analysis-finished'
+  | 'warning'
+  | 'error'
+  | 'run-finished'
+
+export interface SamplingRunSummary {
+  batchId: string
+  currentStage: string
+  errorCount: number
+  finishedAt?: string
+  operationType: SamplingRunOperationType
+  progressPercent: number
+  runId: string
+  startedAt: string
+  status: SamplingRunStatus
+  summary?: string
+  warningCount: number
+}
+
+export interface SamplingRunEvent {
+  createdAt: string
+  eventId: string
+  level: SamplingRunEventLevel
+  message: string
+  metadata?: Record<string, unknown>
+  progressPercent?: number
+  runId: string
+  stage?: string
+  type: SamplingRunEventType
+}
+
+export interface SamplingRunCollectionDocument {
+  items: SamplingRunSummary[]
+  updatedAt: string
+  version: number
+}
+
+export interface SamplingRunEventCollectionDocument {
+  items: SamplingRunEvent[]
+  runId: string
+  updatedAt: string
+  version: number
+}
