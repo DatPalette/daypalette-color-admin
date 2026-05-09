@@ -45,7 +45,9 @@ function toPublicDictionariesDocument(
   for (const [key, dictionary] of Object.entries(document.dictionaries)) {
     dictionaries[key] = {
       ...dictionary,
-      items: includeDeleted ? dictionary.items : dictionary.items.filter((item) => !item.isDeleted),
+      items: includeDeleted
+        ? dictionary.items
+        : dictionary.items.filter((item) => !item.isDeleted),
     };
   }
 
@@ -81,7 +83,10 @@ function normalizeOptionalString(value: unknown): string {
   return value.trim();
 }
 
-function findDictionaryOrThrow(document: DictionariesDocument, key: string): DictionaryNode {
+function findDictionaryOrThrow(
+  document: DictionariesDocument,
+  key: string,
+): DictionaryNode {
   const dictionary = document.dictionaries[key];
 
   if (!dictionary) {
@@ -91,11 +96,16 @@ function findDictionaryOrThrow(document: DictionariesDocument, key: string): Dic
   return dictionary;
 }
 
-function findDictionaryItemOrThrow(dictionary: DictionaryNode, itemId: string): DictionaryItem {
+function findDictionaryItemOrThrow(
+  dictionary: DictionaryNode,
+  itemId: string,
+): DictionaryItem {
   const item = dictionary.items.find((candidate) => candidate.id === itemId);
 
   if (!item) {
-    throw new NotFoundException(`Dictionary item ${itemId} was not found in ${dictionary.key}.`);
+    throw new NotFoundException(
+      `Dictionary item ${itemId} was not found in ${dictionary.key}.`,
+    );
   }
 
   return item;
@@ -114,12 +124,16 @@ function normalizeDictionaryItem(
   const isActive = Boolean(candidate.isActive);
 
   if (isDeleted && isActive) {
-    throw new BadRequestException(`${fieldName} cannot be active after soft delete.`);
+    throw new BadRequestException(
+      `${fieldName} cannot be active after soft delete.`,
+    );
   }
 
   return {
     aliases:
-      candidate.aliases === undefined ? [] : normalizeStringArray(candidate.aliases, `${fieldName}.aliases`),
+      candidate.aliases === undefined
+        ? []
+        : normalizeStringArray(candidate.aliases, `${fieldName}.aliases`),
     appliesTo:
       candidate.appliesTo === undefined
         ? undefined
@@ -134,17 +148,25 @@ function normalizeDictionaryItem(
     labelEn: normalizeRequiredString(candidate.labelEn, `${fieldName}.labelEn`),
     labelZh: normalizeRequiredString(candidate.labelZh, `${fieldName}.labelZh`),
     sortOrder:
-      typeof candidate.sortOrder === 'number' && Number.isFinite(candidate.sortOrder)
+      typeof candidate.sortOrder === 'number' &&
+      Number.isFinite(candidate.sortOrder)
         ? candidate.sortOrder
         : (() => {
-            throw new BadRequestException(`${fieldName}.sortOrder must be a finite number.`);
+            throw new BadRequestException(
+              `${fieldName}.sortOrder must be a finite number.`,
+            );
           })(),
   };
 }
 
-function normalizeSelectionMode(value: unknown, fieldName: string): 'mixed' | 'multi' | 'single' {
+function normalizeSelectionMode(
+  value: unknown,
+  fieldName: string,
+): 'mixed' | 'multi' | 'single' {
   if (value !== 'mixed' && value !== 'multi' && value !== 'single') {
-    throw new BadRequestException(`${fieldName} must be one of: single, multi, mixed.`);
+    throw new BadRequestException(
+      `${fieldName} must be one of: single, multi, mixed.`,
+    );
   }
 
   return value;
@@ -156,25 +178,37 @@ function normalizeStringArray(value: unknown, fieldName: string): string[] {
   }
 
   return Array.from(
-    new Set(value.map((item) => normalizeRequiredString(item, `${fieldName} item`))),
+    new Set(
+      value.map((item) => normalizeRequiredString(item, `${fieldName} item`)),
+    ),
   );
 }
 
-function normalizeDictionaryFieldMappings(value: unknown): DictionaryFieldMapping[] {
+function normalizeDictionaryFieldMappings(
+  value: unknown,
+): DictionaryFieldMapping[] {
   if (!Array.isArray(value) || value.length === 0) {
     throw new BadRequestException('fieldMappings must be a non-empty array.');
   }
 
   return value.map((fieldMapping, index) => {
     if (!fieldMapping || typeof fieldMapping !== 'object') {
-      throw new BadRequestException(`fieldMappings[${index}] must be an object.`);
+      throw new BadRequestException(
+        `fieldMappings[${index}] must be an object.`,
+      );
     }
 
     const candidate = fieldMapping as Record<string, unknown>;
 
     return {
-      entity: normalizeRequiredString(candidate.entity, `fieldMappings[${index}].entity`),
-      field: normalizeRequiredString(candidate.field, `fieldMappings[${index}].field`),
+      entity: normalizeRequiredString(
+        candidate.entity,
+        `fieldMappings[${index}].entity`,
+      ),
+      field: normalizeRequiredString(
+        candidate.field,
+        `fieldMappings[${index}].field`,
+      ),
       selectionMode: normalizeSelectionMode(
         candidate.selectionMode,
         `fieldMappings[${index}].selectionMode`,
@@ -204,7 +238,10 @@ function normalizeDictionaryItems(value: unknown): DictionaryItem[] {
   });
 }
 
-function buildUpdatedDictionaryNode(key: string, payload: UpdateDictionaryDto): DictionaryNode {
+function buildUpdatedDictionaryNode(
+  key: string,
+  payload: UpdateDictionaryDto,
+): DictionaryNode {
   return {
     descriptionEn: normalizeOptionalString(payload.descriptionEn),
     descriptionZh: normalizeOptionalString(payload.descriptionZh),
@@ -214,7 +251,10 @@ function buildUpdatedDictionaryNode(key: string, payload: UpdateDictionaryDto): 
     key,
     labelEn: normalizeRequiredString(payload.labelEn, 'labelEn'),
     labelZh: normalizeRequiredString(payload.labelZh, 'labelZh'),
-    selectionMode: normalizeSelectionMode(payload.selectionMode, 'selectionMode'),
+    selectionMode: normalizeSelectionMode(
+      payload.selectionMode,
+      'selectionMode',
+    ),
   };
 }
 
@@ -255,17 +295,29 @@ function toReferenceDisplayLabel(
 
 async function loadReferenceDocuments(
   fieldMappings: DictionaryFieldMapping[],
-): Promise<Record<DictionaryConsumerEntity, PaletteDataCollectionDocument<DictionaryReferenceRecord>>> {
+): Promise<
+  Record<
+    DictionaryConsumerEntity,
+    PaletteDataCollectionDocument<DictionaryReferenceRecord>
+  >
+> {
   const entities = Array.from(
-    new Set(fieldMappings.map((fieldMapping) => fieldMapping.entity as DictionaryConsumerEntity)),
+    new Set(
+      fieldMappings.map(
+        (fieldMapping) => fieldMapping.entity as DictionaryConsumerEntity,
+      ),
+    ),
   );
   const entries = await Promise.all(
-    entities.map(async (entity) => [
-      entity,
-      await readPaletteDataFile<PaletteDataCollectionDocument<DictionaryReferenceRecord>>(
-        paletteDataFileNameByEntity[entity],
-      ),
-    ] as const),
+    entities.map(
+      async (entity) =>
+        [
+          entity,
+          await readPaletteDataFile<
+            PaletteDataCollectionDocument<DictionaryReferenceRecord>
+          >(paletteDataFileNameByEntity[entity]),
+        ] as const,
+    ),
   );
 
   return Object.fromEntries(entries) as Record<
@@ -278,7 +330,10 @@ function buildDictionaryItemDeleteCheck(
   dictionaryKey: string,
   item: DictionaryItem,
   fieldMappings: DictionaryFieldMapping[],
-  referenceDocuments: Record<DictionaryConsumerEntity, PaletteDataCollectionDocument<DictionaryReferenceRecord>>,
+  referenceDocuments: Record<
+    DictionaryConsumerEntity,
+    PaletteDataCollectionDocument<DictionaryReferenceRecord>
+  >,
 ): DictionaryItemDeleteCheckResult {
   const blockingReferences: DictionaryItemDeleteCheckReference[] = [];
 
@@ -295,7 +350,13 @@ function buildDictionaryItemDeleteCheck(
         continue;
       }
 
-      if (matchesDictionaryValue(record[fieldMapping.field], item.id, fieldMapping.selectionMode)) {
+      if (
+        matchesDictionaryValue(
+          record[fieldMapping.field],
+          item.id,
+          fieldMapping.selectionMode,
+        )
+      ) {
         blockingReferences.push({
           displayLabel: toReferenceDisplayLabel(entity, record),
           id: record.id,
@@ -319,13 +380,20 @@ function buildDictionaryItemDeleteCheck(
 @Injectable()
 export class DictionariesService {
   async getCollection(includeDeleted = false): Promise<DictionariesDocument> {
-    const document = await readPaletteDataFile<DictionariesDocument>('dictionaries.v1.json');
+    const document = await readPaletteDataFile<DictionariesDocument>(
+      'dictionaries.v1.json',
+    );
 
     return toPublicDictionariesDocument(document, includeDeleted);
   }
 
-  async updateDictionary(key: string, payload: UpdateDictionaryDto): Promise<DictionariesDocument> {
-    const document = await readPaletteDataFile<DictionariesDocument>('dictionaries.v1.json');
+  async updateDictionary(
+    key: string,
+    payload: UpdateDictionaryDto,
+  ): Promise<DictionariesDocument> {
+    const document = await readPaletteDataFile<DictionariesDocument>(
+      'dictionaries.v1.json',
+    );
 
     findDictionaryOrThrow(document, key);
 
@@ -347,7 +415,9 @@ export class DictionariesService {
     key: string,
     payload: CreateDictionaryItemDto,
   ): Promise<DictionariesDocument> {
-    const document = await readPaletteDataFile<DictionariesDocument>('dictionaries.v1.json');
+    const document = await readPaletteDataFile<DictionariesDocument>(
+      'dictionaries.v1.json',
+    );
     const dictionary = findDictionaryOrThrow(document, key);
     const nextItem = normalizeDictionaryItem(
       {
@@ -360,7 +430,9 @@ export class DictionariesService {
     );
 
     if (dictionary.items.some((item) => item.id === nextItem.id)) {
-      throw new ConflictException(`Dictionary item ${nextItem.id} already exists in ${key}.`);
+      throw new ConflictException(
+        `Dictionary item ${nextItem.id} already exists in ${key}.`,
+      );
     }
 
     const nextDocument: DictionariesDocument = {
@@ -369,7 +441,9 @@ export class DictionariesService {
         ...document.dictionaries,
         [key]: {
           ...dictionary,
-          items: [...dictionary.items, nextItem].sort((left, right) => left.sortOrder - right.sortOrder),
+          items: [...dictionary.items, nextItem].sort(
+            (left, right) => left.sortOrder - right.sortOrder,
+          ),
         },
       },
       updatedAt: new Date().toISOString(),
@@ -384,12 +458,21 @@ export class DictionariesService {
     key: string,
     itemId: string,
   ): Promise<DictionaryItemDeleteCheckResult> {
-    const document = await readPaletteDataFile<DictionariesDocument>('dictionaries.v1.json');
+    const document = await readPaletteDataFile<DictionariesDocument>(
+      'dictionaries.v1.json',
+    );
     const dictionary = findDictionaryOrThrow(document, key);
     const item = findDictionaryItemOrThrow(dictionary, itemId);
-    const referenceDocuments = await loadReferenceDocuments(dictionary.fieldMappings);
+    const referenceDocuments = await loadReferenceDocuments(
+      dictionary.fieldMappings,
+    );
 
-    return buildDictionaryItemDeleteCheck(key, item, dictionary.fieldMappings, referenceDocuments);
+    return buildDictionaryItemDeleteCheck(
+      key,
+      item,
+      dictionary.fieldMappings,
+      referenceDocuments,
+    );
   }
 
   async deleteItem(
@@ -397,15 +480,21 @@ export class DictionariesService {
     itemId: string,
     payload: DeleteDictionaryItemDto,
   ): Promise<DictionariesDocument> {
-    const document = await readPaletteDataFile<DictionariesDocument>('dictionaries.v1.json');
+    const document = await readPaletteDataFile<DictionariesDocument>(
+      'dictionaries.v1.json',
+    );
     const dictionary = findDictionaryOrThrow(document, key);
     const item = findDictionaryItemOrThrow(dictionary, itemId);
 
     if (item.isDeleted) {
-      throw new ConflictException(`Dictionary item ${itemId} is already deleted.`);
+      throw new ConflictException(
+        `Dictionary item ${itemId} is already deleted.`,
+      );
     }
 
-    const referenceDocuments = await loadReferenceDocuments(dictionary.fieldMappings);
+    const referenceDocuments = await loadReferenceDocuments(
+      dictionary.fieldMappings,
+    );
     const deleteCheck = buildDictionaryItemDeleteCheck(
       key,
       item,
@@ -447,8 +536,13 @@ export class DictionariesService {
     return toPublicDictionariesDocument(nextDocument);
   }
 
-  async restoreItem(key: string, itemId: string): Promise<DictionariesDocument> {
-    const document = await readPaletteDataFile<DictionariesDocument>('dictionaries.v1.json');
+  async restoreItem(
+    key: string,
+    itemId: string,
+  ): Promise<DictionariesDocument> {
+    const document = await readPaletteDataFile<DictionariesDocument>(
+      'dictionaries.v1.json',
+    );
     const dictionary = findDictionaryOrThrow(document, key);
     const item = findDictionaryItemOrThrow(dictionary, itemId);
 

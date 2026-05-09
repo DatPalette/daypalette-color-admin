@@ -1,11 +1,14 @@
 import { randomUUID } from 'node:crypto';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type {
   SamplingRunCollectionDocument,
   SamplingRunEvent,
   SamplingRunEventCollectionDocument,
   SamplingRunOperationType,
-  SamplingRunStatus,
   SamplingRunSummary,
 } from '@daypalette-color-admin/contracts';
 import type { MessageEvent } from '@nestjs/common';
@@ -21,7 +24,9 @@ interface SamplingRunRecord {
   version: number;
 }
 
-const supportedOperationTypes: SamplingRunOperationType[] = ['generate-candidates'];
+const supportedOperationTypes: SamplingRunOperationType[] = [
+  'generate-candidates',
+];
 
 function hasText(value: string | undefined): boolean {
   return Boolean(value?.trim());
@@ -63,7 +68,10 @@ export class SamplingRunsService {
   getCollection(batchId?: string): SamplingRunCollectionDocument {
     const normalizedBatchId = batchId?.trim();
     const records = Array.from(this.runs.values())
-      .filter((record) => !normalizedBatchId || record.run.batchId === normalizedBatchId)
+      .filter(
+        (record) =>
+          !normalizedBatchId || record.run.batchId === normalizedBatchId,
+      )
       .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
 
     return {
@@ -155,9 +163,14 @@ export class SamplingRunsService {
     return { ...record.run };
   }
 
-  private async executeRun(runId: string, payload: CreateSamplingRunDto): Promise<void> {
+  private async executeRun(
+    runId: string,
+    payload: CreateSamplingRunDto,
+  ): Promise<void> {
     const record = this.getRunRecord(runId);
-    const requestedMode = payload.generateCandidates?.mode ?? this.samplingBatchesService.getCapabilities().defaultMode;
+    const requestedMode =
+      payload.generateCandidates?.mode ??
+      this.samplingBatchesService.getCapabilities().defaultMode;
     const capabilities = this.samplingBatchesService.getCapabilities();
 
     try {
@@ -205,7 +218,8 @@ export class SamplingRunsService {
       if (requestedMode !== 'rules-only' && !capabilities.modelEnabled) {
         this.emitEvent(record, {
           level: 'warning',
-          message: 'Model analysis is not configured. The run will fall back to rules-only when possible.',
+          message:
+            'Model analysis is not configured. The run will fall back to rules-only when possible.',
           metadata: {
             requestedMode,
           },
@@ -346,7 +360,10 @@ export class SamplingRunsService {
     };
   }
 
-  private updateRun(record: SamplingRunRecord, patch: Partial<SamplingRunSummary>): void {
+  private updateRun(
+    record: SamplingRunRecord,
+    patch: Partial<SamplingRunSummary>,
+  ): void {
     record.run = {
       ...record.run,
       ...patch,

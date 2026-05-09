@@ -14,7 +14,9 @@ function resolveCandidateRoots(): string[] {
     path.resolve(process.cwd(), '..'),
   ];
 
-  return candidates.filter((candidate): candidate is string => Boolean(candidate));
+  return candidates.filter((candidate): candidate is string =>
+    Boolean(candidate),
+  );
 }
 
 function hasAdminWorkspaceRoot(root: string): boolean {
@@ -37,7 +39,9 @@ export function resolveDayPaletteColorAdminRoot(): string {
 }
 
 export async function listSamplingBatchFiles(): Promise<string[]> {
-  const samplingRoot = resolvePaletteSamplingDataRoot(resolveDayPaletteColorAdminRoot());
+  const samplingRoot = resolvePaletteSamplingDataRoot(
+    resolveDayPaletteColorAdminRoot(),
+  );
 
   if (!existsSync(samplingRoot)) {
     return [];
@@ -49,13 +53,19 @@ export async function listSamplingBatchFiles(): Promise<string[]> {
 }
 
 export async function readSamplingBatchFile<T>(batchId: string): Promise<T> {
-  const filePath = resolvePaletteSamplingBatchFilePath(resolveDayPaletteColorAdminRoot(), batchId);
+  const filePath = resolvePaletteSamplingBatchFilePath(
+    resolveDayPaletteColorAdminRoot(),
+    batchId,
+  );
   const fileContent = await readFile(filePath, 'utf8');
 
   return JSON.parse(fileContent) as T;
 }
 
-export async function writeSamplingBatchFile<T>(batchId: string, data: T): Promise<void> {
+export async function writeSamplingBatchFile<T>(
+  batchId: string,
+  data: T,
+): Promise<void> {
   const adminRoot = resolveDayPaletteColorAdminRoot();
   const samplingRoot = resolvePaletteSamplingDataRoot(adminRoot);
 
@@ -68,5 +78,10 @@ export async function writeSamplingBatchFile<T>(batchId: string, data: T): Promi
 }
 
 export async function deleteSamplingBatchFile(batchId: string): Promise<void> {
-  await rm(resolvePaletteSamplingBatchFilePath(resolveDayPaletteColorAdminRoot(), batchId));
+  await rm(
+    resolvePaletteSamplingBatchFilePath(
+      resolveDayPaletteColorAdminRoot(),
+      batchId,
+    ),
+  );
 }

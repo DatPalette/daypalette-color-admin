@@ -12,11 +12,15 @@ function resolveCandidateRoots(): string[] {
     path.resolve(process.cwd(), '../day_palette'),
   ];
 
-  return candidates.filter((candidate): candidate is string => Boolean(candidate));
+  return candidates.filter((candidate): candidate is string =>
+    Boolean(candidate),
+  );
 }
 
 function hasPaletteDataDirectory(root: string): boolean {
-  return existsSync(path.join(root, paletteDataRelativePath, 'base-colors.v1.json'));
+  return existsSync(
+    path.join(root, paletteDataRelativePath, 'base-colors.v1.json'),
+  );
 }
 
 export function resolveDayPaletteRoot(): string {
@@ -36,11 +40,21 @@ export function resolvePaletteDataFilePath(fileName: string): string {
 }
 
 export async function readPaletteDataFile<T>(fileName: string): Promise<T> {
-  const fileContent = await readFile(resolvePaletteDataFilePath(fileName), 'utf8');
+  const fileContent = await readFile(
+    resolvePaletteDataFilePath(fileName),
+    'utf8',
+  );
 
   return JSON.parse(fileContent) as T;
 }
 
-export async function writePaletteDataFile<T>(fileName: string, data: T): Promise<void> {
-  await writeFile(resolvePaletteDataFilePath(fileName), `${JSON.stringify(data, null, 2)}\n`, 'utf8');
+export async function writePaletteDataFile<T>(
+  fileName: string,
+  data: T,
+): Promise<void> {
+  await writeFile(
+    resolvePaletteDataFilePath(fileName),
+    `${JSON.stringify(data, null, 2)}\n`,
+    'utf8',
+  );
 }

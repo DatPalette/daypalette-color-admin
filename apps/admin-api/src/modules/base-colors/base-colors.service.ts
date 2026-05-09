@@ -30,7 +30,10 @@ type BaseColorDictionaryKey =
   | 'styleTag'
   | 'tone';
 
-type BaseColorPaletteReferenceField = 'accentColorId' | 'primaryColorId' | 'secondaryColorId';
+type BaseColorPaletteReferenceField =
+  | 'accentColorId'
+  | 'primaryColorId'
+  | 'secondaryColorId';
 
 function toPublicCollection(
   document: PaletteDataCollectionDocument<BaseColorRecord>,
@@ -38,7 +41,9 @@ function toPublicCollection(
 ): PaletteDataCollectionDocument<BaseColorRecord> {
   return {
     ...document,
-    items: includeDeleted ? document.items : document.items.filter((item) => item.status !== 'deleted'),
+    items: includeDeleted
+      ? document.items
+      : document.items.filter((item) => item.status !== 'deleted'),
   };
 }
 
@@ -97,10 +102,14 @@ function getAllowedDictionaryIds(
   const dictionary = dictionaries.dictionaries[dictionaryKey];
 
   if (!dictionary) {
-    throw new BadRequestException(`Dictionary ${dictionaryKey} is not configured.`);
+    throw new BadRequestException(
+      `Dictionary ${dictionaryKey} is not configured.`,
+    );
   }
 
-  return new Set(dictionary.items.filter((item) => !item.isDeleted).map((item) => item.id));
+  return new Set(
+    dictionary.items.filter((item) => !item.isDeleted).map((item) => item.id),
+  );
 }
 
 function assertDictionaryValue(
@@ -110,7 +119,9 @@ function assertDictionaryValue(
   dictionaryKey: BaseColorDictionaryKey,
 ): void {
   if (!getAllowedDictionaryIds(dictionaries, dictionaryKey).has(value)) {
-    throw new BadRequestException(`${fieldName} contains unsupported value: ${value}.`);
+    throw new BadRequestException(
+      `${fieldName} contains unsupported value: ${value}.`,
+    );
   }
 }
 
@@ -124,7 +135,9 @@ function assertDictionaryValues(
 
   for (const value of values) {
     if (!allowedIds.has(value)) {
-      throw new BadRequestException(`${fieldName} contains unsupported value: ${value}.`);
+      throw new BadRequestException(
+        `${fieldName} contains unsupported value: ${value}.`,
+      );
     }
   }
 }
@@ -139,11 +152,17 @@ function buildUpdatedBaseColorRecord(
     hex: normalizeHex(payload.hex),
     id,
     isNeutralCore: Boolean(payload.isNeutralCore),
-    lightnessLevel: normalizeRequiredString(payload.lightnessLevel, 'lightnessLevel'),
+    lightnessLevel: normalizeRequiredString(
+      payload.lightnessLevel,
+      'lightnessLevel',
+    ),
     nameEn: normalizeRequiredString(payload.nameEn, 'nameEn'),
     nameZh: normalizeRequiredString(payload.nameZh, 'nameZh'),
     occasionTags: normalizeStringArray(payload.occasionTags, 'occasionTags'),
-    saturationLevel: normalizeRequiredString(payload.saturationLevel, 'saturationLevel'),
+    saturationLevel: normalizeRequiredString(
+      payload.saturationLevel,
+      'saturationLevel',
+    ),
     seasonTags: normalizeStringArray(payload.seasonTags, 'seasonTags'),
     status: normalizeRequiredString(payload.status, 'status'),
     styleTags: normalizeStringArray(payload.styleTags, 'styleTags'),
@@ -163,14 +182,36 @@ function buildUpdatedBaseColorRecord(
     dictionaries,
     'saturationLevel',
   );
-  assertDictionaryValue(nextRecord.colorFamily, 'colorFamily', dictionaries, 'colorFamily');
+  assertDictionaryValue(
+    nextRecord.colorFamily,
+    'colorFamily',
+    dictionaries,
+    'colorFamily',
+  );
   assertDictionaryValue(nextRecord.status, 'status', dictionaries, 'status');
-  assertDictionaryValues(nextRecord.styleTags, 'styleTags', dictionaries, 'styleTag');
-  assertDictionaryValues(nextRecord.occasionTags, 'occasionTags', dictionaries, 'occasion');
-  assertDictionaryValues(nextRecord.seasonTags, 'seasonTags', dictionaries, 'seasonTag');
+  assertDictionaryValues(
+    nextRecord.styleTags,
+    'styleTags',
+    dictionaries,
+    'styleTag',
+  );
+  assertDictionaryValues(
+    nextRecord.occasionTags,
+    'occasionTags',
+    dictionaries,
+    'occasion',
+  );
+  assertDictionaryValues(
+    nextRecord.seasonTags,
+    'seasonTags',
+    dictionaries,
+    'seasonTag',
+  );
 
   if (nextRecord.status === 'deleted') {
-    throw new BadRequestException('status cannot be deleted when creating or updating a base color.');
+    throw new BadRequestException(
+      'status cannot be deleted when creating or updating a base color.',
+    );
   }
 
   return nextRecord;
@@ -231,9 +272,9 @@ export class BaseColorsService {
   async getCollection(
     includeDeleted = false,
   ): Promise<PaletteDataCollectionDocument<BaseColorRecord>> {
-    const document = await readPaletteDataFile<PaletteDataCollectionDocument<BaseColorRecord>>(
-      'base-colors.v1.json',
-    );
+    const document = await readPaletteDataFile<
+      PaletteDataCollectionDocument<BaseColorRecord>
+    >('base-colors.v1.json');
 
     return toPublicCollection(document, includeDeleted);
   }
@@ -242,7 +283,9 @@ export class BaseColorsService {
     payload: CreateBaseColorDto,
   ): Promise<PaletteDataCollectionDocument<BaseColorRecord>> {
     const [document, dictionaries] = await Promise.all([
-      readPaletteDataFile<PaletteDataCollectionDocument<BaseColorRecord>>('base-colors.v1.json'),
+      readPaletteDataFile<PaletteDataCollectionDocument<BaseColorRecord>>(
+        'base-colors.v1.json',
+      ),
       readPaletteDataFile<DictionariesDocument>('dictionaries.v1.json'),
     ]);
 
@@ -250,7 +293,11 @@ export class BaseColorsService {
       throw new ConflictException(`Base color ${payload.id} already exists.`);
     }
 
-    const nextItem = buildUpdatedBaseColorRecord(payload.id, payload, dictionaries);
+    const nextItem = buildUpdatedBaseColorRecord(
+      payload.id,
+      payload,
+      dictionaries,
+    );
     const nextDocument: PaletteDataCollectionDocument<BaseColorRecord> = {
       ...document,
       items: [...document.items, nextItem],
@@ -264,8 +311,12 @@ export class BaseColorsService {
 
   async getDeleteCheck(id: string): Promise<BaseColorDeleteCheckResult> {
     const [document, palettesDocument] = await Promise.all([
-      readPaletteDataFile<PaletteDataCollectionDocument<BaseColorRecord>>('base-colors.v1.json'),
-      readPaletteDataFile<PaletteDataCollectionDocument<PaletteRecord>>('palettes.v1.json'),
+      readPaletteDataFile<PaletteDataCollectionDocument<BaseColorRecord>>(
+        'base-colors.v1.json',
+      ),
+      readPaletteDataFile<PaletteDataCollectionDocument<PaletteRecord>>(
+        'palettes.v1.json',
+      ),
     ]);
 
     const target = findBaseColorRecordOrThrow(document, id);
@@ -278,7 +329,9 @@ export class BaseColorsService {
     payload: UpdateBaseColorDto,
   ): Promise<PaletteDataCollectionDocument<BaseColorRecord>> {
     const [document, dictionaries] = await Promise.all([
-      readPaletteDataFile<PaletteDataCollectionDocument<BaseColorRecord>>('base-colors.v1.json'),
+      readPaletteDataFile<PaletteDataCollectionDocument<BaseColorRecord>>(
+        'base-colors.v1.json',
+      ),
       readPaletteDataFile<DictionariesDocument>('dictionaries.v1.json'),
     ]);
 
@@ -301,8 +354,12 @@ export class BaseColorsService {
     payload: DeleteBaseColorDto,
   ): Promise<PaletteDataCollectionDocument<BaseColorRecord>> {
     const [document, palettesDocument] = await Promise.all([
-      readPaletteDataFile<PaletteDataCollectionDocument<BaseColorRecord>>('base-colors.v1.json'),
-      readPaletteDataFile<PaletteDataCollectionDocument<PaletteRecord>>('palettes.v1.json'),
+      readPaletteDataFile<PaletteDataCollectionDocument<BaseColorRecord>>(
+        'base-colors.v1.json',
+      ),
+      readPaletteDataFile<PaletteDataCollectionDocument<PaletteRecord>>(
+        'palettes.v1.json',
+      ),
     ]);
 
     const target = findBaseColorRecordOrThrow(document, id);
@@ -341,10 +398,12 @@ export class BaseColorsService {
     return toPublicCollection(nextDocument);
   }
 
-  async restoreItem(id: string): Promise<PaletteDataCollectionDocument<BaseColorRecord>> {
-    const document = await readPaletteDataFile<PaletteDataCollectionDocument<BaseColorRecord>>(
-      'base-colors.v1.json',
-    );
+  async restoreItem(
+    id: string,
+  ): Promise<PaletteDataCollectionDocument<BaseColorRecord>> {
+    const document = await readPaletteDataFile<
+      PaletteDataCollectionDocument<BaseColorRecord>
+    >('base-colors.v1.json');
     const target = findBaseColorRecordOrThrow(document, id);
 
     if (target.status !== 'deleted') {

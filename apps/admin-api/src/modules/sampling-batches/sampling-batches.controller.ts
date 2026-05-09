@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Put,
+} from '@nestjs/common';
 import type { GenerateSamplingCandidatesDto } from './dto/generate-sampling-candidates.dto';
 import type { UpsertSamplingBatchDto } from './dto/upsert-sampling-batch.dto';
 import type { UpdateSamplingBatchStatusDto } from './dto/update-sampling-batch-status.dto';
@@ -6,7 +15,9 @@ import { SamplingBatchesService } from './sampling-batches.service';
 
 @Controller('api/sampling-batches')
 export class SamplingBatchesController {
-  constructor(private readonly samplingBatchesService: SamplingBatchesService) {}
+  constructor(
+    private readonly samplingBatchesService: SamplingBatchesService,
+  ) {}
 
   @Get()
   getCollection() {
@@ -24,7 +35,10 @@ export class SamplingBatchesController {
   }
 
   @Post(':id/generate-candidates')
-  generateCandidates(@Param('id') id: string, @Body() payload: GenerateSamplingCandidatesDto = {}) {
+  generateCandidates(
+    @Param('id') id: string,
+    @Body() payload: GenerateSamplingCandidatesDto = {},
+  ) {
     return this.samplingBatchesService.generateCandidates(id, payload);
   }
 
@@ -34,7 +48,10 @@ export class SamplingBatchesController {
   }
 
   @Patch(':id/status')
-  updateStatus(@Param('id') id: string, @Body() payload: UpdateSamplingBatchStatusDto) {
+  updateStatus(
+    @Param('id') id: string,
+    @Body() payload: UpdateSamplingBatchStatusDto,
+  ) {
     return this.samplingBatchesService.updateStatus(id, payload.status);
   }
 

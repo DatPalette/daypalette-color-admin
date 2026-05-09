@@ -1,7 +1,5 @@
-import { useEffect, useRef, useState, type ReactElement, type ReactNode } from 'react'
+import { useState, type KeyboardEvent, type ReactElement, type ReactNode } from 'react'
 import {
-  ArrowRight,
-  BookOpenText,
   CheckCheck,
   Layers3,
   Plus,
@@ -14,11 +12,13 @@ import {
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { DetailDrawer } from '@/components/workbench/DetailDrawer'
 import { WorkbenchPageHeader } from '@/components/workbench/WorkbenchPageHeader'
 import { WorkbenchModal } from '@/components/workbench/WorkbenchModal'
 import {
   getSamplingChannelTypeLabel,
   getSamplingDigestionStatusLabel,
+  getSamplingOccasionLabel,
   samplingBatchStatusOptions,
   samplingChannelTypeOptions,
   samplingDigestionStatusOptions,
@@ -44,39 +44,6 @@ const labelClassName = 'label-caps text-muted-foreground'
 
 const fieldShellClassName =
   'space-y-3 rounded-[20px] border border-[var(--dp-border-hairline)] bg-[rgba(247,243,242,0.88)] p-4'
-
-const sourcePriorityItems = [
-  {
-    value: 'brand-site',
-    label: '品牌官网',
-    priority: '优先级 1',
-    hint: '先找新品专题、lookbook、系列页，最容易看出完整配色关系。',
-  },
-  {
-    value: 'brand-flagship-store',
-    label: '官方旗舰店',
-    priority: '优先级 2',
-    hint: '找官方商品页，适合补平台、品牌和可回溯链接。',
-  },
-  {
-    value: 'multi-brand-platform',
-    label: '多品牌平台',
-    priority: '优先级 3',
-    hint: '当官网样本不够时，再去多品牌平台补不同品牌的同类路线。',
-  },
-  {
-    value: 'marketplace-brand-store',
-    label: '平台品牌店',
-    priority: '优先级 4',
-    hint: '最后兜底，用品牌店公开页补样本，不要先从泛平台截图开始。',
-  },
-] as const
-
-const helpWorkflowSteps = [
-  '先在左侧选一条采样记录，不要一上来就改整批设置。',
-  '优先补渠道类型、平台、品牌、来源链接、观察日期、综合色摘要。',
-  '填完就先保存；风格信号、市场信号、候选 palette 这些都属于后一步。',
-] as const
 
 const semanticPreviewColorPresets = [
   {
@@ -221,7 +188,7 @@ function SamplingSection({
 }: {
   actions?: ReactNode
   children: ReactNode
-  eyebrow: string
+  eyebrow?: string
   hint?: string
   title: string
   tone?: 'hero' | 'paper' | 'soft'
@@ -239,9 +206,9 @@ function SamplingSection({
       <CardContent className="p-0">
         <div className="border-b border-[var(--dp-border-subtle)] px-6 py-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="space-y-2">
-              <p className="label-caps text-muted-foreground">{eyebrow}</p>
-              <div className="space-y-1">
+            <div className={cn(eyebrow || hint ? 'space-y-2' : 'space-y-0')}>
+              {eyebrow ? <p className="label-caps text-muted-foreground">{eyebrow}</p> : null}
+              <div className={cn(hint ? 'space-y-1' : 'space-y-0')}>
                 <h2 className="display-font text-[clamp(1.5rem,2vw,2.4rem)] leading-none tracking-[-0.04em] text-foreground">
                   {title}
                 </h2>
@@ -378,7 +345,7 @@ function SamplingEvidenceTimeline({ record }: { record: SamplingRecordDto }): Re
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className={labelClassName}>证据时间线</p>
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">按审阅顺序把当前记录的证据压成一列，方便你快速判断这条来源值不值得留下。</p>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">按审阅顺序把当前记录的证据压成一列，方便快速判断这条来源值不值得留下。</p>
         </div>
         <SamplingBadge tone="soft">{record.brandName || '待补品牌'}</SamplingBadge>
       </div>
@@ -392,7 +359,7 @@ function SamplingEvidenceTimeline({ record }: { record: SamplingRecordDto }): Re
             </div>
             <div className="rounded-[18px] border border-[var(--dp-border-hairline)] bg-[var(--dp-surface-soft)] px-4 py-3">
               <p className="label-caps text-muted-foreground">{item.title}</p>
-              <p className="mt-1 text-sm leading-6 text-foreground break-all">{item.detail}</p>
+              <p className="mt-1 break-all text-sm leading-6 text-foreground">{item.detail}</p>
             </div>
           </div>
         ))}
@@ -575,81 +542,6 @@ function SamplingRunConsole({
   )
 }
 
-function SamplingHelpModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }): ReactElement {
-  return (
-    <WorkbenchModal isOpen={isOpen} onClose={onClose} panelClassName="max-w-[720px] rounded-[24px]">
-      <ModalHeader
-        description="把页面说明收进弹窗里，主界面只保留你进入后马上要做的动作。"
-        onClose={onClose}
-        title="采样助手怎么用"
-      />
-
-      <div className="space-y-6 px-6 py-6">
-        <div className="grid gap-4 md:grid-cols-3">
-          {helpWorkflowSteps.map((step, index) => (
-            <div key={step} className="rounded-[18px] border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] p-4">
-              <p className="label-caps text-muted-foreground">步骤 0{index + 1}</p>
-              <p className="mt-3 text-sm leading-6 text-foreground">{step}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-[18px] border border-[var(--dp-border-subtle)] bg-white p-5">
-            <div className="flex items-start gap-3">
-              <div className="flex size-10 items-center justify-center rounded-full bg-[var(--dp-fill-inverse)] text-[var(--dp-text-on-inverse)]">
-                <BookOpenText className="size-5" />
-              </div>
-              <div className="space-y-2">
-                <p className="label-caps text-muted-foreground">当前不需要</p>
-                <p className="text-base font-semibold text-foreground">不需要大模型 API key</p>
-                <p className="text-sm leading-6 text-muted-foreground">
-                  自动生成候选来源本身不需要模型密钥；只有你希望系统继续做 AI 色路深化时，才需要配置 `DAYPALETTE_LLM_API_KEY` 和 `DAYPALETTE_LLM_MODEL`。
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-[18px] border border-[var(--dp-border-subtle)] bg-white p-5">
-            <p className="label-caps text-muted-foreground">默认先填</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <SamplingBadge tone="soft">渠道类型</SamplingBadge>
-              <SamplingBadge tone="soft">平台</SamplingBadge>
-              <SamplingBadge tone="soft">品牌</SamplingBadge>
-              <SamplingBadge tone="soft">品类</SamplingBadge>
-              <SamplingBadge tone="soft">来源链接</SamplingBadge>
-              <SamplingBadge tone="soft">观察日期</SamplingBadge>
-              <SamplingBadge tone="soft">综合色摘要</SamplingBadge>
-            </div>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              其他字段都已经收进“高级字段”，可以后补，不用第一次就全填。
-            </p>
-          </div>
-        </div>
-
-        <div className="rounded-[18px] border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] p-5">
-          <p className="label-caps text-muted-foreground">优先去哪找</p>
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
-            {sourcePriorityItems.map((item) => (
-              <div key={item.value} className="rounded-[16px] border border-[var(--dp-border-hairline)] bg-white p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-foreground">{item.label}</p>
-                  <SamplingBadge tone="soft">{item.priority}</SamplingBadge>
-                </div>
-                <p className="mt-3 text-sm leading-6 text-muted-foreground">{item.hint}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-end border-t border-[var(--dp-border-subtle)] px-6 py-5">
-        <Button onClick={onClose} variant="primary">知道了</Button>
-      </div>
-    </WorkbenchModal>
-  )
-}
-
 function SamplingBatchSettingsModal({
   draft,
   isDeleting,
@@ -771,7 +663,93 @@ function SamplingBatchSettingsModal({
   )
 }
 
+function SamplingGenerationConfirmModal({
+  currentCount,
+  generationTargetCount,
+  isGenerating,
+  isOpen,
+  occasionLabel,
+  onClose,
+  onConfirm,
+  remainingVisibleUniqueCapacity,
+  visibleUniqueCapacity,
+  visibleUniqueCount,
+}: {
+  currentCount: number
+  generationTargetCount: number
+  isGenerating: boolean
+  isOpen: boolean
+  occasionLabel: string
+  onClose: () => void
+  onConfirm: () => Promise<void>
+  remainingVisibleUniqueCapacity: number
+  visibleUniqueCapacity: number
+  visibleUniqueCount: number
+}): ReactElement {
+  const isCapacityInsufficient = visibleUniqueCapacity < generationTargetCount
+
+  return (
+    <WorkbenchModal isOpen={isOpen} onClose={onClose} panelClassName="max-w-[560px] rounded-[24px]">
+      <ModalHeader
+        description="这个操作不是增量补齐，而是按目标数量重新生成整批候选。确认后会直接替换当前结果。"
+        onClose={onClose}
+        title="确认覆盖当前候选"
+      />
+
+      <div className="space-y-4 px-6 py-6 text-sm leading-6 text-foreground">
+        <p>
+          当前批次里已有 <span className="font-semibold">{currentCount}</span> 条{occasionLabel}候选。
+        </p>
+        <p>
+          如果继续，会清空当前候选结果，并重新生成 <span className="font-semibold">{generationTargetCount}</span> 条{occasionLabel}候选。
+        </p>
+        <div className="rounded-[18px] border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] p-4 text-sm leading-6 text-muted-foreground">
+          当前可视唯一 <span className="font-semibold text-foreground">{visibleUniqueCount}</span> 组，
+          当前场景最多支持 <span className="font-semibold text-foreground">{visibleUniqueCapacity}</span> 组，
+          剩余可扩 <span className="font-semibold text-foreground">{remainingVisibleUniqueCapacity}</span> 组。
+        </div>
+        {isCapacityInsufficient ? (
+          <p className="text-sm text-red-600">
+            当前场景容量不足以支撑 {generationTargetCount} 条无重复重建。需要先扩充该场景主题池，或者降低目标数量。
+          </p>
+        ) : null}
+        <p className="text-muted-foreground">如果你只是想保留现有结果继续补充，不应该使用这个入口。</p>
+      </div>
+
+      <div className="flex items-center justify-end gap-3 border-t border-[var(--dp-border-subtle)] px-6 py-5">
+        <Button disabled={isGenerating} onClick={onClose} variant="ghost">取消</Button>
+        <Button disabled={isGenerating || isCapacityInsufficient} onClick={() => void onConfirm()} variant="primary">
+          <Sparkles className="size-4" />
+          {isGenerating ? '生成中' : isCapacityInsufficient ? '当前容量不足' : '确认覆盖并重建'}
+        </Button>
+      </div>
+    </WorkbenchModal>
+  )
+}
+
 type SamplingOverviewFilter = 'all' | 'complete' | 'pending' | 'rejected' | 'reviewed'
+
+interface SamplingBatchUiState {
+  batchId: string | null
+  isDuplicateCheckEnabled: boolean
+  isGenerateConfirmOpen: boolean
+  isReviewDrawerOpen: boolean
+  overviewFilter: SamplingOverviewFilter
+}
+
+function buildSamplingBatchUiState(batchId: string | null): SamplingBatchUiState {
+  return {
+    batchId,
+    isDuplicateCheckEnabled: false,
+    isGenerateConfirmOpen: false,
+    isReviewDrawerOpen: false,
+    overviewFilter: 'all',
+  }
+}
+
+interface SamplingPaletteDuplicateInfo {
+  duplicateOfSamplingId: string
+}
 
 interface SamplingPaletteCluster {
   brandCount: number
@@ -843,6 +821,46 @@ function buildSamplingPaletteClusters(records: SamplingRecordDto[]): SamplingPal
   })
 }
 
+function buildSamplingPaletteDuplicateSignature(cluster: SamplingPaletteCluster): string | null {
+  const tokens = buildSamplingPreviewSwatches(cluster.representative)
+    .map((swatch) => swatch.hex.trim().toLowerCase())
+    .filter(Boolean)
+
+  if (tokens.length === 0) {
+    return null
+  }
+
+  return tokens.join('|')
+}
+
+function buildSamplingPaletteDuplicateMap(
+  clusters: SamplingPaletteCluster[],
+): Map<string, SamplingPaletteDuplicateInfo> {
+  const firstSamplingIdBySignature = new Map<string, string>()
+  const duplicateMap = new Map<string, SamplingPaletteDuplicateInfo>()
+
+  for (const cluster of clusters) {
+    const signature = buildSamplingPaletteDuplicateSignature(cluster)
+
+    if (!signature) {
+      continue
+    }
+
+    const firstSamplingId = firstSamplingIdBySignature.get(signature)
+
+    if (firstSamplingId) {
+      duplicateMap.set(cluster.id, {
+        duplicateOfSamplingId: firstSamplingId,
+      })
+      continue
+    }
+
+    firstSamplingIdBySignature.set(signature, cluster.representative.samplingId)
+  }
+
+  return duplicateMap
+}
+
 function isReviewedSamplingRecord(record: SamplingRecordDto): boolean {
   return record.digestionStatus === 'clustered' || record.digestionStatus === 'shortlisted' || record.digestionStatus === 'published'
 }
@@ -907,74 +925,115 @@ function SamplingBatchStripCard({
   onSelect: () => void
 }): ReactElement {
   return (
-    <button className="block min-w-[250px] text-left" onClick={onSelect} type="button">
+    <button className="block min-w-[210px] text-left" onClick={onSelect} type="button">
       <div
         className={cn(
-          'rounded-[20px] border bg-white px-4 py-4 transition-all duration-300',
+          'rounded-[18px] border bg-white px-3.5 py-3 transition-all duration-300',
           isSelected
             ? 'border-[var(--dp-fill-inverse)] shadow-[0_18px_34px_-28px_rgba(26,26,26,0.32)]'
             : 'border-[var(--dp-border-subtle)] hover:-translate-y-0.5 hover:shadow-[0_16px_30px_-28px_rgba(26,26,26,0.28)]',
         )}
       >
-        <div className="flex items-start justify-between gap-3">
-          <div className="space-y-1">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 space-y-1">
             <p className="label-caps text-muted-foreground">{card.id}</p>
-            <h3 className="text-base font-semibold text-foreground">{card.titleZh}</h3>
-            <p className="text-xs text-muted-foreground">{card.occasionLabel}</p>
+            <h3 className="line-clamp-1 text-sm font-semibold text-foreground">{card.titleZh}</h3>
           </div>
           <SamplingBadge tone={isSelected ? 'dark' : 'soft'}>{card.statusLabel}</SamplingBadge>
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
-          <span>{card.recordCountLabel}</span>
-          <span>·</span>
-          <span>{card.completedLabel}</span>
-        </div>
+        <p className="mt-2 text-[11px] text-muted-foreground">{card.recordCountLabel} · {card.completedLabel}</p>
       </div>
     </button>
   )
 }
 
+function getSamplingClusterStatus(cluster: SamplingPaletteCluster): {
+  label: string
+  tone: SamplingBadgeProps['tone']
+} {
+  if (cluster.rejectedCount === cluster.sourceCount) {
+    return {
+      label: '已驳回',
+      tone: 'dark',
+    }
+  }
+
+  if (cluster.pendingCount > 0) {
+    return {
+      label: '待审',
+      tone: 'default',
+    }
+  }
+
+  return {
+    label: '已通过',
+    tone: 'ok',
+  }
+}
+
+function isSamplingRunActive(run: SamplingRunDto | null): boolean {
+  return Boolean(run && ['queued', 'running', 'needsManualInput'].includes(run.status))
+}
+
 function SamplingPaletteWallCard({
   cluster,
+  duplicateInfo,
+  isDuplicateCheckEnabled,
   isSelected,
+  onApprove,
+  onReject,
   onSelect,
 }: {
   cluster: SamplingPaletteCluster
+  duplicateInfo?: SamplingPaletteDuplicateInfo
+  isDuplicateCheckEnabled: boolean
   isSelected: boolean
+  onApprove: () => Promise<void>
+  onReject: () => Promise<void>
   onSelect: () => void
 }): ReactElement {
   const record = cluster.representative
+  const isDuplicate = Boolean(isDuplicateCheckEnabled && duplicateInfo)
+  const reviewStatus = getSamplingClusterStatus(cluster)
   const swatches = buildSamplingPreviewSwatches(record)
-  const summaryTokens = record.colorSummary.filter((item) => item.trim()).slice(0, 3)
+
+  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      onSelect()
+    }
+  }
 
   return (
     <div
       className={cn(
         'rounded-[24px] border bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,243,242,0.88))] p-5 shadow-[0_18px_36px_-28px_rgba(26,26,26,0.28)] transition-all duration-300',
+        isDuplicate && 'border-amber-300 bg-[linear-gradient(180deg,rgba(255,251,235,0.98),rgba(247,243,242,0.9))]',
         isSelected
           ? 'border-[var(--dp-fill-inverse)] shadow-[0_24px_44px_-28px_rgba(26,26,26,0.36)]'
           : 'border-[var(--dp-border-subtle)] hover:-translate-y-0.5 hover:shadow-[0_22px_40px_-28px_rgba(26,26,26,0.32)]',
       )}
+      onClick={onSelect}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-2">
           <p className="label-caps text-muted-foreground">{cluster.themeLabels.slice(0, 2).join(' / ')}</p>
-          <div className="space-y-1">
-            <h3 className="text-lg font-semibold text-foreground">{cluster.brandNames[0] || '待补品牌'}</h3>
-            <p className="text-sm leading-6 text-muted-foreground">
-              {record.itemCategory || '待补品类'} / {cluster.sourceCount} 条来源 / {cluster.brandCount} 个品牌
-            </p>
-          </div>
+          <SamplingBadge tone="soft">ID · {record.samplingId}</SamplingBadge>
+          <h3 className="text-lg font-semibold text-foreground">{cluster.brandNames[0] || '待补品牌'}</h3>
         </div>
 
-        <div className="flex flex-wrap justify-end gap-2">
-          <SamplingBadge tone={cluster.completeCount === cluster.sourceCount ? 'ok' : 'soft'}>
-            {cluster.completeCount === cluster.sourceCount ? '来源完整' : `${cluster.completeCount}/${cluster.sourceCount} 完整`}
-          </SamplingBadge>
-          <SamplingBadge tone={cluster.pendingCount > 0 ? 'default' : 'soft'}>
-            {cluster.pendingCount > 0 ? `${cluster.pendingCount} 条待审` : '已整理'}
-          </SamplingBadge>
+        <div className="flex flex-col items-end gap-2">
+          <SamplingBadge tone={reviewStatus.tone}>{reviewStatus.label}</SamplingBadge>
+          {isDuplicate && duplicateInfo ? (
+            <>
+              <SamplingBadge tone="dark">标记重复</SamplingBadge>
+              <SamplingBadge tone="soft">重复于 {duplicateInfo.duplicateOfSamplingId}</SamplingBadge>
+            </>
+          ) : null}
         </div>
       </div>
 
@@ -997,27 +1056,28 @@ function SamplingPaletteWallCard({
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        {(summaryTokens.length > 0 ? summaryTokens : ['待补综合色']).map((item) => (
-          <SamplingBadge key={`${record.samplingId}-${item}`} tone="soft">
-            {item}
-          </SamplingBadge>
-        ))}
-      </div>
-
-      <div className="mt-4 rounded-[18px] border border-[var(--dp-border-hairline)] bg-white/78 p-4">
-        <p className="label-caps text-muted-foreground">关键来源</p>
-        <p className="mt-2 text-sm leading-6 text-foreground">{record.platform || '待补平台'}</p>
-        <p className="mt-1 text-xs leading-5 text-muted-foreground line-clamp-2">
-          {cluster.sourceCount > 1
-            ? `这个色盘簇已合并 ${cluster.sourceCount} 条相近来源，优先看 ${cluster.brandNames.slice(0, 3).join(' / ')}。`
-            : record.notes || '还没有补充采样备注。'}
-        </p>
-      </div>
-
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Button onClick={onSelect} size="sm" variant={isSelected ? 'primary' : 'ghost'}>
-          <ArrowRight className="size-4" />
-          查看审阅
+        <Button
+          disabled={cluster.sourceCount === 0}
+          onClick={(event) => {
+            event.stopPropagation()
+            void onApprove()
+          }}
+          size="sm"
+          variant={isSelected ? 'primary' : 'ghost'}
+        >
+          <CheckCheck className="size-4" />
+          通过
+        </Button>
+        <Button
+          disabled={cluster.sourceCount === 0}
+          onClick={(event) => {
+            event.stopPropagation()
+            void onReject()
+          }}
+          size="sm"
+          variant="ghost"
+        >
+          驳回
         </Button>
       </div>
     </div>
@@ -1025,11 +1085,9 @@ function SamplingPaletteWallCard({
 }
 
 export function SamplingBatchesPage(): ReactElement {
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false)
+  const [advancedRecordId, setAdvancedRecordId] = useState<string | null>(null)
+  const [batchUiStateDraft, setBatchUiStateDraft] = useState<SamplingBatchUiState>(() => buildSamplingBatchUiState(null))
   const [isBatchSettingsOpen, setIsBatchSettingsOpen] = useState(false)
-  const [isHelpOpen, setIsHelpOpen] = useState(false)
-  const [overviewFilter, setOverviewFilter] = useState<SamplingOverviewFilter>('all')
-  const recordEditorRef = useRef<HTMLDivElement | null>(null)
   const {
     draft,
     errorMessage,
@@ -1047,14 +1105,13 @@ export function SamplingBatchesPage(): ReactElement {
     onDraftRecordFieldChange,
     onDraftSourceWhitelistToggle,
     onDraftThemeKeysChange,
-    onGenerateCandidates,
     onRegenerateBatchToTarget,
     onRefresh,
     onReviewRecord,
+    onReviewRecords,
     onSave,
     onSelectBatch,
     onSelectRecord,
-    onStartSampling,
     saveMessage,
     samplingRun,
     samplingRunEvents,
@@ -1064,51 +1121,100 @@ export function SamplingBatchesPage(): ReactElement {
     validationMessages,
   } = useSamplingBatchesPageViewModel()
 
-  useEffect(() => {
-    setIsAdvancedOpen(false)
-  }, [selectedRecordId])
+  const batchUiState = batchUiStateDraft.batchId === selectedBatchId
+    ? batchUiStateDraft
+    : buildSamplingBatchUiState(selectedBatchId)
+  const isAdvancedOpen = Boolean(selectedRecordId && advancedRecordId === selectedRecordId)
+  const isDuplicateCheckEnabled = batchUiState.isDuplicateCheckEnabled
+  const isGenerateConfirmOpen = batchUiState.isGenerateConfirmOpen
+  const isReviewDrawerOpen = batchUiState.isReviewDrawerOpen
+  const overviewFilter = batchUiState.overviewFilter
 
-  useEffect(() => {
-    setOverviewFilter('all')
-  }, [selectedBatchId])
-  const nextSamplingRecordId = draft
-    ? draft.items.find((item) => item.digestionStatus === 'sampled')?.samplingId ?? draft.items[0]?.samplingId ?? null
-    : null
-  const startSamplingLabel = selectedRecordId && selectedRecordId === nextSamplingRecordId ? '继续审阅当前候选' : '开始审阅'
+  function updateBatchUiState(updater: (current: SamplingBatchUiState) => SamplingBatchUiState): void {
+    setBatchUiStateDraft((current) =>
+      updater(current.batchId === selectedBatchId ? current : buildSamplingBatchUiState(selectedBatchId)),
+    )
+  }
+
   const allClusters = buildSamplingPaletteClusters(draft?.items ?? [])
   const overviewClusters = allClusters.filter((cluster) => matchesSamplingOverviewFilter(cluster, overviewFilter))
+  const duplicateInfoByClusterId = buildSamplingPaletteDuplicateMap(overviewClusters)
   const pendingClusters = allClusters.filter((cluster) => cluster.pendingCount > 0)
   const reviewedClusters = allClusters.filter((cluster) => cluster.reviewedCount > 0 && cluster.pendingCount === 0)
   const rejectedClusters = allClusters.filter((cluster) => cluster.rejectedCount === cluster.sourceCount)
   const completeClusters = allClusters.filter((cluster) => cluster.completeCount === cluster.sourceCount)
-  const selectedCluster = allClusters.find((cluster) => cluster.records.some((record) => record.samplingId === selectedRecordId)) ?? allClusters[0] ?? null
+  const selectedCluster = allClusters.find((cluster) => cluster.records.some((record) => record.samplingId === selectedRecordId)) ?? null
+  const generationTargetCount = 40
+  const generationOccasionLabel = draft ? getSamplingOccasionLabel(draft.batch.occasionId) : '场景'
+  const visibleUniqueCount = draft?.summary.visibleUniqueCount ?? 0
+  const visibleUniqueCapacity = draft?.summary.visibleUniqueCapacity ?? 0
+  const remainingVisibleUniqueCapacity = draft?.summary.remainingVisibleUniqueCapacity ?? 0
+  const visibleDuplicateCount = draft ? Math.max(draft.summary.recordCount - visibleUniqueCount, 0) : 0
+  const visibleUniqueRate = draft && draft.summary.recordCount > 0
+    ? Math.round((visibleUniqueCount / draft.summary.recordCount) * 100)
+    : 0
+  const generationActionLabel = draft
+    ? `生成 ${generationTargetCount} 条${generationOccasionLabel}候选`
+    : `生成 ${generationTargetCount} 条场景候选`
+  const showSamplingRunOnly = isGeneratingCandidates || isSamplingRunActive(samplingRun)
 
-  function focusRecordWorkspace(samplingId: string): void {
+  function handleSelectRecord(samplingId: string): void {
     onSelectRecord(samplingId)
-    requestAnimationFrame(() => {
-      recordEditorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    })
+    setAdvancedRecordId(null)
   }
 
-  async function handleGenerateCandidates(): Promise<void> {
-    await onGenerateCandidates()
-    requestAnimationFrame(() => {
-      recordEditorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    })
+  function handleSelectBatch(batchId: string): void {
+    onSelectBatch(batchId)
+    setAdvancedRecordId(null)
   }
 
-  async function handleRegenerateWorkdayBatch(): Promise<void> {
-    await onRegenerateBatchToTarget(40)
-    requestAnimationFrame(() => {
-      recordEditorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    })
+  function handleCloseGenerateConfirm(): void {
+    updateBatchUiState((current) => ({
+      ...current,
+      isGenerateConfirmOpen: false,
+    }))
   }
 
-  function handleStartSampling(): void {
-    onStartSampling()
-    requestAnimationFrame(() => {
-      recordEditorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    })
+  function handleCloseReviewDrawer(): void {
+    updateBatchUiState((current) => ({
+      ...current,
+      isReviewDrawerOpen: false,
+    }))
+  }
+
+  function openReviewDrawer(samplingId: string): void {
+    handleSelectRecord(samplingId)
+    updateBatchUiState((current) => ({
+      ...current,
+      isReviewDrawerOpen: true,
+    }))
+  }
+
+  function handleOpenGenerateConfirm(): void {
+    if (!draft || isGeneratingCandidates) {
+      return
+    }
+
+    updateBatchUiState((current) => ({
+      ...current,
+      isGenerateConfirmOpen: true,
+    }))
+  }
+
+  async function handleConfirmGenerateSceneCandidates(): Promise<void> {
+    handleCloseGenerateConfirm()
+    await onRegenerateBatchToTarget(generationTargetCount)
+  }
+
+  async function handleReviewCluster(
+    cluster: SamplingPaletteCluster,
+    status: SamplingRecordDto['digestionStatus'],
+  ): Promise<void> {
+    await onReviewRecords(
+      cluster.records.map((record) => record.samplingId),
+      status,
+    )
+    handleCloseReviewDrawer()
   }
 
   return (
@@ -1120,23 +1226,9 @@ export function SamplingBatchesPage(): ReactElement {
               <RefreshCcw className="size-4" />
               刷新
             </Button>
-            <Button disabled={!draft || isGeneratingCandidates} onClick={() => void handleGenerateCandidates()} size="sm" variant="primary">
+            <Button disabled={!draft || isGeneratingCandidates} onClick={handleOpenGenerateConfirm} size="sm" variant="primary">
               <Sparkles className="size-4" />
-              {isGeneratingCandidates ? '生成中' : '自动生成女装候选'}
-            </Button>
-            {draft?.batch.occasionId === 'workday' ? (
-              <Button disabled={!draft || isGeneratingCandidates} onClick={() => void handleRegenerateWorkdayBatch()} size="sm" variant="outline">
-                <RefreshCcw className="size-4" />
-                {isGeneratingCandidates ? '重建中' : '重建 40 条工作日候选'}
-              </Button>
-            ) : null}
-            <Button disabled={!draft || !nextSamplingRecordId} onClick={handleStartSampling} size="sm" variant="ghost">
-              <ArrowRight className="size-4" />
-              {startSamplingLabel}
-            </Button>
-            <Button onClick={() => setIsHelpOpen(true)} size="sm" variant="ghost">
-              <BookOpenText className="size-4" />
-              使用说明
+              {isGeneratingCandidates ? '生成中' : generationActionLabel}
             </Button>
             <Button disabled={!draft} onClick={() => setIsBatchSettingsOpen(true)} size="sm" variant="ghost">
               <Layers3 className="size-4" />
@@ -1159,19 +1251,33 @@ export function SamplingBatchesPage(): ReactElement {
         updatedAtLabel={model?.updatedAtLabel ?? '等待返回'}
       />
 
-      <SamplingHelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
       {draft ? (
-        <SamplingBatchSettingsModal
-          draft={draft}
-          isDeleting={isDeleting}
-          isOpen={isBatchSettingsOpen}
-          onClose={() => setIsBatchSettingsOpen(false)}
-          onDeleteBatch={onDeleteBatch}
-          onDraftBatchFieldChange={onDraftBatchFieldChange}
-          onDraftBatchStatusChange={onDraftBatchStatusChange}
-          onDraftSourceWhitelistToggle={onDraftSourceWhitelistToggle}
-          onDraftThemeKeysChange={onDraftThemeKeysChange}
-        />
+        <>
+          <SamplingBatchSettingsModal
+            draft={draft}
+            isDeleting={isDeleting}
+            isOpen={isBatchSettingsOpen}
+            onClose={() => setIsBatchSettingsOpen(false)}
+            onDeleteBatch={onDeleteBatch}
+            onDraftBatchFieldChange={onDraftBatchFieldChange}
+            onDraftBatchStatusChange={onDraftBatchStatusChange}
+            onDraftSourceWhitelistToggle={onDraftSourceWhitelistToggle}
+            onDraftThemeKeysChange={onDraftThemeKeysChange}
+          />
+
+          <SamplingGenerationConfirmModal
+            currentCount={draft.items.length}
+            generationTargetCount={generationTargetCount}
+            isGenerating={isGeneratingCandidates}
+            isOpen={isGenerateConfirmOpen}
+            occasionLabel={generationOccasionLabel}
+            onClose={handleCloseGenerateConfirm}
+            onConfirm={handleConfirmGenerateSceneCandidates}
+            remainingVisibleUniqueCapacity={remainingVisibleUniqueCapacity}
+            visibleUniqueCapacity={visibleUniqueCapacity}
+            visibleUniqueCount={visibleUniqueCount}
+          />
+        </>
       ) : null}
 
       {errorMessage ? (
@@ -1186,9 +1292,11 @@ export function SamplingBatchesPage(): ReactElement {
         </Card>
       ) : null}
 
-      <SamplingRunConsole contextBatchId={selectedBatchId} events={samplingRunEvents} run={samplingRun} />
+      {showSamplingRunOnly ? (
+        <SamplingRunConsole contextBatchId={selectedBatchId} events={samplingRunEvents} run={samplingRun} />
+      ) : null}
 
-      {validationMessages.length > 0 ? (
+      {!showSamplingRunOnly && validationMessages.length > 0 ? (
         <Card className="border-[var(--dp-border-subtle)] bg-white/78 text-foreground">
           <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4 text-sm leading-6">
             <p>当前批次还有 {validationMessages.length} 条待补项，先补当前这条的必要字段即可。</p>
@@ -1197,208 +1305,248 @@ export function SamplingBatchesPage(): ReactElement {
         </Card>
       ) : null}
 
-      <div className="space-y-6">
-        <SamplingSection
-          eyebrow={model ? `${model.cards.length} 个批次` : '批次切换'}
-          hint="批次切换压缩成轻量横条，主视觉让给色盘网格。这里不再用大面积统计卡占空间。"
-          title="批次切换"
-          tone="soft"
-        >
-          <div className="flex gap-3 overflow-x-auto pb-1">
-            {(model?.cards ?? []).map((card) => (
-              <SamplingBatchStripCard
-                key={card.id}
-                card={card}
-                isSelected={selectedBatchId === card.id}
-                onSelect={() => onSelectBatch(card.id)}
-              />
-            ))}
+      {!showSamplingRunOnly ? (
+        <>
+          <div className="space-y-6">
+            <SamplingSection title="批次" tone="soft">
+              <div className="flex gap-3 overflow-x-auto pb-1">
+                {(model?.cards ?? []).map((card) => (
+                  <SamplingBatchStripCard
+                    key={card.id}
+                    card={card}
+                    isSelected={selectedBatchId === card.id}
+                    onSelect={() => handleSelectBatch(card.id)}
+                  />
+                ))}
 
-            {isLoading && !model
-              ? Array.from({ length: 2 }).map((_, index) => (
-                  <Card key={index} className="min-h-[120px] min-w-[240px] animate-pulse bg-white/70" />
-                ))
-              : null}
-          </div>
-        </SamplingSection>
+                {isLoading && !model
+                  ? Array.from({ length: 2 }).map((_, index) => (
+                      <Card key={index} className="min-h-[96px] min-w-[210px] animate-pulse bg-white/70" />
+                    ))
+                  : null}
+              </div>
+            </SamplingSection>
 
-        <div className="space-y-6">
-          {draft && model?.detail ? (
-            <>
-              <div className="grid gap-6 2xl:grid-cols-[minmax(0,1fr)_420px]">
-                <div className="space-y-6">
-                  <SamplingSection
-                    actions={
-                      <div className="flex flex-wrap gap-2">
-                        <Button disabled={isGeneratingCandidates || !draft} onClick={() => void handleGenerateCandidates()} variant="primary">
-                          <Sparkles className="size-4" />
-                          {isGeneratingCandidates ? '生成中' : '刷新当前批次候选'}
-                        </Button>
-                        {draft.batch.occasionId === 'workday' ? (
-                          <Button disabled={isGeneratingCandidates} onClick={() => void handleRegenerateWorkdayBatch()} variant="outline">
-                            <RefreshCcw className="size-4" />
-                            {isGeneratingCandidates ? '重建中' : '完全重建 40 条'}
-                          </Button>
-                        ) : null}
-                        <Button disabled={!nextSamplingRecordId} onClick={handleStartSampling} variant="ghost">
-                          <ArrowRight className="size-4" />
-                          {startSamplingLabel}
-                        </Button>
-                      </div>
-                    }
-                    eyebrow="色盘网格"
-                    hint="进入页面后先看到的是色盘簇，不是离散记录。相同或近似色盘会先被并到同一张卡里，审阅时先判断色路，再下钻到来源证据。"
-                    title="色盘总览"
-                    tone="soft"
-                  >
-                    <div className="space-y-5">
-                      <div className="grid gap-3 xl:grid-cols-5">
-                        <MetricTile label="色盘簇" value={`${allClusters.length} 组`} />
-                        <MetricTile label="待审色盘" value={`${pendingClusters.length} 组`} />
-                        <MetricTile label="已整理" value={`${reviewedClusters.length} 组`} />
-                        <MetricTile label="已驳回" value={`${rejectedClusters.length} 组`} />
-                        <MetricTile label="来源完整" value={`${completeClusters.length} 组`} />
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-2">
-                        <SamplingOverviewFilterButton count={allClusters.length} isActive={overviewFilter === 'all'} label="全部" onClick={() => setOverviewFilter('all')} />
-                        <SamplingOverviewFilterButton count={pendingClusters.length} isActive={overviewFilter === 'pending'} label="待审" onClick={() => setOverviewFilter('pending')} />
-                        <SamplingOverviewFilterButton count={reviewedClusters.length} isActive={overviewFilter === 'reviewed'} label="已整理" onClick={() => setOverviewFilter('reviewed')} />
-                        <SamplingOverviewFilterButton count={rejectedClusters.length} isActive={overviewFilter === 'rejected'} label="已驳回" onClick={() => setOverviewFilter('rejected')} />
-                        <SamplingOverviewFilterButton count={completeClusters.length} isActive={overviewFilter === 'complete'} label="来源完整" onClick={() => setOverviewFilter('complete')} />
-                      </div>
-
-                      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
-                        {overviewClusters.map((cluster) => (
-                          <SamplingPaletteWallCard
-                            key={cluster.id}
-                            cluster={cluster}
-                            isSelected={Boolean(selectedCluster && selectedCluster.id === cluster.id)}
-                            onSelect={() => focusRecordWorkspace(cluster.representative.samplingId)}
-                          />
-                        ))}
-                      </div>
-
-                      {overviewClusters.length === 0 ? (
-                        <div className="rounded-[20px] border border-dashed border-[var(--dp-border-subtle)] bg-white/72 px-5 py-10 text-sm leading-7 text-muted-foreground">
-                          当前筛选下没有可展示的色盘，试着切换到其他筛选条件。
-                        </div>
-                      ) : null}
-                    </div>
-                  </SamplingSection>
-                </div>
-
-                <div ref={recordEditorRef} className="space-y-6 2xl:sticky 2xl:top-6 2xl:self-start">
-                  <SamplingSection
-                    actions={
-                      <Button onClick={onAddRecord} size="sm" variant="ghost">
-                        <Plus className="size-4" />
-                        补充候选
+            <div className="space-y-6">
+              {draft && model?.detail ? (
+                <SamplingSection
+                  actions={
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        disabled={!draft || isGeneratingCandidates}
+                        onClick={handleOpenGenerateConfirm}
+                        variant="primary"
+                      >
+                        <Sparkles className="size-4" />
+                        {isGeneratingCandidates ? '生成中' : generationActionLabel}
                       </Button>
-                    }
-                    eyebrow="审阅侧栏"
-                    hint="右侧只保留当前选中色盘簇的关键证据和必要动作。先看色盘，再看来源，最后再决定是否进入人工修正。"
-                    title={selectedCluster ? `${selectedCluster.themeLabels[0] ?? '待补主题'} / ${selectedCluster.sourceCount} 条来源` : '尚未选择色盘'}
-                  >
-                    {selectedRecord ? (
-                      <div className="space-y-5">
-                        {selectedCluster ? (
-                          <div className="space-y-4 rounded-[20px] border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] p-5">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <SamplingBadge tone="dark">当前色盘簇</SamplingBadge>
-                              <SamplingBadge tone="soft">{selectedCluster.sourceCount} 条来源</SamplingBadge>
-                              <SamplingBadge tone="soft">{selectedCluster.brandCount} 个品牌</SamplingBadge>
-                              <SamplingBadge tone="soft">{selectedCluster.completeCount}/{selectedCluster.sourceCount} 完整</SamplingBadge>
-                            </div>
-                            <div className="grid gap-3 sm:grid-cols-3">
-                              {selectedCluster.records.map((record) => (
-                                <button
-                                  key={record.samplingId}
-                                  className={cn(
-                                    'rounded-[18px] border px-4 py-3 text-left transition',
-                                    record.samplingId === selectedRecordId
-                                      ? 'border-[var(--dp-fill-inverse)] bg-white shadow-[0_16px_28px_-24px_rgba(26,26,26,0.28)]'
-                                      : 'border-[var(--dp-border-subtle)] bg-white/78 hover:border-[var(--dp-fill-inverse)]',
-                                  )}
-                                  onClick={() => onSelectRecord(record.samplingId)}
-                                  type="button"
-                                >
-                                  <p className="text-sm font-semibold text-foreground">{record.brandName || '待补品牌'}</p>
-                                  <p className="mt-1 text-xs leading-5 text-muted-foreground">{record.samplingId}</p>
-                                  <div className="mt-3 flex flex-wrap gap-2">
-                                    <SamplingBadge tone="soft">{record.itemCategory || '待补品类'}</SamplingBadge>
-                                    <SamplingBadge tone={isSamplingRecordComplete(record) ? 'ok' : 'soft'}>
-                                      {isSamplingRecordComplete(record) ? '完整' : '待补'}
-                                    </SamplingBadge>
-                                  </div>
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        ) : null}
+                      <Button
+                        disabled={!draft || allClusters.length === 0}
+                        onClick={() => updateBatchUiState((current) => ({
+                          ...current,
+                          isDuplicateCheckEnabled: !current.isDuplicateCheckEnabled,
+                        }))}
+                        variant={isDuplicateCheckEnabled ? 'outline' : 'ghost'}
+                      >
+                        {isDuplicateCheckEnabled ? '隐藏重复标记' : '查重'}
+                      </Button>
+                    </div>
+                  }
+                  title="色盘总览"
+                  tone="soft"
+                >
+                  <div className="space-y-5">
+                    <div className="grid gap-3 lg:grid-cols-3">
+                      <MetricTile
+                        hint={visibleDuplicateCount > 0 ? `还有 ${visibleDuplicateCount} 条会折叠成重复显示。` : '当前没有可视重复。'}
+                        label="可视唯一率"
+                        value={`${visibleUniqueCount} / ${draft.summary.recordCount} · ${visibleUniqueRate}%`}
+                      />
+                      <MetricTile
+                        hint={visibleUniqueCapacity >= generationTargetCount
+                          ? `当前场景池足够支撑 ${generationTargetCount} 条无重复重建。`
+                          : `当前场景池最多 ${visibleUniqueCapacity} 组，低于 ${generationTargetCount} 时会直接报错。`}
+                        label="场景容量"
+                        value={`${visibleUniqueCapacity} 组`}
+                      />
+                      <MetricTile
+                        hint={remainingVisibleUniqueCapacity > 0
+                          ? '还能继续扩展更多不重复色盘。'
+                          : '已经接近当前场景的可视唯一上限。'}
+                        label="剩余可扩"
+                        value={`${remainingVisibleUniqueCapacity} 组`}
+                      />
+                    </div>
 
-                      <div className="flex flex-wrap items-start justify-between gap-4 rounded-[20px] border border-[var(--dp-border-hairline)] bg-[linear-gradient(180deg,rgba(247,243,242,0.9),rgba(255,255,255,0.92))] p-5">
-                        <div className="space-y-3">
-                          <p className={labelClassName}>当前记录</p>
-                          <div className="space-y-2">
-                            <h3 className="display-font text-[1.8rem] leading-none tracking-[-0.04em] text-foreground">
-                              {selectedRecord.samplingId}
-                            </h3>
-                            <p className="text-sm leading-6 text-muted-foreground">
-                              {selectedRecord.themeLabelZh || selectedRecord.themeKey || '待补主题'} /{' '}
-                              {getSamplingChannelTypeLabel(selectedRecord.channelType)}
-                            </p>
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            <SamplingBadge tone={isSamplingRecordComplete(selectedRecord) ? 'ok' : 'soft'}>
-                              {isSamplingRecordComplete(selectedRecord) ? '候选信息完整' : '候选信息待补'}
-                            </SamplingBadge>
-                            <SamplingBadge tone="soft">
-                              {getSamplingDigestionStatusLabel(selectedRecord.digestionStatus)}
-                            </SamplingBadge>
-                            <SamplingBadge tone="soft">{selectedRecord.itemCategory || '待补品类'}</SamplingBadge>
-                          </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <SamplingOverviewFilterButton count={allClusters.length} isActive={overviewFilter === 'all'} label="全部" onClick={() => updateBatchUiState((current) => ({ ...current, overviewFilter: 'all' }))} />
+                      <SamplingOverviewFilterButton count={pendingClusters.length} isActive={overviewFilter === 'pending'} label="待审" onClick={() => updateBatchUiState((current) => ({ ...current, overviewFilter: 'pending' }))} />
+                      <SamplingOverviewFilterButton count={reviewedClusters.length} isActive={overviewFilter === 'reviewed'} label="已整理" onClick={() => updateBatchUiState((current) => ({ ...current, overviewFilter: 'reviewed' }))} />
+                      <SamplingOverviewFilterButton count={rejectedClusters.length} isActive={overviewFilter === 'rejected'} label="已驳回" onClick={() => updateBatchUiState((current) => ({ ...current, overviewFilter: 'rejected' }))} />
+                      <SamplingOverviewFilterButton count={completeClusters.length} isActive={overviewFilter === 'complete'} label="来源完整" onClick={() => updateBatchUiState((current) => ({ ...current, overviewFilter: 'complete' }))} />
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
+                      {overviewClusters.map((cluster) => (
+                        <SamplingPaletteWallCard
+                          key={cluster.id}
+                          cluster={cluster}
+                          duplicateInfo={duplicateInfoByClusterId.get(cluster.id)}
+                          isDuplicateCheckEnabled={isDuplicateCheckEnabled}
+                          isSelected={Boolean(isReviewDrawerOpen && selectedCluster && selectedCluster.id === cluster.id)}
+                          onApprove={() => handleReviewCluster(cluster, 'clustered')}
+                          onReject={() => handleReviewCluster(cluster, 'rejected')}
+                          onSelect={() => openReviewDrawer(cluster.representative.samplingId)}
+                        />
+                      ))}
+                    </div>
+
+                    {overviewClusters.length === 0 ? (
+                      <div className="rounded-[20px] border border-dashed border-[var(--dp-border-subtle)] bg-white/72 px-5 py-10 text-sm leading-7 text-muted-foreground">
+                        当前筛选下没有可展示的色盘，试着切换到其他筛选条件。
+                      </div>
+                    ) : null}
+                  </div>
+                </SamplingSection>
+              ) : (
+                <SamplingSection
+                  eyebrow="空状态"
+                  hint="先准备一个采样批次文件，页面才会出现完整工作台。"
+                  title="当前没有可展示的采样批次"
+                >
+                  <div className="rounded-[20px] border border-dashed border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-5 py-10 text-sm leading-7 text-muted-foreground">
+                    当前没有可展示的采样批次。你可以先创建批次文件，再回到这里录入样本。
+                  </div>
+                </SamplingSection>
+              )}
+            </div>
+          </div>
+
+          <DetailDrawer isOpen={isReviewDrawerOpen && Boolean(selectedRecord)} onClose={handleCloseReviewDrawer}>
+            <div className="flex h-full flex-col bg-[var(--dp-surface-soft)]">
+              <div className="border-b border-[var(--dp-border-subtle)] bg-white px-5 py-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-2">
+                    <p className={labelClassName}>审阅抽屉</p>
+                    <h2 className="display-font text-[1.8rem] leading-none tracking-[-0.04em] text-foreground">
+                      {selectedCluster ? `${selectedCluster.themeLabels[0] ?? '待补主题'} / ${selectedCluster.sourceCount} 条来源` : '尚未选择色盘'}
+                    </h2>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button onClick={onAddRecord} size="sm" variant="ghost">
+                      <Plus className="size-4" />
+                      补充候选
+                    </Button>
+                    <button
+                      className="inline-flex size-10 items-center justify-center rounded-full border border-[var(--dp-border-subtle)] bg-white text-muted-foreground transition hover:border-[var(--dp-fill-inverse)] hover:text-foreground"
+                      onClick={handleCloseReviewDrawer}
+                      type="button"
+                    >
+                      <X className="size-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-1 space-y-5 overflow-y-auto p-5">
+                {selectedRecord ? (
+                  <>
+                    {selectedCluster ? (
+                      <div className="space-y-4 rounded-[20px] border border-[var(--dp-border-subtle)] bg-white p-5">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <SamplingBadge tone="dark">当前色盘簇</SamplingBadge>
+                          <SamplingBadge tone="soft">{selectedCluster.sourceCount} 条来源</SamplingBadge>
+                          <SamplingBadge tone="soft">{selectedCluster.brandCount} 个品牌</SamplingBadge>
                         </div>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          {selectedCluster.records.map((record) => (
+                            <button
+                              key={record.samplingId}
+                              className={cn(
+                                'rounded-[18px] border px-4 py-3 text-left transition',
+                                record.samplingId === selectedRecordId
+                                  ? 'border-[var(--dp-fill-inverse)] bg-[var(--dp-surface-soft)] shadow-[0_16px_28px_-24px_rgba(26,26,26,0.28)]'
+                                  : 'border-[var(--dp-border-subtle)] bg-white hover:border-[var(--dp-fill-inverse)]',
+                              )}
+                              onClick={() => handleSelectRecord(record.samplingId)}
+                              type="button"
+                            >
+                              <p className="text-sm font-semibold text-foreground">{record.brandName || '待补品牌'}</p>
+                              <p className="mt-1 text-xs leading-5 text-muted-foreground">{record.samplingId}</p>
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                <SamplingBadge tone="soft">{record.itemCategory || '待补品类'}</SamplingBadge>
+                                <SamplingBadge tone={isSamplingRecordComplete(record) ? 'ok' : 'soft'}>
+                                  {isSamplingRecordComplete(record) ? '完整' : '待补'}
+                                </SamplingBadge>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
 
-                        <Button onClick={() => onDeleteRecord(selectedRecord.samplingId)} size="sm" variant="ghost">
-                          <Trash2 className="size-4" />
-                          删除记录
-                        </Button>
+                    <div className="flex flex-wrap items-start justify-between gap-4 rounded-[20px] border border-[var(--dp-border-hairline)] bg-white p-5">
+                      <div className="space-y-3">
+                        <p className={labelClassName}>当前记录</p>
+                        <div className="space-y-2">
+                          <h3 className="display-font text-[1.8rem] leading-none tracking-[-0.04em] text-foreground">
+                            {selectedRecord.samplingId}
+                          </h3>
+                          <p className="text-sm leading-6 text-muted-foreground">
+                            {selectedRecord.themeLabelZh || selectedRecord.themeKey || '待补主题'} /{' '}
+                            {getSamplingChannelTypeLabel(selectedRecord.channelType)}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <SamplingBadge tone={isSamplingRecordComplete(selectedRecord) ? 'ok' : 'soft'}>
+                            {isSamplingRecordComplete(selectedRecord) ? '候选信息完整' : '候选信息待补'}
+                          </SamplingBadge>
+                          <SamplingBadge tone="soft">
+                            {getSamplingDigestionStatusLabel(selectedRecord.digestionStatus)}
+                          </SamplingBadge>
+                          <SamplingBadge tone="soft">{selectedRecord.itemCategory || '待补品类'}</SamplingBadge>
+                        </div>
                       </div>
 
-                      <div className="rounded-[20px] border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] p-5">
-                        <div className="flex flex-wrap items-center justify-between gap-4">
-                          <div className="space-y-2">
-                            <p className={labelClassName}>主动作</p>
-                            <p className="text-sm leading-6 text-muted-foreground">
-                              这里是当前选中色盘的精修区。你已经在总览墙里看到全局颜色分布，现在只需要对这一条做明确决策。
-                            </p>
-                          </div>
+                      <Button onClick={() => onDeleteRecord(selectedRecord.samplingId)} size="sm" variant="ghost">
+                        <Trash2 className="size-4" />
+                        删除记录
+                      </Button>
+                    </div>
 
-                          <div className="flex flex-wrap gap-2">
-                            <Button
-                              disabled={isSaving}
-                              onClick={() => void onReviewRecord(selectedRecord.samplingId, 'clustered')}
-                              variant="primary"
-                            >
-                              <CheckCheck className="size-4" />
-                              {isSaving ? '提交中' : '审阅通过'}
-                            </Button>
-                            <Button
-                              disabled={isSaving}
-                              onClick={() => void onReviewRecord(selectedRecord.samplingId, 'rejected')}
-                              variant="ghost"
-                            >
-                              驳回候选
-                            </Button>
-                          </div>
+                    <div className="rounded-[20px] border border-[var(--dp-border-subtle)] bg-white p-5">
+                      <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div className="space-y-2">
+                          <p className={labelClassName}>主动作</p>
+                          <p className="text-sm leading-6 text-muted-foreground">
+                            在抽屉里看完证据后，再决定这一条是通过还是驳回。
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            disabled={isSaving}
+                            onClick={() => void onReviewRecord(selectedRecord.samplingId, 'clustered')}
+                            variant="primary"
+                          >
+                            <CheckCheck className="size-4" />
+                            {isSaving ? '提交中' : '审阅通过'}
+                          </Button>
+                          <Button
+                            disabled={isSaving}
+                            onClick={() => void onReviewRecord(selectedRecord.samplingId, 'rejected')}
+                            variant="ghost"
+                          >
+                            驳回候选
+                          </Button>
                         </div>
                       </div>
+                    </div>
 
-                      <SamplingColorPreview record={selectedRecord} />
-                      <SamplingEvidenceTimeline record={selectedRecord} />
+                    <SamplingColorPreview record={selectedRecord} />
+                    <SamplingEvidenceTimeline record={selectedRecord} />
 
-                      <div className="grid gap-4 xl:grid-cols-2">
+                    <div className="grid gap-4 xl:grid-cols-2">
                         <FieldBlock hint="只选白名单中的渠道。" label="渠道类型">
                           <select
                             className={inputClassName}
@@ -1472,14 +1620,20 @@ export function SamplingBatchesPage(): ReactElement {
                         />
                       </FieldBlock>
 
-                      <div className="flex items-center justify-between gap-3 rounded-[18px] border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-4 py-4">
+                    <div className="flex items-center justify-between gap-3 rounded-[18px] border border-[var(--dp-border-subtle)] bg-white px-4 py-4">
                         <div>
                           <p className="label-caps text-muted-foreground">人工修正与补录</p>
                           <p className="mt-1 text-sm leading-6 text-muted-foreground">
                             只有在系统候选缺字段，或你需要补主题、市场信号、候选 palette 等信息时再打开。
                           </p>
                         </div>
-                        <Button onClick={() => setIsAdvancedOpen((currentValue) => !currentValue)} size="sm" variant="ghost">
+                        <Button
+                          onClick={() => setAdvancedRecordId((currentValue) =>
+                            currentValue === selectedRecordId ? null : (selectedRecordId ?? null),
+                          )}
+                          size="sm"
+                          variant="ghost"
+                        >
                           {isAdvancedOpen ? '收起高级字段' : '展开高级字段'}
                         </Button>
                       </div>
@@ -1521,7 +1675,7 @@ export function SamplingBatchesPage(): ReactElement {
                                 onChange={(event) => onDraftRecordFieldChange(selectedRecord.samplingId, 'themeKey', event.target.value)}
                                 value={selectedRecord.themeKey}
                               >
-                                {draft.batch.themeKeys.map((themeKey) => (
+                                {(draft?.batch.themeKeys ?? []).map((themeKey) => (
                                   <option key={themeKey} value={themeKey}>
                                     {themeKey}
                                   </option>
@@ -1645,29 +1799,17 @@ export function SamplingBatchesPage(): ReactElement {
                           </FieldBlock>
                         </div>
                       ) : null}
-                    </div>
-                  ) : (
-                    <div className="rounded-[20px] border border-dashed border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-5 py-10 text-sm leading-7 text-muted-foreground">
-                      当前没有可编辑记录。先在左侧色盘网格里选择一个色盘簇，再进入右侧审阅。
-                    </div>
-                  )}
-                  </SamplingSection>
-                </div>
+                  </>
+                ) : (
+                  <div className="rounded-[20px] border border-dashed border-[var(--dp-border-subtle)] bg-white px-5 py-10 text-sm leading-7 text-muted-foreground">
+                    当前没有可编辑记录。先在色卡墙里选择一个色盘，再进入抽屉审阅。
+                  </div>
+                )}
               </div>
-            </>
-          ) : (
-            <SamplingSection
-              eyebrow="空状态"
-              hint="先准备一个采样批次文件，页面才会出现完整工作台。"
-              title="当前没有可展示的采样批次"
-            >
-              <div className="rounded-[20px] border border-dashed border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] px-5 py-10 text-sm leading-7 text-muted-foreground">
-                当前没有可展示的采样批次。你可以先创建批次文件，再回到这里录入样本。
-              </div>
-            </SamplingSection>
-          )}
-        </div>
-      </div>
+            </div>
+          </DetailDrawer>
+        </>
+      ) : null}
     </div>
   )
 }

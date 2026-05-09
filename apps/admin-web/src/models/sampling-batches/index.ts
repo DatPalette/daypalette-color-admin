@@ -14,6 +14,7 @@ export {
   getSamplingBatchStatusLabel,
   getSamplingChannelTypeLabel,
   getSamplingDigestionStatusLabel,
+  getSamplingOccasionLabel,
   samplingBatchStatusOptions,
   samplingChannelTypeOptions,
   samplingDigestionStatusOptions,

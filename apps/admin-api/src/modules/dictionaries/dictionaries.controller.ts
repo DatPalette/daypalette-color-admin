@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import type { CreateDictionaryItemDto } from './dto/create-dictionary-item.dto';
 import type { DeleteDictionaryItemDto } from './dto/delete-dictionary-item.dto';
 import type { UpdateDictionaryDto } from './dto/update-dictionary.dto';
@@ -14,12 +23,18 @@ export class DictionariesController {
   }
 
   @Put(':key')
-  updateDictionary(@Param('key') key: string, @Body() payload: UpdateDictionaryDto) {
+  updateDictionary(
+    @Param('key') key: string,
+    @Body() payload: UpdateDictionaryDto,
+  ) {
     return this.dictionariesService.updateDictionary(key, payload);
   }
 
   @Post(':key/items')
-  createItem(@Param('key') key: string, @Body() payload: CreateDictionaryItemDto) {
+  createItem(
+    @Param('key') key: string,
+    @Body() payload: CreateDictionaryItemDto,
+  ) {
     return this.dictionariesService.createItem(key, payload);
   }
 

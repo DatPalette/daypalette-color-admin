@@ -9,6 +9,7 @@ import type {
 import {
   getSamplingBatchStatusLabel,
   getSamplingDigestionStatusLabel,
+  getSamplingOccasionLabel,
 } from '@/models/sampling-batches'
 import { formatUpdatedAtLabel } from '@/utils/format-updated-at-label'
 
@@ -16,7 +17,7 @@ function toSamplingBatchCardModel(item: SamplingBatchDto): SamplingBatchCardMode
   return {
     completedLabel: `${item.summary.completedCount} / ${item.summary.recordCount} 条完整`,
     id: item.batch.id,
-    occasionLabel: item.batch.occasionId,
+    occasionLabel: getSamplingOccasionLabel(item.batch.occasionId),
     recordCountLabel: `${item.summary.recordCount} 条采样记录`,
     statusLabel: getSamplingBatchStatusLabel(item.batch.status),
     titleZh: item.batch.titleZh,
@@ -42,7 +43,7 @@ function toSamplingBatchDetailModel(item: SamplingBatchDto | null): SamplingBatc
   return {
     completedLabel: `${item.summary.completedCount} / ${item.summary.recordCount} 条来源字段完整`,
     notes: item.batch.notes || '当前没有批次备注。',
-    occasionLabel: item.batch.occasionId,
+    occasionLabel: getSamplingOccasionLabel(item.batch.occasionId),
     recordCountLabel: `${item.summary.recordCount} 条采样记录`,
     recordPreviews: toSamplingRecordPreviewModel(item),
     sourceWhitelistIds: item.batch.sourceWhitelistIds,

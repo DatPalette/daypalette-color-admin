@@ -79,6 +79,7 @@ interface SamplingBatchesPageViewModel {
   onRegenerateBatchToTarget: (targetCount: number) => Promise<void>
   onRefresh: () => Promise<void>
   onReviewRecord: (samplingId: string, status: SamplingRecordDto['digestionStatus']) => Promise<void>
+  onReviewRecords: (samplingIds: string[], status: SamplingRecordDto['digestionStatus']) => Promise<void>
   onSave: () => Promise<void>
   onSelectBatch: (id: string) => void
   onSelectRecord: (samplingId: string) => void
@@ -562,18 +563,26 @@ export function useSamplingBatchesPageViewModel(): SamplingBatchesPageViewModel 
     }
   }
 
-  async function onReviewRecord(
-    samplingId: string,
+  async function onReviewRecords(
+    samplingIds: string[],
     status: SamplingRecordDto['digestionStatus'],
   ): Promise<void> {
     if (!draft || !collection) {
       return
     }
 
+    const uniqueSamplingIds = Array.from(new Set(samplingIds.map((item) => item.trim()).filter(Boolean)))
+
+    if (uniqueSamplingIds.length === 0) {
+      return
+    }
+
+    const samplingIdSet = new Set(uniqueSamplingIds)
+
     const nextDraft = {
       ...draft,
       items: draft.items.map((item) =>
-        item.samplingId === samplingId
+        samplingIdSet.has(item.samplingId)
           ? {
               ...item,
               digestionStatus: status,
@@ -598,15 +607,26 @@ export function useSamplingBatchesPageViewModel(): SamplingBatchesPageViewModel 
       const savedBatch = await updateSamplingBatch(nextDraft.batch.id, nextDraft)
       const nextCollection = upsertSamplingBatchInCollection(collection, savedBatch)
       const savedDraft = cloneSamplingBatch(savedBatch)
-      const nextSelectedRecordId = findFirstPendingReviewRecordId(savedDraft) ?? findSelectedRecordId(savedDraft, samplingId)
+      const nextSelectedRecordId = findFirstPendingReviewRecordId(savedDraft) ?? findSelectedRecordId(savedDraft, uniqueSamplingIds[0] ?? null)
 
       syncPageState(nextCollection, savedBatch.batch.id, savedDraft, nextSelectedRecordId)
-      setSaveMessage(`已更新 ${samplingId} 的审阅状态。`)
+      setSaveMessage(
+        uniqueSamplingIds.length === 1
+          ? `已更新 ${uniqueSamplingIds[0]} 的审阅状态。`
+          : `已批量更新 ${uniqueSamplingIds.length} 条候选的审阅状态。`,
+      )
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : '候选审阅状态更新失败。')
     } finally {
       setIsSaving(false)
     }
+  }
+
+  async function onReviewRecord(
+    samplingId: string,
+    status: SamplingRecordDto['digestionStatus'],
+  ): Promise<void> {
+    await onReviewRecords([samplingId], status)
   }
 
   async function onUpdateStatus(): Promise<void> {
@@ -685,6 +705,7 @@ export function useSamplingBatchesPageViewModel(): SamplingBatchesPageViewModel 
     onRegenerateBatchToTarget,
     onRefresh,
     onReviewRecord,
+    onReviewRecords,
     onSave,
     onSelectBatch,
     onSelectRecord,

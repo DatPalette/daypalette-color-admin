@@ -80,8 +80,11 @@ export interface SamplingBatchMeta {
 export interface SamplingBatchSummary {
   completedCount: number
   recordCount: number
+  remainingVisibleUniqueCapacity: number
   uniqueBrandCount: number
   uniquePlatformCount: number
+  visibleUniqueCapacity: number
+  visibleUniqueCount: number
 }
 
 export interface SamplingCandidateGenerationCapabilities {

@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import type { CreateBaseColorDto } from './dto/create-base-color.dto';
 import type { DeleteBaseColorDto } from './dto/delete-base-color.dto';
 import type { UpdateBaseColorDto } from './dto/update-base-color.dto';

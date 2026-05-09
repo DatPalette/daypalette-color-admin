@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import type { CreatePaletteDto } from './dto/create-palette.dto';
 import type { DeletePaletteDto } from './dto/delete-palette.dto';
 import type { UpdatePaletteDto } from './dto/update-palette.dto';

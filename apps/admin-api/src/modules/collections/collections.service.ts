@@ -4,7 +4,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { readPaletteDataFile, writePaletteDataFile } from '../../common/files/palette-data-reader';
+import {
+  readPaletteDataFile,
+  writePaletteDataFile,
+} from '../../common/files/palette-data-reader';
 import type {
   CollectionRecord,
   CollectionDeleteCheckReference,
@@ -16,7 +19,12 @@ import type {
 import type { DeleteCollectionDto } from './dto/delete-collection.dto';
 import type { UpdateCollectionDto } from './dto/update-collection.dto';
 
-type CollectionDictionaryKey = 'occasion' | 'releaseMode' | 'status' | 'styleTag' | 'themeType';
+type CollectionDictionaryKey =
+  | 'occasion'
+  | 'releaseMode'
+  | 'status'
+  | 'styleTag'
+  | 'themeType';
 
 function toPublicCollection(
   document: PaletteDataCollectionDocument<CollectionRecord>,
@@ -24,7 +32,9 @@ function toPublicCollection(
 ): PaletteDataCollectionDocument<CollectionRecord> {
   return {
     ...document,
-    items: includeDeleted ? document.items : document.items.filter((item) => item.status !== 'deleted'),
+    items: includeDeleted
+      ? document.items
+      : document.items.filter((item) => item.status !== 'deleted'),
   };
 }
 
@@ -60,7 +70,9 @@ function normalizeStringArray(value: unknown, fieldName: string): string[] {
   }
 
   return Array.from(
-    new Set(value.map((item) => normalizeRequiredString(item, `${fieldName} item`))),
+    new Set(
+      value.map((item) => normalizeRequiredString(item, `${fieldName} item`)),
+    ),
   );
 }
 
@@ -71,10 +83,14 @@ function getAllowedDictionaryIds(
   const dictionary = dictionaries.dictionaries[dictionaryKey];
 
   if (!dictionary) {
-    throw new BadRequestException(`Dictionary ${dictionaryKey} is not configured.`);
+    throw new BadRequestException(
+      `Dictionary ${dictionaryKey} is not configured.`,
+    );
   }
 
-  return new Set(dictionary.items.filter((item) => !item.isDeleted).map((item) => item.id));
+  return new Set(
+    dictionary.items.filter((item) => !item.isDeleted).map((item) => item.id),
+  );
 }
 
 function assertDictionaryValue(
@@ -84,7 +100,9 @@ function assertDictionaryValue(
   dictionaryKey: CollectionDictionaryKey,
 ): void {
   if (!getAllowedDictionaryIds(dictionaries, dictionaryKey).has(value)) {
-    throw new BadRequestException(`${fieldName} contains unsupported value: ${value}.`);
+    throw new BadRequestException(
+      `${fieldName} contains unsupported value: ${value}.`,
+    );
   }
 }
 
@@ -98,7 +116,9 @@ function assertDictionaryValues(
 
   for (const value of values) {
     if (!allowedIds.has(value)) {
-      throw new BadRequestException(`${fieldName} contains unsupported value: ${value}.`);
+      throw new BadRequestException(
+        `${fieldName} contains unsupported value: ${value}.`,
+      );
     }
   }
 }
@@ -124,7 +144,9 @@ function assertPaletteExists(
   const palette = palettesDocument.items.find((item) => item.id === id);
 
   if (!palette || palette.status === 'deleted') {
-    throw new BadRequestException(`${fieldName} references unknown palette: ${id}.`);
+    throw new BadRequestException(
+      `${fieldName} references unknown palette: ${id}.`,
+    );
   }
 }
 
@@ -137,9 +159,14 @@ function assertPaletteIdsExist(
   }
 }
 
-function assertCoverPaletteIncluded(coverPaletteId: string, paletteIds: string[]): void {
+function assertCoverPaletteIncluded(
+  coverPaletteId: string,
+  paletteIds: string[],
+): void {
   if (!paletteIds.includes(coverPaletteId)) {
-    throw new BadRequestException('coverPaletteId must also appear in paletteIds.');
+    throw new BadRequestException(
+      'coverPaletteId must also appear in paletteIds.',
+    );
   }
 }
 
@@ -150,7 +177,10 @@ function buildUpdatedCollectionRecord(
   dictionaries: DictionariesDocument,
 ): CollectionRecord {
   const nextRecord: CollectionRecord = {
-    coverPaletteId: normalizeRequiredString(payload.coverPaletteId, 'coverPaletteId'),
+    coverPaletteId: normalizeRequiredString(
+      payload.coverPaletteId,
+      'coverPaletteId',
+    ),
     descriptionEn: normalizeOptionalString(payload.descriptionEn),
     descriptionZh: normalizeOptionalString(payload.descriptionZh),
     id,
@@ -165,17 +195,43 @@ function buildUpdatedCollectionRecord(
     themeType: normalizeRequiredString(payload.themeType, 'themeType'),
   };
 
-  assertPaletteExists(nextRecord.coverPaletteId, 'coverPaletteId', palettesDocument);
+  assertPaletteExists(
+    nextRecord.coverPaletteId,
+    'coverPaletteId',
+    palettesDocument,
+  );
   assertPaletteIdsExist(nextRecord.paletteIds, palettesDocument);
   assertCoverPaletteIncluded(nextRecord.coverPaletteId, nextRecord.paletteIds);
-  assertDictionaryValues(nextRecord.occasionTags, 'occasionTags', dictionaries, 'occasion');
-  assertDictionaryValues(nextRecord.styleTags, 'styleTags', dictionaries, 'styleTag');
-  assertDictionaryValue(nextRecord.releaseMode, 'releaseMode', dictionaries, 'releaseMode');
-  assertDictionaryValue(nextRecord.themeType, 'themeType', dictionaries, 'themeType');
+  assertDictionaryValues(
+    nextRecord.occasionTags,
+    'occasionTags',
+    dictionaries,
+    'occasion',
+  );
+  assertDictionaryValues(
+    nextRecord.styleTags,
+    'styleTags',
+    dictionaries,
+    'styleTag',
+  );
+  assertDictionaryValue(
+    nextRecord.releaseMode,
+    'releaseMode',
+    dictionaries,
+    'releaseMode',
+  );
+  assertDictionaryValue(
+    nextRecord.themeType,
+    'themeType',
+    dictionaries,
+    'themeType',
+  );
   assertDictionaryValue(nextRecord.status, 'status', dictionaries, 'status');
 
   if (nextRecord.status === 'deleted') {
-    throw new BadRequestException('status cannot be deleted when updating a collection.');
+    throw new BadRequestException(
+      'status cannot be deleted when updating a collection.',
+    );
   }
 
   return nextRecord;
@@ -221,17 +277,21 @@ export class CollectionsService {
   async getCollection(
     includeDeleted = false,
   ): Promise<PaletteDataCollectionDocument<CollectionRecord>> {
-    const document = await readPaletteDataFile<PaletteDataCollectionDocument<CollectionRecord>>(
-      'collections.v1.json',
-    );
+    const document = await readPaletteDataFile<
+      PaletteDataCollectionDocument<CollectionRecord>
+    >('collections.v1.json');
 
     return toPublicCollection(document, includeDeleted);
   }
 
   async getDeleteCheck(id: string): Promise<CollectionDeleteCheckResult> {
     const [document, palettesDocument] = await Promise.all([
-      readPaletteDataFile<PaletteDataCollectionDocument<CollectionRecord>>('collections.v1.json'),
-      readPaletteDataFile<PaletteDataCollectionDocument<PaletteRecord>>('palettes.v1.json'),
+      readPaletteDataFile<PaletteDataCollectionDocument<CollectionRecord>>(
+        'collections.v1.json',
+      ),
+      readPaletteDataFile<PaletteDataCollectionDocument<PaletteRecord>>(
+        'palettes.v1.json',
+      ),
     ]);
     const target = findCollectionOrThrow(document, id);
 
@@ -243,16 +303,27 @@ export class CollectionsService {
     payload: UpdateCollectionDto,
   ): Promise<PaletteDataCollectionDocument<CollectionRecord>> {
     const [document, palettesDocument, dictionaries] = await Promise.all([
-      readPaletteDataFile<PaletteDataCollectionDocument<CollectionRecord>>('collections.v1.json'),
-      readPaletteDataFile<PaletteDataCollectionDocument<PaletteRecord>>('palettes.v1.json'),
+      readPaletteDataFile<PaletteDataCollectionDocument<CollectionRecord>>(
+        'collections.v1.json',
+      ),
+      readPaletteDataFile<PaletteDataCollectionDocument<PaletteRecord>>(
+        'palettes.v1.json',
+      ),
       readPaletteDataFile<DictionariesDocument>('dictionaries.v1.json'),
     ]);
 
     if (findCollectionOrThrow(document, id).status === 'deleted') {
-      throw new ConflictException(`Collection ${id} is deleted and must be restored instead of updated.`);
+      throw new ConflictException(
+        `Collection ${id} is deleted and must be restored instead of updated.`,
+      );
     }
 
-    const nextItem = buildUpdatedCollectionRecord(id, payload, palettesDocument, dictionaries);
+    const nextItem = buildUpdatedCollectionRecord(
+      id,
+      payload,
+      palettesDocument,
+      dictionaries,
+    );
     const nextDocument: PaletteDataCollectionDocument<CollectionRecord> = {
       ...document,
       items: document.items.map((item) => (item.id === id ? nextItem : item)),
@@ -269,8 +340,12 @@ export class CollectionsService {
     payload: DeleteCollectionDto,
   ): Promise<PaletteDataCollectionDocument<CollectionRecord>> {
     const [document, palettesDocument] = await Promise.all([
-      readPaletteDataFile<PaletteDataCollectionDocument<CollectionRecord>>('collections.v1.json'),
-      readPaletteDataFile<PaletteDataCollectionDocument<PaletteRecord>>('palettes.v1.json'),
+      readPaletteDataFile<PaletteDataCollectionDocument<CollectionRecord>>(
+        'collections.v1.json',
+      ),
+      readPaletteDataFile<PaletteDataCollectionDocument<PaletteRecord>>(
+        'palettes.v1.json',
+      ),
     ]);
     const target = findCollectionOrThrow(document, id);
 
@@ -308,10 +383,12 @@ export class CollectionsService {
     return toPublicCollection(nextDocument);
   }
 
-  async restoreItem(id: string): Promise<PaletteDataCollectionDocument<CollectionRecord>> {
-    const document = await readPaletteDataFile<PaletteDataCollectionDocument<CollectionRecord>>(
-      'collections.v1.json',
-    );
+  async restoreItem(
+    id: string,
+  ): Promise<PaletteDataCollectionDocument<CollectionRecord>> {
+    const document = await readPaletteDataFile<
+      PaletteDataCollectionDocument<CollectionRecord>
+    >('collections.v1.json');
     const target = findCollectionOrThrow(document, id);
 
     if (target.status !== 'deleted') {

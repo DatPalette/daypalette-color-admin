@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import type { DeleteCollectionDto } from './dto/delete-collection.dto';
 import type { UpdateCollectionDto } from './dto/update-collection.dto';
 import { CollectionsService } from './collections.service';
