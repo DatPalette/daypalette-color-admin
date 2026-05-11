@@ -8,8 +8,9 @@ import { buildApiErrorMessage, resolveAdminApiBaseUrl } from '@/api/admin-api'
 import type { GenerateSamplingBatchCandidatesPayload } from '@/services/sampling-batches/sampling-batches.service'
 
 export interface CreateSamplingRunPayload {
-  batchId: string
+  batchId?: string
   generateCandidates?: GenerateSamplingBatchCandidatesPayload
+  llmBatchGenerate?: import('@daypalette-color-admin/contracts').LlmBatchGenerateParams
   operationType?: SamplingRunOperationType
 }
 
@@ -33,6 +34,9 @@ const samplingRunStreamEventTypes: SamplingRunEventDto['type'][] = [
   'cluster-merged',
   'model-analysis-started',
   'model-analysis-finished',
+  'llm-generation-started',
+  'llm-record-generated',
+  'llm-generation-finished',
   'warning',
   'error',
   'run-finished',

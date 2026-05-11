@@ -130,6 +130,7 @@ export type SamplingRunOperationType =
   | 'collect-evidence'
   | 'extract-colors'
   | 'cluster-palettes'
+  | 'llm-batch-generate'
 
 export type SamplingRunStatus =
   | 'queued'
@@ -156,6 +157,9 @@ export type SamplingRunEventType =
   | 'cluster-merged'
   | 'model-analysis-started'
   | 'model-analysis-finished'
+  | 'llm-generation-started'
+  | 'llm-record-generated'
+  | 'llm-generation-finished'
   | 'warning'
   | 'error'
   | 'run-finished'
@@ -197,4 +201,32 @@ export interface SamplingRunEventCollectionDocument {
   runId: string
   updatedAt: string
   version: number
+}
+
+// ── Color collection: LLM batch generation params ──
+
+export interface LlmBatchGenerateParams {
+  occasionId: string
+  titleZh: string
+  themeKeys: string[]
+  targetCount: number
+  styleConstraints?: string
+  sourceWhitelistIds?: string[]
+}
+
+// ── Color collection: image extraction params ──
+
+export interface ImageExtractionParams {
+  imageUrls?: string[]
+  occasionId: string
+  themeKey: string
+  themeLabelZh: string
+  batchId?: string
+  enableVisionAnalysis?: boolean
+}
+
+export interface ExtractedColor {
+  hex: string
+  percentage: number
+  semanticLabel?: string
 }

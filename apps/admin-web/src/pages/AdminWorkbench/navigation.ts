@@ -2,6 +2,7 @@ export const DEFAULT_DICTIONARY_KEY = 'occasion'
 
 export const workbenchPaths = {
   baseColors: '/base-colors',
+  colorCollection: '/color-collection',
   collections: '/collections',
   dictionaries: (dictionaryKey = DEFAULT_DICTIONARY_KEY): string => `/dictionaries/${dictionaryKey}`,
   dictionariesRoot: '/dictionaries',
@@ -35,6 +36,11 @@ export const navigationItems: WorkbenchNavigationItem[] = [
     label: '采样助手',
     description: '查看采样批次、来源完整度与白名单覆盖',
     to: workbenchPaths.samplingBatches,
+  },
+  {
+    label: '色彩采集',
+    description: 'LLM 批量生成配色候选与图片取色',
+    to: workbenchPaths.colorCollection,
   },
   {
     label: '合集',
