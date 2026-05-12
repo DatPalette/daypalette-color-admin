@@ -10,8 +10,8 @@ import {
   Trash2,
   X,
 } from 'lucide-react'
-import { useSearchParams } from 'react-router-dom'
 
+import { OutfitPreview } from '@/components/outfit-preview'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { DetailDrawer } from '@/components/workbench/DetailDrawer'
@@ -20,7 +20,6 @@ import { WorkbenchModal } from '@/components/workbench/WorkbenchModal'
 import {
   getSamplingChannelTypeLabel,
   getSamplingDigestionStatusLabel,
-  getSamplingOccasionLabel,
   samplingBatchStatusOptions,
   samplingChannelTypeOptions,
   samplingDigestionStatusOptions,
@@ -37,6 +36,13 @@ import {
   isSamplingRecordComplete,
   stringifyCommaSeparatedValues,
 } from './view-model/helpers'
+import {
+  buildDefaultSamplingOutfitPreviewSelection,
+  buildSamplingOutfitPreviewModel,
+  buildSamplingOutfitPreviewSelection,
+  buildSamplingPreviewSwatches,
+  type SamplingOutfitPreviewSelection,
+} from './view-model/outfit-preview'
 import { LlmGenerationForm } from '@/components/sampling/LlmGenerationForm'
 import { ImageExtractionForm } from '@/components/sampling/ImageExtractionForm'
 import {
@@ -59,43 +65,6 @@ const labelClassName = 'label-caps text-muted-foreground'
 const fieldShellClassName =
   'space-y-3 rounded-[20px] border border-[var(--dp-border-hairline)] bg-[rgba(247,243,242,0.88)] p-4'
 
-const semanticPreviewColorPresets = [
-  {
-    hex: '#F3EEE6',
-    keywords: ['壳白', '米白', '奶白', '乳白', '象牙白', '暖白', '白'],
-  },
-  {
-    hex: '#A9B7C4',
-    keywords: ['雾蓝', '灰蓝', '雾灰蓝', '蓝灰', 'steel blue', 'mist blue'],
-  },
-  {
-    hex: '#CCB79E',
-    keywords: ['浅卡其', '卡其', '沙色', '燕麦', '驼', 'camel', 'khaki', 'beige'],
-  },
-  {
-    hex: '#61656B',
-    keywords: ['炭灰', '深灰', '石墨', 'charcoal', 'graphite', '灰'],
-  },
-  {
-    hex: '#31445D',
-    keywords: ['藏蓝', '海军蓝', 'navy'],
-  },
-  {
-    hex: '#8E9780',
-    keywords: ['橄榄', '鼠尾草', 'sage', '军绿', '苔绿', 'olive'],
-  },
-  {
-    hex: '#7D6154',
-    keywords: ['咖', '棕', '可可', 'brown', 'mocha'],
-  },
-  {
-    hex: '#A05C56',
-    keywords: ['砖红', '赤陶', 'terracotta', 'rust'],
-  },
-] as const
-
-const fallbackPreviewHexes = ['#F3EEE6', '#A9B7C4', '#CCB79E'] as const
-
 interface SamplingBadgeProps {
   children: ReactNode
   tone?: 'default' | 'dark' | 'ok' | 'soft'
@@ -104,12 +73,6 @@ interface SamplingBadgeProps {
 interface SamplingEvidenceTimelineItem {
   detail: string
   title: string
-}
-
-interface SamplingPreviewSwatch {
-  hex: string
-  label: string
-  slot: string
 }
 
 function SamplingBadge({ children, tone = 'default' }: SamplingBadgeProps): ReactElement {
@@ -126,70 +89,6 @@ function SamplingBadge({ children, tone = 'default' }: SamplingBadgeProps): Reac
       {children}
     </span>
   )
-}
-
-function getFallbackPreviewHex(fallbackIndex: number): string {
-  if (fallbackIndex <= 0) {
-    return fallbackPreviewHexes[0]
-  }
-
-  if (fallbackIndex === 1) {
-    return fallbackPreviewHexes[1]
-  }
-
-  return fallbackPreviewHexes[2]
-}
-
-function resolveSemanticPreviewHex(label: string, fallbackIndex: number): string {
-  const trimmed = label.trim()
-
-  if (!trimmed) {
-    return getFallbackPreviewHex(fallbackIndex)
-  }
-
-  if (/^#(?:[\dA-F]{3}){1,2}$/i.test(trimmed)) {
-    return trimmed
-  }
-
-  const normalized = trimmed.toLowerCase()
-  const matchedPreset = semanticPreviewColorPresets.find((preset) =>
-    preset.keywords.some((keyword) => normalized.includes(keyword)),
-  )
-
-  return matchedPreset?.hex ?? getFallbackPreviewHex(fallbackIndex)
-}
-
-function buildSamplingPreviewSwatches(record: SamplingRecordDto): SamplingPreviewSwatch[] {
-  const seen = new Set<string>()
-  const candidates = [
-    { slot: '主色', label: record.primaryColorSummary ?? '' },
-    { slot: '次色', label: record.secondaryColorSummary ?? '' },
-    { slot: '点缀', label: record.accentColorSummary ?? '' },
-    ...record.colorSummary.map((label) => ({ slot: '综合色', label })),
-  ]
-
-  const swatches: SamplingPreviewSwatch[] = []
-
-  for (const candidate of candidates) {
-    const label = candidate.label.trim()
-
-    if (!label || seen.has(label)) {
-      continue
-    }
-
-    seen.add(label)
-    swatches.push({
-      hex: resolveSemanticPreviewHex(label, swatches.length),
-      label,
-      slot: candidate.slot,
-    })
-
-    if (swatches.length === 3) {
-      break
-    }
-  }
-
-  return swatches
 }
 
 function SamplingSection({
@@ -280,7 +179,21 @@ function ModalHeader({ description, onClose, title }: { description: string; onC
   )
 }
 
-function SamplingColorPreview({ record }: { record: SamplingRecordDto }): ReactElement | null {
+function SamplingColorPreview({
+  onBottomTemplateChange,
+  onDressTemplateChange,
+  onModeChange,
+  onTopTemplateChange,
+  previewSelection,
+  record,
+}: {
+  onBottomTemplateChange: (template: SamplingOutfitPreviewSelection['bottomTemplate']) => void
+  onDressTemplateChange: (template: SamplingOutfitPreviewSelection['dressTemplate']) => void
+  onModeChange: (mode: SamplingOutfitPreviewSelection['mode']) => void
+  onTopTemplateChange: (template: SamplingOutfitPreviewSelection['topTemplate']) => void
+  previewSelection: SamplingOutfitPreviewSelection
+  record: SamplingRecordDto
+}): ReactElement | null {
   const swatches = buildSamplingPreviewSwatches(record)
   const summaryTokens = record.colorSummary.filter((item) => item.trim()).slice(0, 4)
 
@@ -289,32 +202,27 @@ function SamplingColorPreview({ record }: { record: SamplingRecordDto }): ReactE
   }
 
   return (
-    <div className="rounded-[20px] border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] p-5">
+    <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-2">
-          <p className={labelClassName}>近似色盘预览</p>
+          <p className={labelClassName}>近似试穿预览</p>
           <p className="text-sm leading-6 text-muted-foreground">
-            根据当前候选的主色、次色、点缀色与综合色摘要推导，用来先看方向；最终 palette 以后续正式入库为准。
+            根据当前候选的主色、次色、点缀色与综合色摘要推导，用来先看穿搭方向；最终 palette 以后续正式入库为准。
           </p>
         </div>
         <SamplingBadge tone="soft">语义预览</SamplingBadge>
       </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-3">
-        {swatches.map((swatch, index) => (
-          <div key={`${record.samplingId}-${swatch.slot}-${index}`} className="overflow-hidden rounded-[18px] border border-[var(--dp-border-subtle)] bg-white">
-            <div className="h-24" style={{ backgroundColor: swatch.hex }} />
-            <div className="space-y-2 p-4">
-              <p className="label-caps text-muted-foreground">{swatch.slot}</p>
-              <p className="text-sm font-semibold text-foreground">{swatch.label}</p>
-              <p className="text-xs text-muted-foreground">{swatch.hex.toUpperCase()}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+      <OutfitPreview
+        model={buildSamplingOutfitPreviewModel(record, previewSelection)}
+        onBottomTemplateChange={onBottomTemplateChange}
+        onDressTemplateChange={onDressTemplateChange}
+        onModeChange={onModeChange}
+        onTopTemplateChange={onTopTemplateChange}
+      />
 
       {summaryTokens.length > 0 ? (
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2">
           {summaryTokens.map((item) => (
             <SamplingBadge key={`${record.samplingId}-${item}`} tone="soft">
               {item}
@@ -510,6 +418,7 @@ interface SamplingBatchUiState {
   isDuplicateCheckEnabled: boolean
   isGenerateConfirmOpen: boolean
   isReviewDrawerOpen: boolean
+  outfitPreviewSelection: SamplingOutfitPreviewSelection
   overviewFilter: SamplingOverviewFilter
 }
 
@@ -519,6 +428,7 @@ function buildSamplingBatchUiState(batchId: string | null): SamplingBatchUiState
     isDuplicateCheckEnabled: false,
     isGenerateConfirmOpen: false,
     isReviewDrawerOpen: false,
+    outfitPreviewSelection: buildDefaultSamplingOutfitPreviewSelection(),
     overviewFilter: 'all',
   }
 }
@@ -865,7 +775,6 @@ const WORKBENCH_TABS: Array<{ key: WorkbenchTab; label: string; icon: ReactEleme
 ]
 
 export function SamplingBatchesPage(): ReactElement {
-  const [searchParams] = useSearchParams()
   const [activeTab, setActiveTab] = useState<WorkbenchTab>('review')
   const [advancedRecordId, setAdvancedRecordId] = useState<string | null>(null)
   const [batchUiStateDraft, setBatchUiStateDraft] = useState<SamplingBatchUiState>(() => buildSamplingBatchUiState(null))
@@ -902,8 +811,6 @@ export function SamplingBatchesPage(): ReactElement {
     onSelectBatch,
     onSelectRecord,
     saveMessage,
-    samplingRun,
-    samplingRunEvents,
     selectedBatchId,
     selectedRecord,
     selectedRecordId,
@@ -916,12 +823,22 @@ export function SamplingBatchesPage(): ReactElement {
   const isAdvancedOpen = Boolean(selectedRecordId && advancedRecordId === selectedRecordId)
   const isDuplicateCheckEnabled = batchUiState.isDuplicateCheckEnabled
   const isReviewDrawerOpen = batchUiState.isReviewDrawerOpen
+  const outfitPreviewSelection = batchUiState.outfitPreviewSelection
   const overviewFilter = batchUiState.overviewFilter
 
   function updateBatchUiState(updater: (current: SamplingBatchUiState) => SamplingBatchUiState): void {
     setBatchUiStateDraft((current) =>
       updater(current.batchId === selectedBatchId ? current : buildSamplingBatchUiState(selectedBatchId)),
     )
+  }
+
+  function updateOutfitPreviewSelection(
+    updater: (current: SamplingOutfitPreviewSelection) => SamplingOutfitPreviewSelection,
+  ): void {
+    updateBatchUiState((current) => ({
+      ...current,
+      outfitPreviewSelection: updater(current.outfitPreviewSelection),
+    }))
   }
 
   const allClusters = buildSamplingPaletteClusters(draft?.items ?? [])
@@ -939,8 +856,14 @@ export function SamplingBatchesPage(): ReactElement {
     : 0
 
   function handleSelectRecord(samplingId: string): void {
+    const nextRecord = draft?.items.find((item) => item.samplingId === samplingId) ?? null
+
     onSelectRecord(samplingId)
     setAdvancedRecordId(null)
+
+    if (nextRecord) {
+      updateOutfitPreviewSelection(() => buildSamplingOutfitPreviewSelection(nextRecord))
+    }
   }
 
   function handleSelectBatch(batchId: string): void {
@@ -1464,7 +1387,34 @@ export function SamplingBatchesPage(): ReactElement {
                       </div>
                     </div>
 
-                    <SamplingColorPreview record={selectedRecord} />
+                    <SamplingColorPreview
+                      onBottomTemplateChange={(template) =>
+                        updateOutfitPreviewSelection((current) => ({
+                          ...current,
+                          bottomTemplate: template,
+                        }))
+                      }
+                      onDressTemplateChange={(template) =>
+                        updateOutfitPreviewSelection((current) => ({
+                          ...current,
+                          dressTemplate: template,
+                        }))
+                      }
+                      onModeChange={(mode) =>
+                        updateOutfitPreviewSelection((current) => ({
+                          ...current,
+                          mode,
+                        }))
+                      }
+                      onTopTemplateChange={(template) =>
+                        updateOutfitPreviewSelection((current) => ({
+                          ...current,
+                          topTemplate: template,
+                        }))
+                      }
+                      previewSelection={outfitPreviewSelection}
+                      record={selectedRecord}
+                    />
                     <SamplingEvidenceTimeline record={selectedRecord} />
 
                     <div className="grid gap-4 xl:grid-cols-2">
