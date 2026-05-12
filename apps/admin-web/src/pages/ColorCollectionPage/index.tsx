@@ -39,14 +39,14 @@ export function ColorCollectionPage(): ReactElement {
       )}
 
       {/* Tab bar */}
-      <div className="flex gap-1 rounded-lg bg-[var(--dp-fill-subtle)] p-1">
+      <div className="flex gap-1 rounded-full bg-[var(--dp-surface-soft)] p-1">
         {TAB_ITEMS.map((tab) => (
           <button
             key={tab.key}
-            className={`flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+            className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition ${
               vm.activeTab === tab.key
-                ? 'bg-[var(--dp-fill-surface)] text-[var(--dp-text-primary)] shadow-sm'
-                : 'text-[var(--dp-text-secondary)] hover:text-[var(--dp-text-primary)]'
+                ? 'bg-white text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
             disabled={vm.isGenerating}
             onClick={() => vm.setActiveTab(tab.key)}
@@ -61,8 +61,8 @@ export function ColorCollectionPage(): ReactElement {
       {/* Tab content */}
       <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
         {/* Left: form */}
-        <div className="rounded-xl border border-[var(--dp-border-subtle)] bg-[var(--dp-fill-surface)] p-5">
-          <h3 className="mb-4 text-sm font-semibold text-[var(--dp-text-primary)]">
+        <div className="rounded-xl border border-[var(--dp-border-subtle)] bg-white p-5">
+          <h3 className="mb-4 text-sm font-semibold text-foreground">
             {vm.activeTab === 'llm' ? '生成参数' : '图片上传'}
           </h3>
 
@@ -83,18 +83,18 @@ export function ColorCollectionPage(): ReactElement {
         </div>
 
         {/* Right: progress / result */}
-        <div className="rounded-xl border border-[var(--dp-border-subtle)] bg-[var(--dp-fill-surface)] p-5">
-          <h3 className="mb-4 text-sm font-semibold text-[var(--dp-text-primary)]">
+        <div className="rounded-xl border border-[var(--dp-border-subtle)] bg-white p-5">
+          <h3 className="mb-4 text-sm font-semibold text-foreground">
             生成进度
           </h3>
 
           {!vm.samplingRun && !vm.isGenerating && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Sparkles size={48} className="mb-3 text-[var(--dp-text-tertiary)]" />
-              <p className="text-sm text-[var(--dp-text-secondary)]">
+              <Sparkles size={48} className="mb-3 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">
                 填写参数后点击「开始生成」
               </p>
-              <p className="mt-1 text-xs text-[var(--dp-text-tertiary)]">
+              <p className="mt-1 text-xs text-muted-foreground">
                 LLM 将自动生成符合场景的穿搭配色记录
               </p>
             </div>
@@ -111,7 +111,7 @@ export function ColorCollectionPage(): ReactElement {
           {vm.generatedBatchId && !vm.isGenerating && (
             <div className="mt-4">
               <button
-                className="flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--dp-border-subtle)] bg-[var(--dp-fill-surface)] px-4 py-2.5 text-sm font-medium text-[var(--dp-text-primary)] transition-colors hover:bg-[var(--dp-fill-hover)]"
+                className="flex w-full items-center justify-center gap-2 rounded-full border border-[var(--dp-border-subtle)] bg-white px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-[var(--dp-fill-inverse)]"
                 onClick={() => navigate(`${workbenchPaths.samplingBatches}?batchId=${vm.generatedBatchId}`)}
                 type="button"
               >

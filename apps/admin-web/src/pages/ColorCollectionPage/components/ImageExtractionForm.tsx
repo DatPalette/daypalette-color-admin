@@ -79,12 +79,12 @@ export function ImageExtractionForm({ isDisabled, onSubmitUrls, onSubmitFiles }:
   return (
     <form className="space-y-5" onSubmit={handleSubmit}>
       {/* Input mode toggle */}
-      <div className="flex gap-1 rounded-lg bg-[var(--dp-fill-subtle)] p-1">
+      <div className="flex gap-1 rounded-full bg-[var(--dp-surface-soft)] p-1">
         <button
-          className={`flex items-center gap-1.5 flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+          className={`flex items-center gap-1.5 flex-1 rounded-full px-3 py-1.5 text-sm font-medium transition ${
             inputMode === 'url'
-              ? 'bg-[var(--dp-fill-surface)] text-[var(--dp-text-primary)] shadow-sm'
-              : 'text-[var(--dp-text-secondary)] hover:text-[var(--dp-text-primary)]'
+              ? 'bg-white text-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground'
           }`}
           disabled={isDisabled}
           onClick={() => setInputMode('url')}
@@ -94,10 +94,10 @@ export function ImageExtractionForm({ isDisabled, onSubmitUrls, onSubmitFiles }:
           URL 输入
         </button>
         <button
-          className={`flex items-center gap-1.5 flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+          className={`flex items-center gap-1.5 flex-1 rounded-full px-3 py-1.5 text-sm font-medium transition ${
             inputMode === 'upload'
-              ? 'bg-[var(--dp-fill-surface)] text-[var(--dp-text-primary)] shadow-sm'
-              : 'text-[var(--dp-text-secondary)] hover:text-[var(--dp-text-primary)]'
+              ? 'bg-white text-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground'
           }`}
           disabled={isDisabled}
           onClick={() => setInputMode('upload')}
@@ -117,10 +117,10 @@ export function ImageExtractionForm({ isDisabled, onSubmitUrls, onSubmitFiles }:
           {OCCASION_OPTIONS.map((option) => (
             <button
               key={option.value}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+              className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
                 occasionId === option.value
-                  ? 'bg-[var(--dp-fill-inverse)] text-[var(--dp-text-primary)]'
-                  : 'bg-[var(--dp-fill-subtle)] text-[var(--dp-text-secondary)] hover:bg-[var(--dp-fill-hover)]'
+                  ? 'border-[var(--dp-fill-inverse)] bg-[var(--dp-fill-inverse)] text-[var(--dp-text-on-inverse)]'
+                  : 'border-[var(--dp-border-subtle)] bg-white text-foreground hover:border-[var(--dp-fill-inverse)]'
               }`}
               disabled={isDisabled}
               onClick={() => handleOccasionChange(option.value)}
@@ -138,7 +138,7 @@ export function ImageExtractionForm({ isDisabled, onSubmitUrls, onSubmitFiles }:
           主题方向
         </label>
         <select
-          className="w-full rounded-lg border border-[var(--dp-border-subtle)] bg-[var(--dp-fill-surface)] px-3 py-2 text-sm text-[var(--dp-text-primary)] focus:border-[var(--dp-border-focus)] focus:outline-none"
+          className="w-full rounded-lg border border-[var(--dp-border-subtle)] bg-white px-3 py-2 text-sm text-foreground focus:border-[var(--dp-outline)] focus:outline-none"
           disabled={isDisabled}
           onChange={(e) => setThemeKey(e.target.value)}
           value={themeKey}
@@ -158,7 +158,7 @@ export function ImageExtractionForm({ isDisabled, onSubmitUrls, onSubmitFiles }:
             图片 URL（每行一个）
           </label>
           <textarea
-            className="w-full rounded-lg border border-[var(--dp-border-subtle)] bg-[var(--dp-fill-surface)] px-3 py-2 text-sm text-[var(--dp-text-primary)] placeholder:text-[var(--dp-text-tertiary)] focus:border-[var(--dp-border-focus)] focus:outline-none font-mono"
+            className="w-full rounded-lg border border-[var(--dp-border-subtle)] bg-white px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-[var(--dp-outline)] focus:outline-none font-mono"
             disabled={isDisabled}
             onChange={(e) => setUrlText(e.target.value)}
             placeholder={'https://example.com/outfit1.jpg\nhttps://example.com/outfit2.jpg'}
@@ -171,9 +171,9 @@ export function ImageExtractionForm({ isDisabled, onSubmitUrls, onSubmitFiles }:
           <label className="block text-xs font-medium text-[var(--dp-text-secondary)]">
             上传图片（最多 20 张）
           </label>
-          <label className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[var(--dp-border-subtle)] bg-[var(--dp-fill-surface)] p-6 text-center cursor-pointer hover:border-[var(--dp-border-focus)] transition-colors">
-            <Upload size={24} className="text-[var(--dp-text-tertiary)]" />
-            <span className="text-sm text-[var(--dp-text-secondary)]">
+          <label className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] p-6 text-center cursor-pointer hover:border-[var(--dp-outline)] transition-colors">
+            <Upload size={24} className="text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">
               点击或拖拽图片到这里
             </span>
             <input
@@ -195,7 +195,7 @@ export function ImageExtractionForm({ isDisabled, onSubmitUrls, onSubmitFiles }:
 
       {/* Submit */}
       <button
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--dp-accent)] px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--dp-fill-inverse)] px-4 py-2.5 text-sm font-medium text-[var(--dp-text-on-inverse)] transition-opacity hover:opacity-90 disabled:opacity-50"
         disabled={isDisabled || (inputMode === 'url' ? !urlText.trim() : files.length === 0)}
         type="submit"
       >

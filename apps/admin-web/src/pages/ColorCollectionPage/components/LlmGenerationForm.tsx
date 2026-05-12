@@ -1,5 +1,5 @@
 import { useState, type ReactElement } from 'react'
-import { Sparkles } from 'lucide-react'
+import { Check, Sparkles } from 'lucide-react'
 import type { LlmBatchGenerateParams } from '@daypalette-color-admin/contracts'
 import { samplingOccasionLabelMap } from '@/models/sampling-batches/sampling-batch-constants'
 
@@ -78,10 +78,10 @@ export function LlmGenerationForm({ isDisabled, onSubmit }: LlmGenerationFormPro
           {OCCASION_OPTIONS.map((option) => (
             <button
               key={option.value}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+              className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
                 occasionId === option.value
-                  ? 'bg-[var(--dp-fill-inverse)] text-[var(--dp-text-primary)]'
-                  : 'bg-[var(--dp-fill-subtle)] text-[var(--dp-text-secondary)] hover:bg-[var(--dp-fill-hover)]'
+                  ? 'border-[var(--dp-fill-inverse)] bg-[var(--dp-fill-inverse)] text-[var(--dp-text-on-inverse)]'
+                  : 'border-[var(--dp-border-subtle)] bg-white text-foreground hover:border-[var(--dp-fill-inverse)]'
               }`}
               disabled={isDisabled}
               onClick={() => handleOccasionChange(option.value)}
@@ -99,21 +99,25 @@ export function LlmGenerationForm({ isDisabled, onSubmit }: LlmGenerationFormPro
           主题方向（可多选）
         </label>
         <div className="flex flex-wrap gap-2">
-          {filteredThemes.map((theme) => (
-            <button
-              key={theme.value}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                selectedThemes.includes(theme.value)
-                  ? 'bg-[var(--dp-accent)] text-white'
-                  : 'bg-[var(--dp-fill-subtle)] text-[var(--dp-text-secondary)] hover:bg-[var(--dp-fill-hover)]'
-              }`}
-              disabled={isDisabled}
-              onClick={() => toggleTheme(theme.value)}
-              type="button"
-            >
-              {theme.label}
-            </button>
-          ))}
+          {filteredThemes.map((theme) => {
+            const isSelected = selectedThemes.includes(theme.value)
+            return (
+              <button
+                key={theme.value}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+                  isSelected
+                    ? 'border-[var(--dp-fill-inverse)] bg-[var(--dp-fill-inverse)] text-[var(--dp-text-on-inverse)]'
+                    : 'border-[var(--dp-border-subtle)] bg-white text-foreground hover:border-[var(--dp-fill-inverse)]'
+                }`}
+                disabled={isDisabled}
+                onClick={() => toggleTheme(theme.value)}
+                type="button"
+              >
+                {isSelected && <Check size={14} />}
+                {theme.label}
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -144,7 +148,7 @@ export function LlmGenerationForm({ isDisabled, onSubmit }: LlmGenerationFormPro
           风格约束（可选）
         </label>
         <textarea
-          className="w-full rounded-lg border border-[var(--dp-border-subtle)] bg-[var(--dp-fill-surface)] px-3 py-2 text-sm text-[var(--dp-text-primary)] placeholder:text-[var(--dp-text-tertiary)] focus:border-[var(--dp-border-focus)] focus:outline-none"
+          className="w-full rounded-lg border border-[var(--dp-border-subtle)] bg-white px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-[var(--dp-outline)] focus:outline-none"
           disabled={isDisabled}
           onChange={(e) => setStyleConstraints(e.target.value)}
           placeholder="例如：偏好莫兰迪色系、避免高饱和度、适合 30+ 轻熟风"
@@ -155,7 +159,7 @@ export function LlmGenerationForm({ isDisabled, onSubmit }: LlmGenerationFormPro
 
       {/* Submit */}
       <button
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--dp-accent)] px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--dp-fill-inverse)] px-4 py-2.5 text-sm font-medium text-[var(--dp-text-on-inverse)] transition-opacity hover:opacity-90 disabled:opacity-50"
         disabled={isDisabled || selectedThemes.length === 0}
         onClick={handleSubmit}
         type="button"
