@@ -84,6 +84,19 @@ function buildSamplingBatchSummary(
   };
 }
 
+function normalizeLoadedDocument(
+  document: SamplingBatchDocument,
+): SamplingBatchDocument {
+  return {
+    ...document,
+    items: document.items.map((item) => ({
+      ...item,
+      occasionId: document.batch.occasionId,
+      productionBatchId: document.batch.id,
+    })),
+  };
+}
+
 function buildCollection(
   items: SamplingBatchDocument[],
 ): SamplingBatchCollectionDocument {
@@ -336,9 +349,11 @@ export class SamplingBatchesService {
   private attachDerivedSummary(
     document: SamplingBatchDocument,
   ): SamplingBatchDocument {
+    const normalizedDocument = normalizeLoadedDocument(document);
+
     return {
-      ...document,
-      summary: buildSamplingBatchSummary(document.items),
+      ...normalizedDocument,
+      summary: buildSamplingBatchSummary(normalizedDocument.items),
     };
   }
 

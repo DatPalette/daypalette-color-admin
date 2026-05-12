@@ -817,6 +817,7 @@ function SamplingPaletteWallCard({
               <div className="space-y-1 p-3">
                 <p className="label-caps text-muted-foreground">{swatch.slot}</p>
                 <p className="text-sm font-semibold text-foreground">{swatch.label}</p>
+                <p className="text-xs text-muted-foreground">{swatch.hex.toUpperCase()}</p>
               </div>
             </div>
           ))

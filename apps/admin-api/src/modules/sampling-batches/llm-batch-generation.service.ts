@@ -88,6 +88,7 @@ export class LlmBatchGenerationService {
 
       const records = await this.callLlmForRecords({
         apiKey,
+        batchId,
         model,
         baseUrl,
         params,
@@ -109,6 +110,7 @@ export class LlmBatchGenerationService {
 
   private async callLlmForRecords(context: {
     apiKey: string
+    batchId: string
     model: string
     baseUrl: string
     params: LlmBatchGenerateParams
@@ -117,8 +119,7 @@ export class LlmBatchGenerationService {
     categories: string[]
     batchIndex: number
   }): Promise<SamplingRecord[]> {
-    const { apiKey, model, baseUrl, params, count, startIndex, categories, batchIndex } = context
-    const batchId = this.buildBatchId(params)
+    const { apiKey, batchId, model, baseUrl, params, count, startIndex, categories, batchIndex } = context
     const occasionLabel = OCCASION_LABEL_MAP[params.occasionId] ?? params.occasionId
     const themeLabels = params.themeKeys.map((k) => THEME_LABEL_MAP[k] ?? k).join('、')
 
