@@ -102,3 +102,54 @@
 ## 6. 当前建议
 
 当前不建议继续把时间投入到在线文生图试错上。最有效的下一步是严格按 [`palette-outfit-preview-asset-generation-guide.md`](./palette-outfit-preview-asset-generation-guide.md) 执行：先做矢量资产 shortlist，再只跑三个试运行模板，验证路线后再扩展范围。
+
+## 7. 下次开工直接做什么
+
+为避免下次继续发散，下一步按下面顺序执行，不再并行开新分支任务。
+
+### 7.1 第一步：先做资产 shortlist
+
+1. 打开 `palette-outfit-preview-asset-generation-guide.md`，按文档里的渠道开始搜候选矢量人物资产。
+2. 先只收 `8` 到 `12` 个候选，不做模板改造，不继续修现有 SVG path。
+3. 每个候选至少记录来源、链接、授权状态、是否可编辑、是否单人女性全身、是否可做服装分区。
+
+本步完成标准：
+
+1. 已形成一份可回看的 shortlist。
+2. 已从中筛出 `3` 个可进入深筛的候选。
+
+### 7.2 第二步：从 shortlist 里选一个母版
+
+1. 对 shortlist 前 `3` 个候选做 Figma 可编辑性检查。
+2. 优先选“服装本来就分层、几乎不用重画”的那一个。
+3. 一旦确认母版，就冻结方向，不再继续横向试新的 AI 出图方案。
+
+本步完成标准：
+
+1. 已确认 `1` 个 `croquis master` 候选。
+2. 已明确它能否支撑 `short-sleeve`、`trousers`、`midi-dress` 三个试运行模板。
+
+### 7.3 第三步：只做三个试运行模板
+
+1. 基于选中的母版，先产出 `short-sleeve`。
+2. 基于选中的母版，先产出 `trousers`。
+3. 基于选中的母版，先产出 `midi-dress`。
+4. 为这三个模板分别标出 `main / secondary / accent` 区域。
+
+本步完成标准：
+
+1. 已拿到 `3` 个可编辑 SVG。
+2. 已能说明每个模板的三色映射区域。
+3. 已能判断这条资产路线是否值得继续扩到全部模板。
+
+### 7.4 第四步：再回到代码
+
+只有前三步完成后，才进入代码侧下一轮工作：
+
+1. 替换 `apps/admin-web/src/components/outfit-preview/outfit-preview.templates.ts` 中当前手写 path。
+2. 视最终母版结构决定是否调整 `female-line-v1`。
+3. 再推进 `PalettesPage` 的详情视图接入。
+
+## 8. 交接备注
+
+当前代码已经提交完成，今天下班前不需要再继续改前端实现。下次继续时，直接从“资产 shortlist”开始，不要回头再修当前手写模特轮廓。
