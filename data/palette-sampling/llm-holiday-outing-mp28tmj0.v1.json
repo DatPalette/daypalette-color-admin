@@ -1,0 +1,668 @@
+{
+  "batch": {
+    "id": "llm-holiday-outing-mp28tmj0",
+    "titleZh": "清风户外 LLM 批量生成 20 条",
+    "occasionId": "holiday-outing",
+    "status": "collecting",
+    "themeKeys": [
+      "holiday-sunlit-escape",
+      "nature-earth-walk",
+      "coastal-breeze-holiday",
+      "adventure-sport-outdoor"
+    ],
+    "sourceWhitelistIds": [
+      "brand-site",
+      "brand-flagship-store",
+      "multi-brand-platform",
+      "marketplace-brand-store"
+    ],
+    "notes": "由 LLM 批量生成，共 20 条记录。"
+  },
+  "items": [
+    {
+      "samplingId": "sam_holiday-outing_llm_001",
+      "productionBatchId": "llm-holiday-outing-mp28tmj0",
+      "occasionId": "holiday-outing",
+      "themeKey": "holiday-sunlit-escape",
+      "themeLabelZh": "假日阳光逃逸",
+      "brandName": "The North Face",
+      "channelType": "brand-flagship-store",
+      "platform": "天猫旗舰店",
+      "sourceUrl": "",
+      "sourceId": "candidate-the-north-face-jacket-sam_holiday-outing_llm_001",
+      "observedAt": "2026-05-12",
+      "itemCategory": "jacket",
+      "colorSummary": [
+        "奶油白",
+        "珊瑚橙"
+      ],
+      "primaryColorSummary": "沙色",
+      "secondaryColorSummary": "奶油白",
+      "accentColorSummary": "珊瑚橙",
+      "digestionStatus": "sampled",
+      "candidatePaletteIds": [],
+      "finalPaletteIds": [],
+      "styleSignals": [
+        "earthy",
+        "clean",
+        "warm"
+      ],
+      "marketSignals": "柔和大地色系适合假日轻度徒步",
+      "notes": "沙色夹克搭配奶油白内搭，珊瑚橙配饰点亮整体",
+      "seasonHint": "spring"
+    },
+    {
+      "samplingId": "sam_holiday-outing_llm_002",
+      "productionBatchId": "llm-holiday-outing-mp28tmj0",
+      "occasionId": "holiday-outing",
+      "themeKey": "nature-earth-walk",
+      "themeLabelZh": "自然大地漫步",
+      "brandName": "Patagonia",
+      "channelType": "multi-brand-platform",
+      "platform": "REI多品平台",
+      "sourceUrl": "",
+      "sourceId": "candidate-patagonia-fleece-sam_holiday-outing_llm_002",
+      "observedAt": "2026-05-12",
+      "itemCategory": "fleece",
+      "colorSummary": [
+        "燕麦色",
+        "深苔绿"
+      ],
+      "primaryColorSummary": "鼠尾草绿",
+      "secondaryColorSummary": "燕麦色",
+      "accentColorSummary": "深苔绿",
+      "digestionStatus": "sampled",
+      "candidatePaletteIds": [],
+      "finalPaletteIds": [],
+      "styleSignals": [
+        "earthy",
+        "calm",
+        "minimal"
+      ],
+      "marketSignals": "自然灵感配色，环保面料，适合大地漫步",
+      "notes": "鼠尾草绿抓绒衣配燕麦色裤子，深苔绿围巾增加层次",
+      "seasonHint": "autumn"
+    },
+    {
+      "samplingId": "sam_holiday-outing_llm_003",
+      "productionBatchId": "llm-holiday-outing-mp28tmj0",
+      "occasionId": "holiday-outing",
+      "themeKey": "coastal-breeze-holiday",
+      "themeLabelZh": "海风假日",
+      "brandName": "Arc'teryx",
+      "channelType": "brand-site",
+      "platform": "始祖鸟官网",
+      "sourceUrl": "",
+      "sourceId": "candidate-arc'teryx-windbreaker-sam_holiday-outing_llm_003",
+      "observedAt": "2026-05-12",
+      "itemCategory": "windbreaker",
+      "colorSummary": [
+        "烟灰",
+        "荧光黄"
+      ],
+      "primaryColorSummary": "雾灰蓝",
+      "secondaryColorSummary": "烟灰",
+      "accentColorSummary": "荧光黄",
+      "digestionStatus": "sampled",
+      "candidatePaletteIds": [],
+      "finalPaletteIds": [],
+      "styleSignals": [
+        "urban",
+        "cool",
+        "bold"
+      ],
+      "marketSignals": "都市机能风，微光可见度设计",
+      "notes": "雾灰蓝风衣配烟灰工装裤，荧光黄袜子细节亮眼",
+      "seasonHint": "winter"
+    },
+    {
+      "samplingId": "sam_holiday-outing_llm_004",
+      "productionBatchId": "llm-holiday-outing-mp28tmj0",
+      "occasionId": "holiday-outing",
+      "themeKey": "adventure-sport-outdoor",
+      "themeLabelZh": "探险运动户外",
+      "brandName": "Columbia",
+      "channelType": "brand-flagship-store",
+      "platform": "京东自营",
+      "sourceUrl": "",
+      "sourceId": "candidate-columbia-parka-sam_holiday-outing_llm_004",
+      "observedAt": "2026-05-12",
+      "itemCategory": "parka",
+      "colorSummary": [
+        "云白",
+        "暖阳黄"
+      ],
+      "primaryColorSummary": "海军蓝",
+      "secondaryColorSummary": "云白",
+      "accentColorSummary": "暖阳黄",
+      "digestionStatus": "sampled",
+      "candidatePaletteIds": [],
+      "finalPaletteIds": [],
+      "styleSignals": [
+        "fresh",
+        "sport",
+        "clean"
+      ],
+      "marketSignals": "海风假日防风外套，经典海洋配色",
+      "notes": "海军蓝派克大衣内搭云白卫衣，暖阳黄棒球帽注入活力",
+      "seasonHint": "summer"
+    },
+    {
+      "samplingId": "sam_holiday-outing_llm_005",
+      "productionBatchId": "llm-holiday-outing-mp28tmj0",
+      "occasionId": "holiday-outing",
+      "themeKey": "holiday-sunlit-escape",
+      "themeLabelZh": "假日阳光逃逸",
+      "brandName": "Salomon",
+      "channelType": "multi-brand-platform",
+      "platform": "三夫户外多品",
+      "sourceUrl": "",
+      "sourceId": "candidate-salomon-hiking-shoes-sam_holiday-outing_llm_005",
+      "observedAt": "2026-05-12",
+      "itemCategory": "hiking-shoes",
+      "colorSummary": [
+        "奶油杏",
+        "松石绿"
+      ],
+      "primaryColorSummary": "焦糖棕",
+      "secondaryColorSummary": "奶油杏",
+      "accentColorSummary": "松石绿",
+      "digestionStatus": "sampled",
+      "candidatePaletteIds": [],
+      "finalPaletteIds": [],
+      "styleSignals": [
+        "earthy",
+        "warm",
+        "playful"
+      ],
+      "marketSignals": "探险鞋履，大地色系与亮色点缀",
+      "notes": "焦糖棕登山鞋配奶油杏裤装，松石绿袜子有趣味",
+      "seasonHint": "autumn"
+    },
+    {
+      "samplingId": "sam_holiday-outing_llm_006",
+      "productionBatchId": "llm-holiday-outing-mp28tmj0",
+      "occasionId": "holiday-outing",
+      "themeKey": "nature-earth-walk",
+      "themeLabelZh": "自然大地漫步",
+      "brandName": "Mammut",
+      "channelType": "brand-site",
+      "platform": "猛犸象官网",
+      "sourceUrl": "",
+      "sourceId": "candidate-mammut-backpack-sam_holiday-outing_llm_006",
+      "observedAt": "2026-05-12",
+      "itemCategory": "backpack",
+      "colorSummary": [
+        "熔岩红",
+        "钛灰"
+      ],
+      "primaryColorSummary": "石墨黑",
+      "secondaryColorSummary": "熔岩红",
+      "accentColorSummary": "钛灰",
+      "digestionStatus": "sampled",
+      "candidatePaletteIds": [],
+      "finalPaletteIds": [],
+      "styleSignals": [
+        "bold",
+        "sport",
+        "cool"
+      ],
+      "marketSignals": "高山探险背包，黑红经典色",
+      "notes": "石墨黑背包搭配熔岩红细节，适合硬核户外",
+      "seasonHint": "winter"
+    },
+    {
+      "samplingId": "sam_holiday-outing_llm_007",
+      "productionBatchId": "llm-holiday-outing-mp28tmj0",
+      "occasionId": "holiday-outing",
+      "themeKey": "coastal-breeze-holiday",
+      "themeLabelZh": "海风假日",
+      "brandName": "Nike ACG",
+      "channelType": "marketplace-brand-store",
+      "platform": "天猫品牌旗舰店",
+      "sourceUrl": "",
+      "sourceId": "candidate-nike-acg-cargo-pants-sam_holiday-outing_llm_007",
+      "observedAt": "2026-05-12",
+      "itemCategory": "cargo-pants",
+      "colorSummary": [
+        "橄榄绿",
+        "电光紫"
+      ],
+      "primaryColorSummary": "石洗卡其",
+      "secondaryColorSummary": "橄榄绿",
+      "accentColorSummary": "电光紫",
+      "digestionStatus": "sampled",
+      "candidatePaletteIds": [],
+      "finalPaletteIds": [],
+      "styleSignals": [
+        "urban",
+        "playful",
+        "bold"
+      ],
+      "marketSignals": "城市探索工装裤，潮流拼色",
+      "notes": "石洗卡其工装裤配橄榄绿T恤，电光紫腰包点缀",
+      "seasonHint": "spring"
+    },
+    {
+      "samplingId": "sam_holiday-outing_llm_008",
+      "productionBatchId": "llm-holiday-outing-mp28tmj0",
+      "occasionId": "holiday-outing",
+      "themeKey": "adventure-sport-outdoor",
+      "themeLabelZh": "探险运动户外",
+      "brandName": "Lululemon",
+      "channelType": "brand-flagship-store",
+      "platform": "Lululemon天猫旗舰店",
+      "sourceUrl": "",
+      "sourceId": "candidate-lululemon-vest-sam_holiday-outing_llm_008",
+      "observedAt": "2026-05-12",
+      "itemCategory": "vest",
+      "colorSummary": [
+        "灰白",
+        "嫩芽绿"
+      ],
+      "primaryColorSummary": "浅雾紫",
+      "secondaryColorSummary": "灰白",
+      "accentColorSummary": "嫩芽绿",
+      "digestionStatus": "sampled",
+      "candidatePaletteIds": [],
+      "finalPaletteIds": [],
+      "styleSignals": [
+        "soft",
+        "romantic",
+        "fresh"
+      ],
+      "marketSignals": "轻运动马甲，温柔淡彩",
+      "notes": "浅雾紫马甲搭灰白瑜伽裤，嫩芽绿发带清新",
+      "seasonHint": "spring"
+    },
+    {
+      "samplingId": "sam_holiday-outing_llm_009",
+      "productionBatchId": "llm-holiday-outing-mp28tmj0",
+      "occasionId": "holiday-outing",
+      "themeKey": "holiday-sunlit-escape",
+      "themeLabelZh": "假日阳光逃逸",
+      "brandName": "Jack Wolfskin",
+      "channelType": "multi-brand-platform",
+      "platform": "亚马逊户外专营",
+      "sourceUrl": "",
+      "sourceId": "candidate-jack-wolfskin-shorts-sam_holiday-outing_llm_009",
+      "observedAt": "2026-05-12",
+      "itemCategory": "shorts",
+      "colorSummary": [
+        "浅驼",
+        "贝壳粉"
+      ],
+      "primaryColorSummary": "沙丘米",
+      "secondaryColorSummary": "浅驼",
+      "accentColorSummary": "贝壳粉",
+      "digestionStatus": "sampled",
+      "candidatePaletteIds": [],
+      "finalPaletteIds": [],
+      "styleSignals": [
+        "earthy",
+        "calm",
+        "clean"
+      ],
+      "marketSignals": "沙滩度假短裤，温暖沙色系",
+      "notes": "沙丘米短裤配浅驼上衣，贝壳粉丝巾添女性气质",
+      "seasonHint": "summer"
+    },
+    {
+      "samplingId": "sam_holiday-outing_llm_010",
+      "productionBatchId": "llm-holiday-outing-mp28tmj0",
+      "occasionId": "holiday-outing",
+      "themeKey": "nature-earth-walk",
+      "themeLabelZh": "自然大地漫步",
+      "brandName": "Houdini",
+      "channelType": "brand-site",
+      "platform": "Houdini中国官网",
+      "sourceUrl": "",
+      "sourceId": "candidate-houdini-polo-sam_holiday-outing_llm_010",
+      "observedAt": "2026-05-12",
+      "itemCategory": "polo",
+      "colorSummary": [
+        "岩石灰",
+        "琥珀黄"
+      ],
+      "primaryColorSummary": "雪松绿",
+      "secondaryColorSummary": "岩石灰",
+      "accentColorSummary": "琥珀黄",
+      "digestionStatus": "sampled",
+      "candidatePaletteIds": [],
+      "finalPaletteIds": [],
+      "styleSignals": [
+        "clean",
+        "minimal",
+        "cool"
+      ],
+      "marketSignals": "可持续户外Polo衫，自然静谧色",
+      "notes": "雪松绿Polo配岩石灰短裤，琥珀黄腰带点睛",
+      "seasonHint": "summer"
+    },
+    {
+      "samplingId": "sam_holiday-outing_llm_011",
+      "productionBatchId": "llm-holiday-outing-mp28tmj0",
+      "occasionId": "holiday-outing",
+      "themeKey": "coastal-breeze-holiday",
+      "themeLabelZh": "海风假日",
+      "brandName": "Patagonia",
+      "channelType": "brand-flagship-store",
+      "platform": "Patagonia天猫旗舰店",
+      "sourceUrl": "",
+      "sourceId": "candidate-patagonia-fleece-sam_holiday-outing_llm_011",
+      "observedAt": "2026-05-12",
+      "itemCategory": "fleece",
+      "colorSummary": [
+        "冰川白"
+      ],
+      "primaryColorSummary": "雾灰蓝",
+      "secondaryColorSummary": "冰川白",
+      "accentColorSummary": "珊瑚粉",
+      "digestionStatus": "sampled",
+      "candidatePaletteIds": [],
+      "finalPaletteIds": [],
+      "styleSignals": [
+        "earthy",
+        "warm",
+        "clean"
+      ],
+      "marketSignals": "以大地色系传递温暖与信任感，吸引注重环保与品质的轻户外女性。",
+      "notes": "冰川白辅色平衡雾灰蓝的冷静，珊瑚粉点缀增添女性柔美，适合春日山野漫步。",
+      "seasonHint": "spring"
+    },
+    {
+      "samplingId": "sam_holiday-outing_llm_012",
+      "productionBatchId": "llm-holiday-outing-mp28tmj0",
+      "occasionId": "holiday-outing",
+      "themeKey": "adventure-sport-outdoor",
+      "themeLabelZh": "探险运动户外",
+      "brandName": "The North Face",
+      "channelType": "brand-site",
+      "platform": "thenorthface.com.cn",
+      "sourceUrl": "",
+      "sourceId": "candidate-the-north-face-windbreaker-sam_holiday-outing_llm_012",
+      "observedAt": "2026-05-12",
+      "itemCategory": "windbreaker",
+      "colorSummary": [
+        "沙色",
+        "深橄榄绿"
+      ],
+      "primaryColorSummary": "燕麦驼",
+      "secondaryColorSummary": "沙色",
+      "accentColorSummary": "深橄榄绿",
+      "digestionStatus": "sampled",
+      "candidatePaletteIds": [],
+      "finalPaletteIds": [],
+      "styleSignals": [
+        "urban",
+        "minimal",
+        "calm"
+      ],
+      "marketSignals": "极简中性色调契合都市女性户外通勤需求，经典不过时。",
+      "notes": "燕麦驼与沙色营造高级层次感，深橄榄绿拉链或抽绳点缀，内搭白色针织更显清爽。",
+      "seasonHint": "spring"
+    },
+    {
+      "samplingId": "sam_holiday-outing_llm_013",
+      "productionBatchId": "llm-holiday-outing-mp28tmj0",
+      "occasionId": "holiday-outing",
+      "themeKey": "holiday-sunlit-escape",
+      "themeLabelZh": "假日阳光逃逸",
+      "brandName": "Arc'teryx",
+      "channelType": "multi-brand-platform",
+      "platform": "REI.com",
+      "sourceUrl": "",
+      "sourceId": "candidate-arc'teryx-jacket-sam_holiday-outing_llm_013",
+      "observedAt": "2026-05-12",
+      "itemCategory": "jacket",
+      "colorSummary": [
+        "雾紫"
+      ],
+      "primaryColorSummary": "石墨灰",
+      "secondaryColorSummary": "雾紫",
+      "accentColorSummary": "荧光黄",
+      "digestionStatus": "sampled",
+      "candidatePaletteIds": [],
+      "finalPaletteIds": [],
+      "styleSignals": [
+        "sport",
+        "bold",
+        "tailored"
+      ],
+      "marketSignals": "科技感撞色彰显专业户外基因，吸引追求高性能与个性的年轻女性。",
+      "notes": "石墨灰主调沉稳，雾紫拼接打破沉闷，荧光黄logo或拉链头作为安全亮色，适合多雨山区徒步。",
+      "seasonHint": "summer"
+    },
+    {
+      "samplingId": "sam_holiday-outing_llm_014",
+      "productionBatchId": "llm-holiday-outing-mp28tmj0",
+      "occasionId": "holiday-outing",
+      "themeKey": "nature-earth-walk",
+      "themeLabelZh": "自然大地漫步",
+      "brandName": "Columbia",
+      "channelType": "marketplace-brand-store",
+      "platform": "京东哥伦比亚官方旗舰店",
+      "sourceUrl": "",
+      "sourceId": "candidate-columbia-vest-sam_holiday-outing_llm_014",
+      "observedAt": "2026-05-12",
+      "itemCategory": "vest",
+      "colorSummary": [
+        "海沫绿"
+      ],
+      "primaryColorSummary": "深海蓝",
+      "secondaryColorSummary": "海沫绿",
+      "accentColorSummary": "暖杏",
+      "digestionStatus": "sampled",
+      "candidatePaletteIds": [],
+      "finalPaletteIds": [],
+      "styleSignals": [
+        "fresh",
+        "clean",
+        "soft"
+      ],
+      "marketSignals": "海洋灵感配色带来清新呼吸感，适合阳光海岸线轻探险。",
+      "notes": "深海蓝羽绒背心搭配白色长袖T恤，海沫绿内衬若隐若现，暖杏色围巾增加柔美度。",
+      "seasonHint": "autumn"
+    },
+    {
+      "samplingId": "sam_holiday-outing_llm_015",
+      "productionBatchId": "llm-holiday-outing-mp28tmj0",
+      "occasionId": "holiday-outing",
+      "themeKey": "coastal-breeze-holiday",
+      "themeLabelZh": "海风假日",
+      "brandName": "Lululemon",
+      "channelType": "brand-flagship-store",
+      "platform": "Lululemon天猫旗舰店",
+      "sourceUrl": "",
+      "sourceId": "candidate-lululemon-shorts-sam_holiday-outing_llm_015",
+      "observedAt": "2026-05-12",
+      "itemCategory": "shorts",
+      "colorSummary": [
+        "浅灰褐",
+        "薄荷绿"
+      ],
+      "primaryColorSummary": "亚麻白",
+      "secondaryColorSummary": "浅灰褐",
+      "accentColorSummary": "薄荷绿",
+      "digestionStatus": "rejected",
+      "candidatePaletteIds": [],
+      "finalPaletteIds": [],
+      "styleSignals": [
+        "romantic",
+        "playful",
+        "urban"
+      ],
+      "marketSignals": "柔和莫兰迪色系模糊运动与休闲边界，吸引都市周末轻户外女性。",
+      "notes": "亚麻白短裤搭配浅灰褐运动背心，薄荷绿腰带或发带呼应，轻松应对海边骑行或沙滩瑜伽。",
+      "seasonHint": "summer"
+    },
+    {
+      "samplingId": "sam_holiday-outing_llm_016",
+      "productionBatchId": "llm-holiday-outing-mp28tmj0",
+      "occasionId": "holiday-outing",
+      "themeKey": "adventure-sport-outdoor",
+      "themeLabelZh": "探险运动户外",
+      "brandName": "Fjallraven",
+      "channelType": "brand-site",
+      "platform": "fjallraven.com.cn",
+      "sourceUrl": "",
+      "sourceId": "candidate-fjallraven-backpack-sam_holiday-outing_llm_016",
+      "observedAt": "2026-05-12",
+      "itemCategory": "backpack",
+      "colorSummary": [
+        "焦糖棕"
+      ],
+      "primaryColorSummary": "军绿",
+      "secondaryColorSummary": "焦糖棕",
+      "accentColorSummary": "奶油粉",
+      "digestionStatus": "sampled",
+      "candidatePaletteIds": [],
+      "finalPaletteIds": [],
+      "styleSignals": [
+        "earthy",
+        "warm",
+        "outdoor"
+      ],
+      "marketSignals": "复古大地配色传递自然探险精神，契合可持续生活理念。",
+      "notes": "军绿背包主体搭配焦糖棕皮革细节，奶油粉刺绣点缀，适合森林徒步与日常通勤。",
+      "seasonHint": "autumn"
+    },
+    {
+      "samplingId": "sam_holiday-outing_llm_017",
+      "productionBatchId": "llm-holiday-outing-mp28tmj0",
+      "occasionId": "holiday-outing",
+      "themeKey": "holiday-sunlit-escape",
+      "themeLabelZh": "假日阳光逃逸",
+      "brandName": "Cotopaxi",
+      "channelType": "multi-brand-platform",
+      "platform": "Backcountry.com",
+      "sourceUrl": "",
+      "sourceId": "candidate-cotopaxi-windbreaker-sam_holiday-outing_llm_017",
+      "observedAt": "2026-05-12",
+      "itemCategory": "windbreaker",
+      "colorSummary": [
+        "奶油白",
+        "湖蓝"
+      ],
+      "primaryColorSummary": "落日橙",
+      "secondaryColorSummary": "奶油白",
+      "accentColorSummary": "湖蓝",
+      "digestionStatus": "rejected",
+      "candidatePaletteIds": [],
+      "finalPaletteIds": [],
+      "styleSignals": [
+        "adventure",
+        "playful",
+        "bold"
+      ],
+      "marketSignals": "高饱和撞色定义活力探险者，瞄准热爱多巴胺穿搭的年轻户外女性。",
+      "notes": "落日橙风衣外套内搭白色T恤，湖蓝抽绳与户外鞋呼应，充满阳光能量。",
+      "seasonHint": "summer"
+    },
+    {
+      "samplingId": "sam_holiday-outing_llm_018",
+      "productionBatchId": "llm-holiday-outing-mp28tmj0",
+      "occasionId": "holiday-outing",
+      "themeKey": "nature-earth-walk",
+      "themeLabelZh": "自然大地漫步",
+      "brandName": "Rei Co-op",
+      "channelType": "brand-site",
+      "platform": "rei.com",
+      "sourceUrl": "",
+      "sourceId": "candidate-rei-co-op-hiking-shoes-sam_holiday-outing_llm_018",
+      "observedAt": "2026-05-12",
+      "itemCategory": "hiking-shoes",
+      "colorSummary": [
+        "苔藓绿",
+        "淡黄"
+      ],
+      "primaryColorSummary": "灰褐",
+      "secondaryColorSummary": "苔藓绿",
+      "accentColorSummary": "淡黄",
+      "digestionStatus": "rejected",
+      "candidatePaletteIds": [],
+      "finalPaletteIds": [],
+      "styleSignals": [
+        "earthy",
+        "calm",
+        "soft"
+      ],
+      "marketSignals": "低饱和自然色系融入户外装备，强调舒适与融入环境的安静力量。",
+      "notes": "灰褐色徒步鞋搭配苔藓绿鞋带与淡黄织带，配卡其工装裤，完美融入秋日山林。",
+      "seasonHint": "autumn"
+    },
+    {
+      "samplingId": "sam_holiday-outing_llm_019",
+      "productionBatchId": "llm-holiday-outing-mp28tmj0",
+      "occasionId": "holiday-outing",
+      "themeKey": "coastal-breeze-holiday",
+      "themeLabelZh": "海风假日",
+      "brandName": "Salomon",
+      "channelType": "marketplace-brand-store",
+      "platform": "天猫Salomon官方旗舰店",
+      "sourceUrl": "",
+      "sourceId": "candidate-salomon-parka-sam_holiday-outing_llm_019",
+      "observedAt": "2026-05-12",
+      "itemCategory": "parka",
+      "colorSummary": [
+        "浅卡其"
+      ],
+      "primaryColorSummary": "米灰",
+      "secondaryColorSummary": "浅卡其",
+      "accentColorSummary": "暗红",
+      "digestionStatus": "sampled",
+      "candidatePaletteIds": [],
+      "finalPaletteIds": [],
+      "styleSignals": [
+        "urban",
+        "minimal",
+        "warm"
+      ],
+      "marketSignals": "都市机能美学融合柔性色彩，满足女性从城市到山野的无缝切换。",
+      "notes": "米灰派克服配浅卡其内胆，暗红抽绳收腰设计优化比例，兼具温暖与时髦。",
+      "seasonHint": "winter"
+    },
+    {
+      "samplingId": "sam_holiday-outing_llm_020",
+      "productionBatchId": "llm-holiday-outing-mp28tmj0",
+      "occasionId": "holiday-outing",
+      "themeKey": "adventure-sport-outdoor",
+      "themeLabelZh": "探险运动户外",
+      "brandName": "Marmot",
+      "channelType": "brand-site",
+      "platform": "marmot.com",
+      "sourceUrl": "",
+      "sourceId": "candidate-marmot-fleece-sam_holiday-outing_llm_020",
+      "observedAt": "2026-05-12",
+      "itemCategory": "fleece",
+      "colorSummary": [
+        "暖灰"
+      ],
+      "primaryColorSummary": "鼠尾草绿",
+      "secondaryColorSummary": "暖灰",
+      "accentColorSummary": "淡紫",
+      "digestionStatus": "sampled",
+      "candidatePaletteIds": [],
+      "finalPaletteIds": [],
+      "styleSignals": [
+        "fresh",
+        "soft",
+        "natural"
+      ],
+      "marketSignals": "疗愈系植物色调带来松弛感，契合后疫情时代的自然疗愈需求。",
+      "notes": "鼠尾草绿抓绒衣搭配暖灰打底衫，淡紫色发圈或袜子微亮点缀，适合初春露营或轻徒步。",
+      "seasonHint": "spring"
+    }
+  ],
+  "summary": {
+    "completedCount": 0,
+    "recordCount": 20,
+    "remainingVisibleUniqueCapacity": 0,
+    "uniqueBrandCount": 14,
+    "uniquePlatformCount": 19,
+    "visibleUniqueCapacity": 20,
+    "visibleUniqueCount": 20
+  },
+  "updatedAt": "2026-05-12T06:40:50.497Z",
+  "version": 6
+}
