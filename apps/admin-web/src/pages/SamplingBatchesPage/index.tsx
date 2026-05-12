@@ -1286,25 +1286,16 @@ export function SamplingBatchesPage(): ReactElement {
                   tone="soft"
                 >
                   <div className="space-y-5">
-                    <div className="grid gap-3 lg:grid-cols-3">
+                    <div className="grid gap-3 lg:grid-cols-2">
                       <MetricTile
                         hint={visibleDuplicateCount > 0 ? `还有 ${visibleDuplicateCount} 条会折叠成重复显示。` : '当前没有可视重复。'}
                         label="可视唯一率"
                         value={`${visibleUniqueCount} / ${draft.summary.recordCount} · ${visibleUniqueRate}%`}
                       />
                       <MetricTile
-                        hint={visibleUniqueCapacity >= generationTargetCount
-                          ? `当前场景池足够支撑 ${generationTargetCount} 条无重复重建。`
-                          : `当前场景池最多 ${visibleUniqueCapacity} 组，低于 ${generationTargetCount} 时会直接报错。`}
-                        label="场景容量"
-                        value={`${visibleUniqueCapacity} 组`}
-                      />
-                      <MetricTile
-                        hint={remainingVisibleUniqueCapacity > 0
-                          ? '还能继续扩展更多不重复色盘。'
-                          : '已经接近当前场景的可视唯一上限。'}
-                        label="剩余可扩"
-                        value={`${remainingVisibleUniqueCapacity} 组`}
+                        hint={'通过 LLM 批量生成或图片取色来扩充批次。'}
+                        label="记录总数"
+                        value={`${draft.summary.recordCount} 条`}
                       />
                     </div>
 
