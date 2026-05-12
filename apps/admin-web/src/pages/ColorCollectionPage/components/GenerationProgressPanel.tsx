@@ -29,10 +29,10 @@ export function GenerationProgressPanel({ samplingRun, events }: GenerationProgr
             {samplingRun.progressPercent}%
           </span>
         </div>
-        <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--dp-fill-subtle)]">
+        <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--dp-surface-soft)]">
           <div
             className={`h-full rounded-full transition-all duration-500 ${
-              isFailed ? 'bg-red-400' : isSucceeded ? 'bg-green-400' : 'bg-[var(--dp-accent)]'
+              isFailed ? 'bg-red-400' : isSucceeded ? 'bg-green-400' : 'bg-[var(--dp-fill-inverse)]'
             }`}
             style={{ width: `${samplingRun.progressPercent}%` }}
           />
@@ -63,30 +63,35 @@ export function GenerationProgressPanel({ samplingRun, events }: GenerationProgr
             等待事件...
           </div>
         )}
-        {events.map((event) => (
-          <div
-            key={event.eventId}
-            className="flex items-start gap-2 text-xs"
-          >
-            <span className="mt-0.5 shrink-0">
-              {event.type === 'run-finished' && event.level !== 'error' && (
-                <CheckCircle2 size={12} className="text-green-500" />
-              )}
-              {event.level === 'error' && (
-                <XCircle size={12} className="text-red-500" />
-              )}
-              {event.level === 'warning' && (
-                <AlertCircle size={12} className="text-amber-500" />
-              )}
-              {event.level === 'info' && event.type !== 'run-finished' && (
-                <Loader2 size={12} className="animate-spin text-[var(--dp-text-tertiary)]" />
-              )}
-            </span>
-            <span className="text-[var(--dp-text-secondary)]">
-              {event.message}
-            </span>
-          </div>
-        ))}
+        {events.map((event, index) => {
+          const isLastEvent = index === events.length - 1
+          const showSpinner = isRunning && isLastEvent && event.level === 'info' && event.type !== 'run-finished'
+
+          return (
+            <div
+              key={event.eventId}
+              className="flex items-start gap-2 text-xs"
+            >
+              <span className="mt-0.5 shrink-0">
+                {event.level === 'error' && (
+                  <XCircle size={12} className="text-red-500" />
+                )}
+                {event.level === 'warning' && (
+                  <AlertCircle size={12} className="text-amber-500" />
+                )}
+                {showSpinner && (
+                  <Loader2 size={12} className="animate-spin text-muted-foreground" />
+                )}
+                {event.level === 'info' && !showSpinner && (
+                  <CheckCircle2 size={12} className="text-green-500" />
+                )}
+              </span>
+              <span className="text-muted-foreground">
+                {event.message}
+              </span>
+            </div>
+          )
+        })}
       </div>
 
       {/* Summary */}
