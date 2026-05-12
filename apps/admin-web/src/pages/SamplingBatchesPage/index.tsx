@@ -1,6 +1,7 @@
-import { useState, type KeyboardEvent, type ReactElement, type ReactNode } from 'react'
+import { useState, useCallback, type KeyboardEvent, type ReactElement, type ReactNode } from 'react'
 import {
   CheckCheck,
+  ImageIcon,
   Layers3,
   Plus,
   RefreshCcw,
@@ -9,6 +10,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -28,12 +30,24 @@ import type {
   SamplingRunDto,
   SamplingRunEventDto,
 } from '@/models/sampling-runs'
+import type { LlmBatchGenerateParams } from '@daypalette-color-admin/contracts'
 import { cn } from '@/utils/cn'
 import { useSamplingBatchesPageViewModel } from './view-model/useSamplingBatchesPageViewModel'
 import {
   isSamplingRecordComplete,
   stringifyCommaSeparatedValues,
 } from './view-model/helpers'
+import { LlmGenerationForm } from '@/components/sampling/LlmGenerationForm'
+import { ImageExtractionForm } from '@/components/sampling/ImageExtractionForm'
+import {
+  createSamplingRun,
+  getSamplingRun,
+  subscribeToSamplingRunStream,
+} from '@/services/sampling-runs/sampling-runs.service'
+import {
+  extractColorsFromUrls,
+  extractColorsFromFiles,
+} from '@/services/color-collection/color-collection.service'
 
 const inputClassName =
   'w-full rounded-[14px] border border-[var(--dp-border-subtle)] bg-white/92 px-3.5 py-2.5 text-sm text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] outline-none transition focus:border-[var(--dp-fill-inverse)] focus:bg-white'
@@ -368,180 +382,6 @@ function SamplingEvidenceTimeline({ record }: { record: SamplingRecordDto }): Re
   )
 }
 
-function formatSamplingRunEventTime(value: string): string {
-  return new Date(value).toLocaleTimeString('zh-CN', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  })
-}
-
-function getSamplingRunStatusLabel(status: SamplingRunDto['status']): string {
-  if (status === 'queued') {
-    return '已排队'
-  }
-
-  if (status === 'running') {
-    return '运行中'
-  }
-
-  if (status === 'needsManualInput') {
-    return '等待人工介入'
-  }
-
-  if (status === 'succeeded') {
-    return '已完成'
-  }
-
-  if (status === 'failed') {
-    return '失败'
-  }
-
-  return '已取消'
-}
-
-function getSamplingRunStatusTone(status: SamplingRunDto['status']): SamplingBadgeProps['tone'] {
-  if (status === 'succeeded') {
-    return 'ok'
-  }
-
-  if (status === 'failed') {
-    return 'dark'
-  }
-
-  if (status === 'running' || status === 'queued') {
-    return 'default'
-  }
-
-  return 'soft'
-}
-
-function getSamplingRunOperationTypeLabel(operationType: SamplingRunDto['operationType'] | null | undefined): string {
-  if (operationType === 'generate-candidates') {
-    return '候选生成任务'
-  }
-
-  return '采样运行台'
-}
-
-function getSamplingRunStageLabel(stage: string | null | undefined): string {
-  if (!stage || stage === 'idle') {
-    return '空闲'
-  }
-
-  if (stage === 'queued') {
-    return '排队中'
-  }
-
-  if (stage === 'prepare_batch') {
-    return '准备批次'
-  }
-
-  if (stage === 'generate-candidates' || stage === 'generate_candidates') {
-    return '生成候选'
-  }
-
-  if (stage === 'finalize') {
-    return '整理结果'
-  }
-
-  return stage
-}
-
-function SamplingRunConsole({
-  contextBatchId,
-  events,
-  run,
-}: {
-  contextBatchId: string | null
-  events: SamplingRunEventDto[]
-  run: SamplingRunDto | null
-}): ReactElement {
-  const latestEvents = [...events].slice(-12).reverse()
-  const currentBatchId = run?.batchId ?? contextBatchId ?? '未选择批次'
-  const currentStage = getSamplingRunStageLabel(run?.currentStage)
-  const currentProgress = run?.progressPercent ?? 0
-  const currentWarnings = run?.warningCount ?? 0
-  const currentErrors = run?.errorCount ?? 0
-  const statusLabel = run ? getSamplingRunStatusLabel(run.status) : '待启动'
-  const statusTone: SamplingBadgeProps['tone'] = run ? getSamplingRunStatusTone(run.status) : 'soft'
-  const summaryText = run?.summary
-    ?? (contextBatchId
-      ? `当前批次 ${contextBatchId} 还没有启动采样任务。点击“自动生成女装候选”后，这里会实时显示阶段、进度、警告和错误。`
-      : '先选择一个候选批次。开始自动生成后，这里会持续输出任务日志。')
-
-  return (
-    <Card className="border-[var(--dp-border-subtle)] bg-white/88">
-      <CardContent className="space-y-5 p-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="space-y-2">
-            <p className={labelClassName}>采样运行</p>
-            <h3 className="display-font text-[1.5rem] leading-none tracking-[-0.04em] text-foreground">
-              {getSamplingRunOperationTypeLabel(run?.operationType)}
-            </h3>
-            <p className="text-sm leading-6 text-muted-foreground">{summaryText}</p>
-          </div>
-
-          <SamplingBadge tone={statusTone}>{statusLabel}</SamplingBadge>
-        </div>
-
-        <>
-          <div className="grid gap-3 sm:grid-cols-4">
-            <MetricTile label="批次" value={currentBatchId} />
-            <MetricTile label="当前阶段" value={currentStage} />
-            <MetricTile label="警告 / 错误" value={`${currentWarnings} / ${currentErrors}`} />
-            <MetricTile label="进度" value={`${currentProgress}%`} />
-          </div>
-
-          <div className="space-y-2">
-            <div className="h-2 overflow-hidden rounded-full bg-[var(--dp-surface-soft)]">
-              <div
-                className="h-full rounded-full bg-[var(--dp-fill-inverse)] transition-all"
-                style={{ width: `${run ? Math.max(4, currentProgress) : 0}%` }}
-              />
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {run
-                ? `开始于 ${formatSamplingRunEventTime(run.startedAt)}${run.finishedAt ? ` / 完成于 ${formatSamplingRunEventTime(run.finishedAt)}` : ''}`
-                : '当前处于空闲态，尚未启动采样运行。'}
-            </p>
-          </div>
-        </>
-
-        <div className="rounded-[18px] border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] p-4">
-          <div className="flex items-center justify-between gap-3">
-            <p className={labelClassName}>流式日志</p>
-            <SamplingBadge tone="soft">{events.length} 条事件</SamplingBadge>
-          </div>
-
-          <div className="mt-3 max-h-[260px] space-y-3 overflow-y-auto pr-1">
-            {latestEvents.length > 0 ? (
-              latestEvents.map((event) => (
-                <div key={event.eventId} className="rounded-[16px] border border-[var(--dp-border-hairline)] bg-white/88 px-4 py-3">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <SamplingBadge tone={event.level === 'error' ? 'dark' : event.level === 'warning' ? 'default' : 'soft'}>
-                        {event.type}
-                      </SamplingBadge>
-                      {event.stage ? <SamplingBadge tone="soft">{event.stage}</SamplingBadge> : null}
-                    </div>
-                    <span className="text-xs text-muted-foreground">{formatSamplingRunEventTime(event.createdAt)}</span>
-                  </div>
-                  <p className="mt-2 text-sm leading-6 text-foreground">{event.message}</p>
-                </div>
-              ))
-            ) : (
-              <div className="rounded-[16px] border border-dashed border-[var(--dp-border-subtle)] bg-white/70 px-4 py-6 text-sm leading-6 text-muted-foreground">
-                当前还没有任务日志。这个区域现在会固定显示；开始自动生成后，这里会实时展示每一步在做什么、卡在哪、是否需要人工介入。
-              </div>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
 function SamplingBatchSettingsModal({
   draft,
   isDeleting,
@@ -658,70 +498,6 @@ function SamplingBatchSettingsModal({
           <Button onClick={onClose} variant="ghost">关闭</Button>
           <Button onClick={onClose} variant="primary">继续编辑</Button>
         </div>
-      </div>
-    </WorkbenchModal>
-  )
-}
-
-function SamplingGenerationConfirmModal({
-  currentCount,
-  generationTargetCount,
-  isGenerating,
-  isOpen,
-  occasionLabel,
-  onClose,
-  onConfirm,
-  remainingVisibleUniqueCapacity,
-  visibleUniqueCapacity,
-  visibleUniqueCount,
-}: {
-  currentCount: number
-  generationTargetCount: number
-  isGenerating: boolean
-  isOpen: boolean
-  occasionLabel: string
-  onClose: () => void
-  onConfirm: () => Promise<void>
-  remainingVisibleUniqueCapacity: number
-  visibleUniqueCapacity: number
-  visibleUniqueCount: number
-}): ReactElement {
-  const isCapacityInsufficient = visibleUniqueCapacity < generationTargetCount
-
-  return (
-    <WorkbenchModal isOpen={isOpen} onClose={onClose} panelClassName="max-w-[560px] rounded-[24px]">
-      <ModalHeader
-        description="这个操作不是增量补齐，而是按目标数量重新生成整批候选。确认后会直接替换当前结果。"
-        onClose={onClose}
-        title="确认覆盖当前候选"
-      />
-
-      <div className="space-y-4 px-6 py-6 text-sm leading-6 text-foreground">
-        <p>
-          当前批次里已有 <span className="font-semibold">{currentCount}</span> 条{occasionLabel}候选。
-        </p>
-        <p>
-          如果继续，会清空当前候选结果，并重新生成 <span className="font-semibold">{generationTargetCount}</span> 条{occasionLabel}候选。
-        </p>
-        <div className="rounded-[18px] border border-[var(--dp-border-subtle)] bg-[var(--dp-surface-soft)] p-4 text-sm leading-6 text-muted-foreground">
-          当前可视唯一 <span className="font-semibold text-foreground">{visibleUniqueCount}</span> 组，
-          当前场景最多支持 <span className="font-semibold text-foreground">{visibleUniqueCapacity}</span> 组，
-          剩余可扩 <span className="font-semibold text-foreground">{remainingVisibleUniqueCapacity}</span> 组。
-        </div>
-        {isCapacityInsufficient ? (
-          <p className="text-sm text-red-600">
-            当前场景容量不足以支撑 {generationTargetCount} 条无重复重建。需要先扩充该场景主题池，或者降低目标数量。
-          </p>
-        ) : null}
-        <p className="text-muted-foreground">如果你只是想保留现有结果继续补充，不应该使用这个入口。</p>
-      </div>
-
-      <div className="flex items-center justify-end gap-3 border-t border-[var(--dp-border-subtle)] px-6 py-5">
-        <Button disabled={isGenerating} onClick={onClose} variant="ghost">取消</Button>
-        <Button disabled={isGenerating || isCapacityInsufficient} onClick={() => void onConfirm()} variant="primary">
-          <Sparkles className="size-4" />
-          {isGenerating ? '生成中' : isCapacityInsufficient ? '当前容量不足' : '确认覆盖并重建'}
-        </Button>
       </div>
     </WorkbenchModal>
   )
@@ -972,10 +748,6 @@ function getSamplingClusterStatus(cluster: SamplingPaletteCluster): {
   }
 }
 
-function isSamplingRunActive(run: SamplingRunDto | null): boolean {
-  return Boolean(run && ['queued', 'running', 'needsManualInput'].includes(run.status))
-}
-
 function SamplingPaletteWallCard({
   cluster,
   duplicateInfo,
@@ -1084,15 +856,32 @@ function SamplingPaletteWallCard({
   )
 }
 
+type WorkbenchTab = 'collect' | 'review'
+
+const WORKBENCH_TABS: Array<{ key: WorkbenchTab; label: string; icon: ReactElement }> = [
+  { key: 'collect', label: '采集', icon: <Sparkles size={15} /> },
+  { key: 'review', label: '审阅', icon: <Layers3 size={15} /> },
+]
+
 export function SamplingBatchesPage(): ReactElement {
+  const [searchParams] = useSearchParams()
+  const [activeTab, setActiveTab] = useState<WorkbenchTab>('review')
   const [advancedRecordId, setAdvancedRecordId] = useState<string | null>(null)
   const [batchUiStateDraft, setBatchUiStateDraft] = useState<SamplingBatchUiState>(() => buildSamplingBatchUiState(null))
   const [isBatchSettingsOpen, setIsBatchSettingsOpen] = useState(false)
+
+  // Collection tab state
+  const [collectionMode, setCollectionMode] = useState<'llm' | 'image'>('llm')
+  const [isCollecting, setIsCollecting] = useState(false)
+  const [collectErrorMessage, setCollectErrorMessage] = useState('')
+  const [collectSuccessMessage, setCollectSuccessMessage] = useState('')
+  const [collectRun, setCollectRun] = useState<SamplingRunDto | null>(null)
+  const [collectRunEvents, setCollectRunEvents] = useState<SamplingRunEventDto[]>([])
+
   const {
     draft,
     errorMessage,
     isDeleting,
-    isGeneratingCandidates,
     isLoading,
     isSaving,
     model,
@@ -1105,7 +894,6 @@ export function SamplingBatchesPage(): ReactElement {
     onDraftRecordFieldChange,
     onDraftSourceWhitelistToggle,
     onDraftThemeKeysChange,
-    onRegenerateBatchToTarget,
     onRefresh,
     onReviewRecord,
     onReviewRecords,
@@ -1126,7 +914,6 @@ export function SamplingBatchesPage(): ReactElement {
     : buildSamplingBatchUiState(selectedBatchId)
   const isAdvancedOpen = Boolean(selectedRecordId && advancedRecordId === selectedRecordId)
   const isDuplicateCheckEnabled = batchUiState.isDuplicateCheckEnabled
-  const isGenerateConfirmOpen = batchUiState.isGenerateConfirmOpen
   const isReviewDrawerOpen = batchUiState.isReviewDrawerOpen
   const overviewFilter = batchUiState.overviewFilter
 
@@ -1144,19 +931,11 @@ export function SamplingBatchesPage(): ReactElement {
   const rejectedClusters = allClusters.filter((cluster) => cluster.rejectedCount === cluster.sourceCount)
   const completeClusters = allClusters.filter((cluster) => cluster.completeCount === cluster.sourceCount)
   const selectedCluster = allClusters.find((cluster) => cluster.records.some((record) => record.samplingId === selectedRecordId)) ?? null
-  const generationTargetCount = 40
-  const generationOccasionLabel = draft ? getSamplingOccasionLabel(draft.batch.occasionId) : '场景'
   const visibleUniqueCount = draft?.summary.visibleUniqueCount ?? 0
-  const visibleUniqueCapacity = draft?.summary.visibleUniqueCapacity ?? 0
-  const remainingVisibleUniqueCapacity = draft?.summary.remainingVisibleUniqueCapacity ?? 0
   const visibleDuplicateCount = draft ? Math.max(draft.summary.recordCount - visibleUniqueCount, 0) : 0
   const visibleUniqueRate = draft && draft.summary.recordCount > 0
     ? Math.round((visibleUniqueCount / draft.summary.recordCount) * 100)
     : 0
-  const generationActionLabel = draft
-    ? `生成 ${generationTargetCount} 条${generationOccasionLabel}候选`
-    : `生成 ${generationTargetCount} 条场景候选`
-  const showSamplingRunOnly = isGeneratingCandidates || isSamplingRunActive(samplingRun)
 
   function handleSelectRecord(samplingId: string): void {
     onSelectRecord(samplingId)
@@ -1166,13 +945,6 @@ export function SamplingBatchesPage(): ReactElement {
   function handleSelectBatch(batchId: string): void {
     onSelectBatch(batchId)
     setAdvancedRecordId(null)
-  }
-
-  function handleCloseGenerateConfirm(): void {
-    updateBatchUiState((current) => ({
-      ...current,
-      isGenerateConfirmOpen: false,
-    }))
   }
 
   function handleCloseReviewDrawer(): void {
@@ -1190,21 +962,106 @@ export function SamplingBatchesPage(): ReactElement {
     }))
   }
 
-  function handleOpenGenerateConfirm(): void {
-    if (!draft || isGeneratingCandidates) {
-      return
+  // Collection tab handlers
+  const handleLlmGenerate = useCallback(async (params: LlmBatchGenerateParams) => {
+    setIsCollecting(true)
+    setCollectErrorMessage('')
+    setCollectSuccessMessage('')
+    setCollectRunEvents([])
+
+    try {
+      const run = await createSamplingRun({
+        batchId: '',
+        operationType: 'llm-batch-generate',
+        llmBatchGenerate: params,
+      })
+      setCollectRun(run)
+
+      const seenIds = new Set<string>()
+      const eventSource = subscribeToSamplingRunStream(run.runId, {
+        onEvent: (event) => {
+          if (seenIds.has(event.eventId)) return
+          seenIds.add(event.eventId)
+          setCollectRunEvents((prev) => [...prev, event])
+          setCollectRun((prev) => prev ? {
+            ...prev,
+            status: event.type === 'run-finished' ? (event.level === 'error' ? 'failed' : 'succeeded') : prev.status,
+            currentStage: event.stage ?? prev.currentStage,
+            progressPercent: event.progressPercent ?? prev.progressPercent,
+            errorCount: prev.errorCount + (event.level === 'error' ? 1 : 0),
+            warningCount: prev.warningCount + (event.level === 'warning' ? 1 : 0),
+            finishedAt: event.type === 'run-finished' ? event.createdAt : prev.finishedAt,
+          } : prev)
+
+          if (event.type === 'run-finished') {
+            eventSource.close()
+            const batchId = (event.metadata as Record<string, unknown>)?.batchId as string | undefined
+            void getSamplingRun(run.runId).then((finalRun) => {
+              setCollectRun(finalRun)
+              setIsCollecting(false)
+              if (event.level === 'error') {
+                setCollectErrorMessage(`生成失败: ${event.message}`)
+              } else {
+                setCollectSuccessMessage('生成完成！')
+                void onRefresh()
+                setActiveTab('review')
+                if (batchId) onSelectBatch(batchId)
+              }
+            }).catch(() => {
+              setIsCollecting(false)
+              if (event.level !== 'error') {
+                setCollectSuccessMessage('生成完成！')
+                void onRefresh()
+                setActiveTab('review')
+              }
+            })
+          }
+        },
+        onError: () => {
+          eventSource.close()
+          setIsCollecting(false)
+          setCollectErrorMessage('连接中断，请重试。')
+        },
+      })
+    } catch (error) {
+      setIsCollecting(false)
+      setCollectErrorMessage(error instanceof Error ? error.message : '启动生成失败')
     }
+  }, [onRefresh, onSelectBatch])
 
-    updateBatchUiState((current) => ({
-      ...current,
-      isGenerateConfirmOpen: true,
-    }))
-  }
+  const handleImageExtractUrls = useCallback(async (params: { imageUrls: string[]; occasionId: string; themeKey: string; themeLabelZh: string }) => {
+    setIsCollecting(true)
+    setCollectErrorMessage('')
+    setCollectSuccessMessage('')
+    try {
+      const result = await extractColorsFromUrls(params)
+      setCollectSuccessMessage(`提取完成！共 ${result.records.length} 条记录。`)
+      setIsCollecting(false)
+      void onRefresh()
+      setActiveTab('review')
+      onSelectBatch(result.batchId)
+    } catch (error) {
+      setIsCollecting(false)
+      setCollectErrorMessage(error instanceof Error ? error.message : '图片取色失败')
+    }
+  }, [onRefresh, onSelectBatch])
 
-  async function handleConfirmGenerateSceneCandidates(): Promise<void> {
-    handleCloseGenerateConfirm()
-    await onRegenerateBatchToTarget(generationTargetCount)
-  }
+  const handleImageExtractFiles = useCallback(async (params: { files: File[]; occasionId: string; themeKey: string; themeLabelZh: string }) => {
+    setIsCollecting(true)
+    setCollectErrorMessage('')
+    setCollectSuccessMessage('')
+    try {
+      const result = await extractColorsFromFiles(params)
+      setCollectSuccessMessage(`提取完成！共 ${result.records.length} 条记录。`)
+      setIsCollecting(false)
+      void onRefresh()
+      setActiveTab('review')
+      onSelectBatch(result.batchId)
+    } catch (error) {
+      setIsCollecting(false)
+      setCollectErrorMessage(error instanceof Error ? error.message : '图片取色失败')
+    }
+  }, [onRefresh, onSelectBatch])
 
   async function handleReviewCluster(
     cluster: SamplingPaletteCluster,
@@ -1221,38 +1078,139 @@ export function SamplingBatchesPage(): ReactElement {
     <div className="space-y-6 pb-10">
       <WorkbenchPageHeader
         actions={
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={() => void onRefresh()} size="sm" variant="ghost">
-              <RefreshCcw className="size-4" />
-              刷新
-            </Button>
-            <Button disabled={!draft || isGeneratingCandidates} onClick={handleOpenGenerateConfirm} size="sm" variant="primary">
-              <Sparkles className="size-4" />
-              {isGeneratingCandidates ? '生成中' : generationActionLabel}
-            </Button>
-            <Button disabled={!draft} onClick={() => setIsBatchSettingsOpen(true)} size="sm" variant="ghost">
-              <Layers3 className="size-4" />
-              批次设置
-            </Button>
-            <Button disabled={!draft || isSaving} onClick={() => void onSave()} size="sm" variant="ghost">
-              <Save className="size-4" />
-              {isSaving ? '保存中' : '保存批次'}
-            </Button>
-          </div>
+          activeTab === 'review' ? (
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={() => void onRefresh()} size="sm" variant="ghost">
+                <RefreshCcw className="size-4" />
+                刷新
+              </Button>
+              <Button disabled={!draft} onClick={() => setIsBatchSettingsOpen(true)} size="sm" variant="ghost">
+                <Layers3 className="size-4" />
+                批次设置
+              </Button>
+              <Button disabled={!draft || isSaving} onClick={() => void onSave()} size="sm" variant="ghost">
+                <Save className="size-4" />
+                {isSaving ? '保存中' : '保存批次'}
+              </Button>
+            </div>
+          ) : undefined
         }
         archivedLabel={model?.archivedLabel ?? '0 个已归档批次'}
-        description="主流程只保留三步：生成候选、逐条审阅、必要时少量修正。"
+        description="LLM 生成配色候选、图片取色与批次审阅"
         hideSearch
         onSearchChange={() => {}}
         searchPlaceholder="当前版本暂不支持搜索"
         searchValue=""
-        title="候选审阅台"
+        title="采样工作台"
         totalLabel={model?.totalLabel ?? '读取中'}
         updatedAtLabel={model?.updatedAtLabel ?? '等待返回'}
       />
 
-      {draft ? (
-        <>
+      {/* Tab bar */}
+      <div className="flex gap-1 rounded-full bg-[var(--dp-surface-soft)] p-1">
+        {WORKBENCH_TABS.map((tab) => (
+          <button
+            key={tab.key}
+            className={cn(
+              'flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition',
+              activeTab === tab.key
+                ? 'bg-white text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground',
+            )}
+            onClick={() => setActiveTab(tab.key)}
+            type="button"
+          >
+            {tab.icon}
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Collection tab */}
+      {activeTab === 'collect' && (
+        <div className="space-y-4">
+          {/* Collection mode toggle */}
+          <div className="flex gap-1 rounded-full bg-[var(--dp-surface-soft)] p-1 w-fit">
+            <button
+              className={cn(
+                'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition',
+                collectionMode === 'llm'
+                  ? 'bg-white text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
+              disabled={isCollecting}
+              onClick={() => setCollectionMode('llm')}
+              type="button"
+            >
+              <Sparkles size={14} />
+              LLM 批量生成
+            </button>
+            <button
+              className={cn(
+                'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition',
+                collectionMode === 'image'
+                  ? 'bg-white text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
+              disabled={isCollecting}
+              onClick={() => setCollectionMode('image')}
+              type="button"
+            >
+              <ImageIcon size={14} />
+              图片取色
+            </button>
+          </div>
+
+          {/* Error / Success messages */}
+          {collectErrorMessage && (
+            <Card className="border-red-200 bg-red-50/80 text-red-700">
+              <CardContent className="p-4 text-sm">{collectErrorMessage}</CardContent>
+            </Card>
+          )}
+          {collectSuccessMessage && (
+            <Card className="border-emerald-200 bg-emerald-50/80 text-emerald-700">
+              <CardContent className="p-4 text-sm">{collectSuccessMessage}</CardContent>
+            </Card>
+          )}
+
+          <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+            {/* Left: form */}
+            <div className="rounded-xl border border-[var(--dp-border-subtle)] bg-white p-5">
+              <h3 className="mb-4 text-sm font-semibold text-foreground">
+                {collectionMode === 'llm' ? '生成参数' : '图片上传'}
+              </h3>
+              {collectionMode === 'llm' && (
+                <LlmGenerationForm isDisabled={isCollecting} onSubmit={handleLlmGenerate} />
+              )}
+              {collectionMode === 'image' && (
+                <ImageExtractionForm
+                  isDisabled={isCollecting}
+                  onSubmitUrls={handleImageExtractUrls}
+                  onSubmitFiles={handleImageExtractFiles}
+                />
+              )}
+            </div>
+
+            {/* Right: progress */}
+            <div className="rounded-xl border border-[var(--dp-border-subtle)] bg-white p-5">
+              <h3 className="mb-4 text-sm font-semibold text-foreground">生成进度</h3>
+              {!collectRun && !isCollecting && (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Sparkles size={48} className="mb-3 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">填写参数后点击「开始生成」</p>
+                </div>
+              )}
+              {(collectRun || isCollecting) && (
+                <CollectProgressPanel events={collectRunEvents} run={collectRun} />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Review tab */}
+      {activeTab === 'review' && draft ? (
+      <div className="space-y-6">
           <SamplingBatchSettingsModal
             draft={draft}
             isDeleting={isDeleting}
@@ -1264,21 +1222,6 @@ export function SamplingBatchesPage(): ReactElement {
             onDraftSourceWhitelistToggle={onDraftSourceWhitelistToggle}
             onDraftThemeKeysChange={onDraftThemeKeysChange}
           />
-
-          <SamplingGenerationConfirmModal
-            currentCount={draft.items.length}
-            generationTargetCount={generationTargetCount}
-            isGenerating={isGeneratingCandidates}
-            isOpen={isGenerateConfirmOpen}
-            occasionLabel={generationOccasionLabel}
-            onClose={handleCloseGenerateConfirm}
-            onConfirm={handleConfirmGenerateSceneCandidates}
-            remainingVisibleUniqueCapacity={remainingVisibleUniqueCapacity}
-            visibleUniqueCapacity={visibleUniqueCapacity}
-            visibleUniqueCount={visibleUniqueCount}
-          />
-        </>
-      ) : null}
 
       {errorMessage ? (
         <Card className="border-red-200 bg-red-50/80 text-red-700">
@@ -1292,11 +1235,7 @@ export function SamplingBatchesPage(): ReactElement {
         </Card>
       ) : null}
 
-      {showSamplingRunOnly ? (
-        <SamplingRunConsole contextBatchId={selectedBatchId} events={samplingRunEvents} run={samplingRun} />
-      ) : null}
-
-      {!showSamplingRunOnly && validationMessages.length > 0 ? (
+      {validationMessages.length > 0 ? (
         <Card className="border-[var(--dp-border-subtle)] bg-white/78 text-foreground">
           <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4 text-sm leading-6">
             <p>当前批次还有 {validationMessages.length} 条待补项，先补当前这条的必要字段即可。</p>
@@ -1305,8 +1244,6 @@ export function SamplingBatchesPage(): ReactElement {
         </Card>
       ) : null}
 
-      {!showSamplingRunOnly ? (
-        <>
           <div className="space-y-6">
             <SamplingSection title="批次" tone="soft">
               <div className="flex gap-3 overflow-x-auto pb-1">
@@ -1332,14 +1269,6 @@ export function SamplingBatchesPage(): ReactElement {
                 <SamplingSection
                   actions={
                     <div className="flex flex-wrap gap-2">
-                      <Button
-                        disabled={!draft || isGeneratingCandidates}
-                        onClick={handleOpenGenerateConfirm}
-                        variant="primary"
-                      >
-                        <Sparkles className="size-4" />
-                        {isGeneratingCandidates ? '生成中' : generationActionLabel}
-                      </Button>
                       <Button
                         disabled={!draft || allClusters.length === 0}
                         onClick={() => updateBatchUiState((current) => ({
@@ -1808,8 +1737,56 @@ export function SamplingBatchesPage(): ReactElement {
               </div>
             </div>
           </DetailDrawer>
-        </>
+      </div>
       ) : null}
+    </div>
+  )
+}
+
+function CollectProgressPanel({ events, run }: { events: SamplingRunEventDto[]; run: SamplingRunDto | null }): ReactElement {
+  if (!run) return <div className="text-sm text-muted-foreground">等待事件...</div>
+
+  const isRunning = run.status === 'running' || run.status === 'queued'
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-sm">
+          <span className="font-medium text-foreground">
+            {isRunning ? '正在生成...' : run.status === 'succeeded' ? '生成完成' : '生成失败'}
+          </span>
+          <span className="text-muted-foreground">{run.progressPercent}%</span>
+        </div>
+        <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--dp-surface-soft)]">
+          <div
+            className={cn(
+              'h-full rounded-full transition-all duration-500',
+              run.status === 'failed' ? 'bg-red-400' : run.status === 'succeeded' ? 'bg-green-400' : 'bg-[var(--dp-fill-inverse)]',
+            )}
+            style={{ width: `${run.progressPercent}%` }}
+          />
+        </div>
+      </div>
+      <div className="max-h-60 space-y-1 overflow-y-auto rounded-lg bg-[var(--dp-surface-soft)] p-3">
+        {events.map((event, index) => {
+          const isLast = index === events.length - 1
+          const showSpinner = isRunning && isLast && event.level === 'info' && event.type !== 'run-finished'
+          return (
+            <div key={event.eventId} className="flex items-start gap-2 text-xs">
+              <span className="mt-0.5 shrink-0">
+                {event.level === 'error' && <X size={12} className="text-red-500" />}
+                {event.level === 'warning' && <span className="text-amber-500">!</span>}
+                {showSpinner && <RefreshCcw size={12} className="animate-spin text-muted-foreground" />}
+                {event.level === 'info' && !showSpinner && <CheckCheck size={12} className="text-green-500" />}
+              </span>
+              <span className="text-muted-foreground">{event.message}</span>
+            </div>
+          )
+        })}
+      </div>
+      {run.summary && (
+        <div className="rounded-lg bg-[var(--dp-surface-soft)] p-3 text-sm text-muted-foreground">{run.summary}</div>
+      )}
     </div>
   )
 }

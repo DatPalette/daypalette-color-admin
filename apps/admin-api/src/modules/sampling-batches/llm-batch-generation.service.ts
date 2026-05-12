@@ -28,10 +28,10 @@ interface LlmRecordResponse {
 const RECORDS_PER_LLM_CALL = 10
 
 const OCCASION_LABEL_MAP: Record<string, string> = {
-  workday: '通勤',
-  weekend: '周末约会',
-  outdoor: '户外',
-  dinner: '晚宴社交',
+  workday: '温柔通勤',
+  'city-weekend': '周末约会',
+  'holiday-outing': '清风户外',
+  'light-social': '晚宴流光',
 }
 
 const THEME_LABEL_MAP: Record<string, string> = {
@@ -56,9 +56,9 @@ const THEME_LABEL_MAP: Record<string, string> = {
 
 const CATEGORY_MATRIX: Record<string, string[]> = {
   workday: ['blazer', 'shirt', 'cardigan', 'coat', 'dress', 'knitwear', 'skirt', 'trench', 'trousers', 'blouse'],
-  weekend: ['dress', 'cardigan', 'jeans', 'blouse', 'skirt', 'sweater', 'jacket', 'tee', 'coat', 'knitwear'],
-  outdoor: ['jacket', 'vest', 'cargo-pants', 'windbreaker', 'hiking-shoes', 'backpack', 'polo', 'shorts', 'parka', 'fleece'],
-  dinner: ['dress', 'blazer', 'heels', 'clutch', 'silk-blouse', 'tailored-pants', 'wrap-dress', 'statement-earrings', 'evening-coat', 'satin-skirt'],
+  'city-weekend': ['dress', 'cardigan', 'jeans', 'blouse', 'skirt', 'sweater', 'jacket', 'tee', 'coat', 'knitwear'],
+  'holiday-outing': ['jacket', 'vest', 'cargo-pants', 'windbreaker', 'hiking-shoes', 'backpack', 'polo', 'shorts', 'parka', 'fleece'],
+  'light-social': ['dress', 'blazer', 'heels', 'clutch', 'silk-blouse', 'tailored-pants', 'wrap-dress', 'statement-earrings', 'evening-coat', 'satin-skirt'],
 }
 
 @Injectable()

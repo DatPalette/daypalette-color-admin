@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import type {
   SamplingBatchCollectionDocument,
-  SamplingCandidateGenerationCapabilities,
   SamplingBatchDocument,
   SamplingBatchStatus,
   SamplingBatchSummary,
@@ -17,8 +16,6 @@ import {
   readSamplingBatchFile,
   writeSamplingBatchFile,
 } from '../../common/files/sampling-batch-reader';
-import type { GenerateSamplingCandidatesDto } from './dto/generate-sampling-candidates.dto';
-import { SamplingCandidateGenerationService } from './sampling-candidate-generation.service';
 import type { UpsertSamplingBatchDto } from './dto/upsert-sampling-batch.dto';
 
 const allowedSamplingBatchStatuses: SamplingBatchStatus[] = [
@@ -336,26 +333,13 @@ function normalizeBatchDocument(
 
 @Injectable()
 export class SamplingBatchesService {
-  constructor(
-    private readonly samplingCandidateGenerationService: SamplingCandidateGenerationService,
-  ) {}
-
   private attachDerivedSummary(
     document: SamplingBatchDocument,
   ): SamplingBatchDocument {
     return {
       ...document,
-      summary: {
-        ...buildSamplingBatchSummary(document.items),
-        ...this.samplingCandidateGenerationService.buildBatchGenerationSummary(
-          document,
-        ),
-      },
+      summary: buildSamplingBatchSummary(document.items),
     };
-  }
-
-  getCapabilities(): SamplingCandidateGenerationCapabilities {
-    return this.samplingCandidateGenerationService.getCapabilities();
   }
 
   async getCollection(): Promise<SamplingBatchCollectionDocument> {
@@ -381,38 +365,6 @@ export class SamplingBatchesService {
     } catch {
       throw new NotFoundException(`Sampling batch ${id} was not found.`);
     }
-  }
-
-  async generateCandidates(
-    id: string,
-    payload: GenerateSamplingCandidatesDto,
-  ): Promise<SamplingBatchDocument> {
-    const currentDocument = await this.getItem(id);
-
-    if (currentDocument.batch.status === 'archived') {
-      throw new BadRequestException(
-        'Archived batches cannot generate new candidates.',
-      );
-    }
-
-    const nextItems =
-      await this.samplingCandidateGenerationService.generateBatchCandidates(
-        currentDocument,
-        payload,
-      );
-
-    return this.upsertItem(id, {
-      ...currentDocument,
-      batch: {
-        ...currentDocument.batch,
-        status:
-          currentDocument.batch.status === 'draft'
-            ? 'collecting'
-            : currentDocument.batch.status,
-      },
-      items: nextItems,
-      version: currentDocument.version,
-    });
   }
 
   async upsertItem(

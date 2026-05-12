@@ -1,16 +1,17 @@
-import type { SamplingRunOperationType } from '@daypalette-color-admin/contracts'
+import type {
+  LlmBatchGenerateParams,
+  SamplingRunOperationType,
+} from '@daypalette-color-admin/contracts'
 
 import type {
   SamplingRunDto,
   SamplingRunEventDto,
 } from '@/models/sampling-runs'
 import { buildApiErrorMessage, resolveAdminApiBaseUrl } from '@/api/admin-api'
-import type { GenerateSamplingBatchCandidatesPayload } from '@/services/sampling-batches/sampling-batches.service'
 
 export interface CreateSamplingRunPayload {
   batchId?: string
-  generateCandidates?: GenerateSamplingBatchCandidatesPayload
-  llmBatchGenerate?: import('@daypalette-color-admin/contracts').LlmBatchGenerateParams
+  llmBatchGenerate?: LlmBatchGenerateParams
   operationType?: SamplingRunOperationType
 }
 

@@ -2,30 +2,10 @@ import { useState, type ReactElement } from 'react'
 import { Check, Sparkles } from 'lucide-react'
 import type { LlmBatchGenerateParams } from '@daypalette-color-admin/contracts'
 import { samplingOccasionLabelMap } from '@/models/sampling-batches/sampling-batch-constants'
+import { THEME_OPTIONS } from '@/models/sampling-batches/sampling-theme-options'
 
 const OCCASION_OPTIONS = Object.entries(samplingOccasionLabelMap)
-  .filter(([key]) => ['workday', 'weekend', 'outdoor', 'dinner'].includes(key))
   .map(([value, label]) => ({ value, label }))
-
-const THEME_OPTIONS: Array<{ value: string; label: string; occasion: string }> = [
-  { value: 'polished-light-commute', label: '轻正式通勤', occasion: 'workday' },
-  { value: 'urban-minimal-foundation', label: '都市极简基础', occasion: 'workday' },
-  { value: 'soft-tone-lift', label: '柔调提亮', occasion: 'workday' },
-  { value: 'mist-cool-commute', label: '雾冷调通勤', occasion: 'workday' },
-  { value: 'warm-grounded-commute', label: '暖调沉稳通勤', occasion: 'workday' },
-  { value: 'city-weekend-soft', label: '城市周末柔和', occasion: 'weekend' },
-  { value: 'date-evening-glow', label: '约会暮光', occasion: 'weekend' },
-  { value: 'playful-pop-weekend', label: '趣味波普周末', occasion: 'weekend' },
-  { value: 'relaxed-denim-weekend', label: '休闲牛仔周末', occasion: 'weekend' },
-  { value: 'holiday-sunlit-escape', label: '假日阳光逃逸', occasion: 'outdoor' },
-  { value: 'nature-earth-walk', label: '自然大地漫步', occasion: 'outdoor' },
-  { value: 'coastal-breeze-holiday', label: '海风假日', occasion: 'outdoor' },
-  { value: 'adventure-sport-outdoor', label: '探险运动户外', occasion: 'outdoor' },
-  { value: 'light-social-glow', label: '社交微光', occasion: 'dinner' },
-  { value: 'elegant-dinner-luxe', label: '优雅晚宴奢华', occasion: 'dinner' },
-  { value: 'moody-evening-drama', label: '暗调晚宴戏剧感', occasion: 'dinner' },
-  { value: 'minimalist-evening', label: '极简晚宴', occasion: 'dinner' },
-]
 
 interface LlmGenerationFormProps {
   isDisabled: boolean
@@ -56,7 +36,6 @@ export function LlmGenerationForm({ isDisabled, onSubmit }: LlmGenerationFormPro
 
   const handleSubmit = () => {
     if (selectedThemes.length === 0) return
-
     const occasionLabel = OCCASION_OPTIONS.find((o) => o.value === occasionId)?.label ?? occasionId
     onSubmit({
       occasionId,
@@ -69,11 +48,8 @@ export function LlmGenerationForm({ isDisabled, onSubmit }: LlmGenerationFormPro
 
   return (
     <div className="space-y-5">
-      {/* Occasion selector */}
       <div className="space-y-1.5">
-        <label className="block text-xs font-medium text-[var(--dp-text-secondary)]">
-          场景
-        </label>
+        <label className="block text-xs font-medium text-muted-foreground">场景</label>
         <div className="flex flex-wrap gap-2">
           {OCCASION_OPTIONS.map((option) => (
             <button
@@ -93,11 +69,8 @@ export function LlmGenerationForm({ isDisabled, onSubmit }: LlmGenerationFormPro
         </div>
       </div>
 
-      {/* Theme multi-select */}
       <div className="space-y-1.5">
-        <label className="block text-xs font-medium text-[var(--dp-text-secondary)]">
-          主题方向（可多选）
-        </label>
+        <label className="block text-xs font-medium text-muted-foreground">主题方向（可多选）</label>
         <div className="flex flex-wrap gap-2">
           {filteredThemes.map((theme) => {
             const isSelected = selectedThemes.includes(theme.value)
@@ -121,11 +94,8 @@ export function LlmGenerationForm({ isDisabled, onSubmit }: LlmGenerationFormPro
         </div>
       </div>
 
-      {/* Target count */}
       <div className="space-y-1.5">
-        <label className="block text-xs font-medium text-[var(--dp-text-secondary)]">
-          生成数量：{targetCount} 条
-        </label>
+        <label className="block text-xs font-medium text-muted-foreground">生成数量：{targetCount} 条</label>
         <input
           className="w-full"
           disabled={isDisabled}
@@ -136,17 +106,11 @@ export function LlmGenerationForm({ isDisabled, onSubmit }: LlmGenerationFormPro
           type="range"
           value={targetCount}
         />
-        <div className="flex justify-between text-xs text-[var(--dp-text-tertiary)]">
-          <span>5</span>
-          <span>50</span>
-        </div>
+        <div className="flex justify-between text-xs text-muted-foreground"><span>5</span><span>50</span></div>
       </div>
 
-      {/* Style constraints */}
       <div className="space-y-1.5">
-        <label className="block text-xs font-medium text-[var(--dp-text-secondary)]">
-          风格约束（可选）
-        </label>
+        <label className="block text-xs font-medium text-muted-foreground">风格约束（可选）</label>
         <textarea
           className="w-full rounded-lg border border-[var(--dp-border-subtle)] bg-white px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-[var(--dp-outline)] focus:outline-none"
           disabled={isDisabled}
@@ -157,7 +121,6 @@ export function LlmGenerationForm({ isDisabled, onSubmit }: LlmGenerationFormPro
         />
       </div>
 
-      {/* Submit */}
       <button
         className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--dp-fill-inverse)] px-4 py-2.5 text-sm font-medium text-[var(--dp-text-on-inverse)] transition-opacity hover:opacity-90 disabled:opacity-50"
         disabled={isDisabled || selectedThemes.length === 0}

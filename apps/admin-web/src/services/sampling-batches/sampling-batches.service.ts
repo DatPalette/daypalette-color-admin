@@ -3,17 +3,8 @@ import type { SamplingBatchStatus } from '@daypalette-color-admin/contracts'
 import type {
   SamplingBatchCollectionDto,
   SamplingBatchDto,
-  SamplingCandidateGenerationCapabilitiesDto,
 } from '@/models/sampling-batches'
 import { buildApiErrorMessage, resolveAdminApiBaseUrl } from '@/api/admin-api'
-
-export interface GenerateSamplingBatchCandidatesPayload {
-  audience?: 'mixed' | 'womenswear'
-  mode?: 'hybrid' | 'model-only' | 'rules-only'
-  overwriteExisting?: boolean
-  resetExisting?: boolean
-  targetCount?: number
-}
 
 export async function getSamplingBatchCollection(): Promise<SamplingBatchCollectionDto> {
   const requestUrl = new URL('/api/sampling-batches', resolveAdminApiBaseUrl())
@@ -24,17 +15,6 @@ export async function getSamplingBatchCollection(): Promise<SamplingBatchCollect
   }
 
   return (await response.json()) as SamplingBatchCollectionDto
-}
-
-export async function getSamplingBatchCapabilities(): Promise<SamplingCandidateGenerationCapabilitiesDto> {
-  const requestUrl = new URL('/api/sampling-batches/capabilities', resolveAdminApiBaseUrl())
-  const response = await fetch(requestUrl)
-
-  if (!response.ok) {
-    throw new Error(await buildApiErrorMessage(response, `Failed to load sampling capabilities: ${response.status}`))
-  }
-
-  return (await response.json()) as SamplingCandidateGenerationCapabilitiesDto
 }
 
 export async function updateSamplingBatch(
@@ -52,28 +32,6 @@ export async function updateSamplingBatch(
 
   if (!response.ok) {
     throw new Error(await buildApiErrorMessage(response, `Failed to update sampling batch: ${response.status}`))
-  }
-
-  return (await response.json()) as SamplingBatchDto
-}
-
-export async function generateSamplingBatchCandidates(
-  id: string,
-  payload: GenerateSamplingBatchCandidatesPayload,
-): Promise<SamplingBatchDto> {
-  const requestUrl = new URL(`/api/sampling-batches/${encodeURIComponent(id)}/generate-candidates`, resolveAdminApiBaseUrl())
-  const response = await fetch(requestUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  })
-
-  if (!response.ok) {
-    throw new Error(
-      await buildApiErrorMessage(response, `Failed to generate sampling candidates: ${response.status}`),
-    )
   }
 
   return (await response.json()) as SamplingBatchDto

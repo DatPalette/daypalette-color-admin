@@ -33,12 +33,10 @@ export const samplingChannelTypeOptions: SamplingOption<PaletteReferenceChannelT
 ]
 
 export const samplingOccasionLabelMap: Record<string, string> = {
+  workday: '温柔通勤',
   'city-weekend': '周末约会',
-  holiday: '节假日',
   'holiday-outing': '清风户外',
   'light-social': '晚宴流光',
-  weekend: '周末',
-  workday: '温柔通勤',
 }
 
 export function getSamplingBatchStatusLabel(status: string): string {

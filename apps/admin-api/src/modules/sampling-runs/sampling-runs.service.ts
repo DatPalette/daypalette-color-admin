@@ -26,7 +26,6 @@ interface SamplingRunRecord {
 }
 
 const supportedOperationTypes: SamplingRunOperationType[] = [
-  'generate-candidates',
   'llm-batch-generate',
 ];
 
@@ -39,22 +38,13 @@ function toErrorMessage(error: unknown): string {
 }
 
 function buildGenerationScopeLabel(payload: CreateSamplingRunDto): string {
-  const targetCount = payload.generateCandidates?.targetCount;
-  const shouldResetExisting = payload.generateCandidates?.resetExisting;
-
-  if (shouldResetExisting && targetCount) {
-    return `rebuild to ${targetCount} records`;
-  }
-
-  if (shouldResetExisting) {
-    return 'full rebuild';
-  }
+  const targetCount = payload.llmBatchGenerate?.targetCount;
 
   if (targetCount) {
-    return `expand to ${targetCount} records`;
+    return `generate ${targetCount} records`;
   }
 
-  return 'refresh existing records';
+  return 'LLM batch generation';
 }
 
 @Injectable()
@@ -157,8 +147,7 @@ export class SamplingRunsService {
       message: `Created ${operationType} run for batch ${batchId} with ${buildGenerationScopeLabel(payload)}.`,
       metadata: {
         operationType,
-        resetExisting: payload.generateCandidates?.resetExisting ?? false,
-        targetCount: payload.generateCandidates?.targetCount,
+        targetCount: payload.llmBatchGenerate?.targetCount,
       },
       progressPercent: 0,
       stage: 'queued',
@@ -180,159 +169,6 @@ export class SamplingRunsService {
 
     if (record.run.operationType === 'llm-batch-generate') {
       await this.executeLlmBatchGenerate(record, payload);
-      return;
-    }
-
-    const requestedMode =
-      payload.generateCandidates?.mode ??
-      this.samplingBatchesService.getCapabilities().defaultMode;
-    const capabilities = this.samplingBatchesService.getCapabilities();
-
-    try {
-      this.updateRun(record, {
-        currentStage: 'preparing-batch',
-        progressPercent: 10,
-        status: 'running',
-      });
-      this.emitEvent(record, {
-        level: 'info',
-        message: payload.generateCandidates?.resetExisting
-          ? `Preparing batch ${record.run.batchId} for a full rebuild before candidate generation.`
-          : `Preparing batch ${record.run.batchId} for candidate generation.`,
-        metadata: {
-          batchId: record.run.batchId,
-          resetExisting: payload.generateCandidates?.resetExisting ?? false,
-          targetCount: payload.generateCandidates?.targetCount,
-        },
-        progressPercent: 10,
-        stage: 'preparing-batch',
-        type: 'stage-started',
-      });
-
-      this.updateRun(record, {
-        currentStage: 'rules-generation',
-        progressPercent: 35,
-      });
-      this.emitEvent(record, {
-        level: 'info',
-        message: payload.generateCandidates?.targetCount
-          ? `Running ${requestedMode} candidate generation with target ${payload.generateCandidates.targetCount} records.`
-          : `Running ${requestedMode} candidate generation.`,
-        metadata: {
-          mode: requestedMode,
-          modelEnabled: capabilities.modelEnabled,
-          rulesEnabled: capabilities.rulesEnabled,
-          resetExisting: payload.generateCandidates?.resetExisting ?? false,
-          targetCount: payload.generateCandidates?.targetCount,
-        },
-        progressPercent: 35,
-        stage: 'rules-generation',
-        type: 'stage-started',
-      });
-
-      if (requestedMode !== 'rules-only' && !capabilities.modelEnabled) {
-        this.emitEvent(record, {
-          level: 'warning',
-          message:
-            'Model analysis is not configured. The run will fall back to rules-only when possible.',
-          metadata: {
-            requestedMode,
-          },
-          progressPercent: 40,
-          stage: 'rules-generation',
-          type: 'warning',
-        });
-      }
-
-      if (requestedMode !== 'rules-only' && capabilities.modelEnabled) {
-        this.updateRun(record, {
-          currentStage: 'model-analysis',
-          progressPercent: 55,
-        });
-        this.emitEvent(record, {
-          level: 'info',
-          message: 'Starting model-assisted color analysis.',
-          metadata: {
-            mode: requestedMode,
-          },
-          progressPercent: 55,
-          stage: 'model-analysis',
-          type: 'model-analysis-started',
-        });
-      }
-
-      const nextBatch = await this.samplingBatchesService.generateCandidates(
-        record.run.batchId,
-        payload.generateCandidates ?? {},
-      );
-
-      if (requestedMode !== 'rules-only' && capabilities.modelEnabled) {
-        this.emitEvent(record, {
-          level: 'info',
-          message: 'Model-assisted color analysis finished.',
-          metadata: {
-            itemCount: nextBatch.items.length,
-          },
-          progressPercent: 80,
-          stage: 'model-analysis',
-          type: 'model-analysis-finished',
-        });
-      }
-
-      this.updateRun(record, {
-        currentStage: 'persisted',
-        finishedAt: new Date().toISOString(),
-        progressPercent: 100,
-        status: 'succeeded',
-        summary: payload.generateCandidates?.resetExisting
-          ? `Rebuilt batch ${nextBatch.batch.id} and generated ${nextBatch.items.length} candidates.`
-          : `Generated candidates for ${nextBatch.items.length} records in batch ${nextBatch.batch.id}.`,
-      });
-      this.emitEvent(record, {
-        level: 'info',
-        message: `Run completed successfully for batch ${nextBatch.batch.id}.`,
-        metadata: {
-          itemCount: nextBatch.items.length,
-          updatedAt: nextBatch.updatedAt,
-          version: nextBatch.version,
-        },
-        progressPercent: 100,
-        stage: 'persisted',
-        type: 'run-finished',
-      });
-      record.stream.complete();
-    } catch (error) {
-      const errorMessage = toErrorMessage(error);
-
-      this.updateRun(record, {
-        currentStage: 'failed',
-        finishedAt: new Date().toISOString(),
-        progressPercent: record.run.progressPercent,
-        status: 'failed',
-        summary: errorMessage,
-      });
-      this.emitEvent(record, {
-        level: 'error',
-        message: errorMessage,
-        metadata: {
-          batchId: record.run.batchId,
-          operationType: record.run.operationType,
-        },
-        progressPercent: record.run.progressPercent,
-        stage: 'failed',
-        type: 'error',
-      });
-      this.emitEvent(record, {
-        level: 'error',
-        message: `Run failed for batch ${record.run.batchId}.`,
-        metadata: {
-          batchId: record.run.batchId,
-        },
-        progressPercent: record.run.progressPercent,
-        stage: 'failed',
-        type: 'run-finished',
-      });
-      record.stream.complete();
     }
   }
 

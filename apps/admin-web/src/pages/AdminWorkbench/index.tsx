@@ -6,7 +6,6 @@ import { CollectionsPage } from '@/pages/CollectionsPage'
 import { DictionariesPage } from '@/pages/DictionariesPage'
 import { PalettesPage } from '@/pages/PalettesPage'
 import { SamplingBatchesPage } from '@/pages/SamplingBatchesPage'
-import { ColorCollectionPage } from '@/pages/ColorCollectionPage'
 
 import { DEFAULT_DICTIONARY_KEY, workbenchPaths } from './navigation'
 import { AdminShell } from './components/AdminShell'
@@ -19,8 +18,9 @@ export function AdminWorkbench(): ReactElement {
         <Route element={<Navigate replace to={workbenchPaths.baseColors} />} path="/" />
         <Route element={<BaseColorsPage />} path={workbenchPaths.baseColors} />
         <Route element={<PalettesPage />} path={workbenchPaths.palettes} />
-        <Route element={<SamplingBatchesPage />} path={workbenchPaths.samplingBatches} />
-        <Route element={<ColorCollectionPage />} path={workbenchPaths.colorCollection} />
+        <Route element={<SamplingBatchesPage />} path={workbenchPaths.samplingWorkbench} />
+        <Route element={<Navigate replace to={workbenchPaths.samplingWorkbench} />} path="/sampling-batches" />
+        <Route element={<Navigate replace to={workbenchPaths.samplingWorkbench} />} path="/color-collection" />
         <Route element={<CollectionsPage />} path={workbenchPaths.collections} />
         <Route element={<Navigate replace to={workbenchPaths.dictionaries()} />} path="/dictionaries" />
         <Route element={<DictionariesRoute />} path="/dictionaries/:dictionaryKey" />

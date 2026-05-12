@@ -4,7 +4,6 @@ import type {
   SamplingBatchCollectionDto,
   SamplingBatchDto,
   SamplingBatchesPageModel,
-  SamplingCandidateGenerationCapabilitiesDto,
   SamplingRecordDto,
 } from '@/models/sampling-batches'
 import type {
@@ -15,7 +14,6 @@ import type { SamplingBatchStatus } from '@daypalette-color-admin/contracts'
 
 import {
   deleteSamplingBatch,
-  getSamplingBatchCapabilities,
   getSamplingBatchCollection,
   updateSamplingBatch,
   updateSamplingBatchStatus,
@@ -47,9 +45,7 @@ import {
 interface SamplingBatchesPageViewModel {
   draft: SamplingBatchDto | null
   errorMessage: string | null
-  generationCapabilities: SamplingCandidateGenerationCapabilitiesDto | null
   isDeleting: boolean
-  isGeneratingCandidates: boolean
   isLoading: boolean
   isSaving: boolean
   isUpdatingStatus: boolean
@@ -75,8 +71,6 @@ interface SamplingBatchesPageViewModel {
   ) => void
   onDraftSourceWhitelistToggle: (channelType: string) => void
   onDraftThemeKeysChange: (value: string) => void
-  onGenerateCandidates: () => Promise<void>
-  onRegenerateBatchToTarget: (targetCount: number) => Promise<void>
   onRefresh: () => Promise<void>
   onReviewRecord: (samplingId: string, status: SamplingRecordDto['digestionStatus']) => Promise<void>
   onReviewRecords: (samplingIds: string[], status: SamplingRecordDto['digestionStatus']) => Promise<void>
@@ -119,14 +113,13 @@ function mergeSamplingRunEvent(run: SamplingRunDto, event: SamplingRunEventDto):
 }
 
 export function useSamplingBatchesPageViewModel(): SamplingBatchesPageViewModel {
-  const [generationCapabilities, setGenerationCapabilities] = useState<SamplingCandidateGenerationCapabilitiesDto | null>(null)
+
   const [collection, setCollection] = useState<SamplingBatchCollectionDto | null>(null)
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null)
   const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null)
   const [draft, setDraft] = useState<SamplingBatchDto | null>(null)
   const [model, setModel] = useState<SamplingBatchesPageModel | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [isGeneratingCandidates, setIsGeneratingCandidates] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
@@ -236,15 +229,11 @@ export function useSamplingBatchesPageViewModel(): SamplingBatchesPageViewModel 
     setSaveMessage(null)
 
     try {
-      const [nextCollection, nextCapabilities] = await Promise.all([
-        getSamplingBatchCollection(),
-        getSamplingBatchCapabilities(),
-      ])
+      const nextCollection = await getSamplingBatchCollection()
       const nextSelectedBatchId = findSelectedBatchId(nextCollection, selectedBatchId)
       const nextDraft = cloneSamplingBatch(findSelectedBatch(nextCollection, nextSelectedBatchId))
       const nextSelectedRecordId = findSelectedRecordId(nextDraft, selectedRecordId)
 
-      setGenerationCapabilities(nextCapabilities)
       syncPageState(nextCollection, nextSelectedBatchId, nextDraft, nextSelectedRecordId)
     } catch (error) {
       setErrorMessage(
@@ -253,77 +242,6 @@ export function useSamplingBatchesPageViewModel(): SamplingBatchesPageViewModel 
     } finally {
       setIsLoading(false)
     }
-  }
-
-  async function startSamplingGeneration(options?: { resetExisting?: boolean; targetCount?: number }): Promise<void> {
-    if (!draft) {
-      return
-    }
-
-    setIsGeneratingCandidates(true)
-    setErrorMessage(null)
-    setSaveMessage(null)
-    closeSamplingRunStream()
-    samplingRunEventIdsRef.current.clear()
-    setSamplingRunEvents([])
-
-    try {
-      const nextRun = await createSamplingRun({
-        batchId: draft.batch.id,
-        generateCandidates: {
-          audience: 'womenswear',
-          mode: generationCapabilities?.defaultMode ?? 'rules-only',
-          overwriteExisting: options?.resetExisting ? true : false,
-          resetExisting: options?.resetExisting,
-          targetCount: options?.targetCount,
-        },
-        operationType: 'generate-candidates',
-      })
-
-      setSamplingRun(nextRun)
-      samplingRunStreamRef.current = subscribeToSamplingRunStream(nextRun.runId, {
-        onError: (error) => {
-          if (!samplingRunStreamRef.current) {
-            return
-          }
-
-          closeSamplingRunStream()
-          void recoverSamplingRun(nextRun.runId, error instanceof Error ? error.message : '流式日志连接已中断。')
-        },
-        onEvent: (event) => {
-          if (samplingRunEventIdsRef.current.has(event.eventId)) {
-            return
-          }
-
-          samplingRunEventIdsRef.current.add(event.eventId)
-          setSamplingRunEvents((current) => [...current, event])
-          setSamplingRun((current) => (current ? mergeSamplingRunEvent(current, event) : current))
-
-          if (event.type === 'run-finished') {
-            closeSamplingRunStream()
-            void finalizeSamplingRun(nextRun.runId)
-          }
-        },
-      })
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : '自动生成候选失败。')
-      setSamplingRun(null)
-      setSamplingRunEvents([])
-      samplingRunEventIdsRef.current.clear()
-      closeSamplingRunStream()
-      setIsGeneratingCandidates(false)
-    }
-  }
-
-  async function onGenerateCandidates(): Promise<void> {
-    await startSamplingGeneration()
-  }
-
-  async function onRegenerateBatchToTarget(targetCount: number): Promise<void> {
-    await startSamplingGeneration({
-      resetExisting: true,
-      targetCount,
-    })
   }
 
   function onSelectBatch(id: string): void {
@@ -684,9 +602,7 @@ export function useSamplingBatchesPageViewModel(): SamplingBatchesPageViewModel 
   return {
     draft,
     errorMessage,
-    generationCapabilities,
     isDeleting,
-    isGeneratingCandidates,
     isLoading,
     isSaving,
     isUpdatingStatus,
@@ -701,8 +617,6 @@ export function useSamplingBatchesPageViewModel(): SamplingBatchesPageViewModel 
     onDraftRecordFieldChange,
     onDraftSourceWhitelistToggle,
     onDraftThemeKeysChange,
-    onGenerateCandidates,
-    onRegenerateBatchToTarget,
     onRefresh,
     onReviewRecord,
     onReviewRecords,
