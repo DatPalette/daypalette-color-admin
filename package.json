@@ -7,9 +7,11 @@
     "dev:api": "pnpm --dir apps/admin-api start:dev",
     "build:web": "pnpm --dir apps/admin-web build",
     "build:api": "pnpm --dir apps/admin-api build",
+    "build:lab": "pnpm --filter @daypalette-color-admin/outfit-preview-lab build",
     "build:packages": "pnpm -r --filter './packages/*' build",
     "lint:web": "pnpm --dir apps/admin-web lint",
     "lint:api": "pnpm --dir apps/admin-api lint",
+    "lab": "pnpm --filter @daypalette-color-admin/outfit-preview-lab start",
     "lint": "pnpm lint:web && pnpm lint:api",
     "build": "pnpm build:packages && pnpm build:web && pnpm build:api"
   },

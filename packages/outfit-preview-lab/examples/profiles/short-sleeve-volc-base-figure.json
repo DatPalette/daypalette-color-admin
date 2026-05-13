@@ -1,0 +1,41 @@
+{
+  "id": "short-sleeve-volc-base-figure",
+  "provider": "volcengine",
+  "modelEnv": "VOLC_MODEL",
+  "prompt": {
+    "files": [
+      "../prompts/variants/base-figure-reference-note.txt",
+      "../prompts/base/style-prefix.txt",
+      "../prompts/base/china-face.txt",
+      "../prompts/variants/confident-expression.txt",
+      "../prompts/variants/full-body-template-lock.txt",
+      "../prompts/variants/short-sleeve-template-lock.txt",
+      "../prompts/variants/vector-flatten-adjustment.txt"
+    ]
+  },
+  "negativePrompt": {
+    "files": [
+      "../prompts/base/common-negative.txt",
+      "../prompts/variants/single-figure-negative.txt"
+    ]
+  },
+  "referenceImages": [
+    "../../refs/style/croquis-base-best.jpeg"
+  ],
+  "size": "2K",
+  "tags": [
+    "short-sleeve",
+    "volcengine",
+    "base-figure"
+  ],
+  "metadata": {
+    "template": "short-sleeve",
+    "round": "base-figure"
+  },
+  "providerOptions": {
+    "responseFormat": "url",
+    "watermark": false,
+    "stream": false,
+    "sequentialImageGeneration": "disabled"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@daypalette-color-admin/outfit-preview-lab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "outfit-preview-lab": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prestart": "pnpm build",
+    "start": "node dist/cli.js"
+  }
+}

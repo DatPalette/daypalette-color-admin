@@ -1,0 +1,1159 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Outfit Overlay Prototype</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f2eb;
+        --panel: rgba(255, 255, 255, 0.9);
+        --line: rgba(25, 25, 25, 0.12);
+        --text: #1e1915;
+        --muted: #6e6257;
+        --accent: #b4532a;
+        --accent-soft: rgba(180, 83, 42, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(224, 194, 165, 0.35), transparent 30%),
+          radial-gradient(circle at top right, rgba(191, 120, 73, 0.18), transparent 24%),
+          linear-gradient(180deg, #fbf7f1 0%, var(--bg) 100%);
+      }
+
+      .page {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 32px 24px 56px;
+      }
+
+      .hero {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+
+      .eyebrow {
+        font-size: 12px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(28px, 4vw, 44px);
+        line-height: 1.05;
+        font-weight: 700;
+      }
+
+      .intro {
+        max-width: 860px;
+        font-size: 15px;
+        line-height: 1.7;
+        color: var(--muted);
+      }
+
+      .status {
+        margin-top: 4px;
+        font-size: 14px;
+        color: var(--accent);
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 8px;
+      }
+
+      .control-card {
+        min-width: 220px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        border: 1px solid rgba(25, 25, 25, 0.08);
+        background: rgba(255, 255, 255, 0.72);
+      }
+
+      .control-label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .control-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .control-row input[type="color"] {
+        width: 48px;
+        height: 36px;
+        padding: 0;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+      }
+
+      .color-value {
+        font-family: "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+        font-size: 14px;
+        color: var(--text);
+      }
+
+      .control-hint {
+        margin-top: 8px;
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--muted);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        margin-top: 20px;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 16px;
+        box-shadow: 0 18px 48px rgba(40, 22, 7, 0.08);
+        backdrop-filter: blur(10px);
+      }
+
+      .panel h2 {
+        margin: 0 0 6px;
+        font-size: 16px;
+      }
+
+      .panel p {
+        margin: 0 0 12px;
+        font-size: 13px;
+        line-height: 1.6;
+        color: var(--muted);
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 16px;
+        background: #fff;
+        border: 1px solid rgba(20, 20, 20, 0.06);
+      }
+
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        color: var(--muted);
+        background: var(--accent-soft);
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      .note {
+        margin-top: 20px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        border: 1px dashed rgba(180, 83, 42, 0.35);
+        background: rgba(255, 255, 255, 0.7);
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      @media (max-width: 1120px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <div class="eyebrow">Outfit Preview Lab</div>
+        <h1>基础模特与独立服装层叠合验证</h1>
+        <div class="intro">
+          这个页面不追求生产级自动拼接，只验证当前阶段的三张资产是否已经具备“可贴合”的基本条件：基础模特、3/4 短袖独立层、3/4 长裤独立层。页面会先用手工 silhouette 和内部 cutout 生成透明服装层，再用多锚点三角网格做局部仿射贴合，输出短袖、长裤和完整合成预览。
+        </div>
+        <div id="status" class="status">正在加载本地资产…</div>
+        <div class="controls">
+          <label class="control-card" for="shirt-color">
+            <span class="control-label">短袖主色</span>
+            <span class="control-row">
+              <input id="shirt-color" type="color" value="#c7aa84" />
+              <span id="shirt-color-value" class="color-value">#C7AA84</span>
+            </span>
+            <span class="control-hint">主色覆盖衣身主体，结构和褶皱仍然来自同一张服装层。</span>
+          </label>
+          <label class="control-card" for="shirt-accent-color">
+            <span class="control-label">短袖辅色</span>
+            <span class="control-row">
+              <input id="shirt-accent-color" type="color" value="#9f715d" />
+              <span id="shirt-accent-color-value" class="color-value">#9F715D</span>
+            </span>
+            <span class="control-hint">辅色只作用在袖子和下摆区域，用来验证区域分色。</span>
+          </label>
+          <label class="control-card" for="trousers-color">
+            <span class="control-label">长裤主色</span>
+            <span class="control-row">
+              <input id="trousers-color" type="color" value="#74889b" />
+              <span id="trousers-color-value" class="color-value">#74889B</span>
+            </span>
+            <span class="control-hint">主色作为裤装主体色，这里的 Hex 才是展示真相源。</span>
+          </label>
+          <label class="control-card" for="trousers-accent-color">
+            <span class="control-label">长裤辅色</span>
+            <span class="control-row">
+              <input id="trousers-accent-color" type="color" value="#495f79" />
+              <span id="trousers-accent-color-value" class="color-value">#495F79</span>
+            </span>
+            <span class="control-hint">辅色只作用在腰头和侧片区域，用来演示多色裤装展示。</span>
+          </label>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="panel">
+          <h2>短袖叠合预览</h2>
+          <p>验证短袖 3/4 角度、肩线和下摆是否大体贴住基础模特的上半身。</p>
+          <canvas id="shirt-preview"></canvas>
+        </article>
+        <article class="panel">
+          <h2>长裤叠合预览</h2>
+          <p>验证长裤 3/4 角度、腰头和裤脚是否大体贴住基础模特的下半身。</p>
+          <canvas id="trousers-preview"></canvas>
+        </article>
+        <article class="panel">
+          <h2>完整合成预览</h2>
+          <p>先叠长裤，再叠短袖，查看整体是否仍然保持同一人物和同一姿态。</p>
+          <canvas id="full-preview"></canvas>
+          <div class="legend">
+            <span class="chip"><span class="dot" style="background:#cb4b16"></span>短袖锚点</span>
+            <span class="chip"><span class="dot" style="background:#2563eb"></span>长裤锚点</span>
+            <span class="chip"><span class="dot" style="background:#7c3aed"></span>基础模特锚点</span>
+          </div>
+        </article>
+      </section>
+
+      <section class="grid">
+        <article class="panel">
+          <h2>基础模特锚点</h2>
+          <p>紫色点是叠合目标锚点，当前使用归一化坐标定义。</p>
+          <canvas id="base-debug"></canvas>
+        </article>
+        <article class="panel">
+          <h2>短袖源图锚点</h2>
+          <p>橙色点用于把短袖服装层按三角网格局部贴合到基础模特上半身。</p>
+          <canvas id="shirt-debug"></canvas>
+        </article>
+        <article class="panel">
+          <h2>长裤源图锚点</h2>
+          <p>蓝色点用于把长裤服装层按三角网格局部贴合到基础模特下半身。</p>
+          <canvas id="trousers-debug"></canvas>
+        </article>
+      </section>
+
+      <div class="note">
+        当前算法是“最小可验证原型”，不是最终运行时方案。它使用手工 silhouette、内部 cutout 和多锚点三角网格仿射贴合，足够判断路线是否成立，但还不能替代后续更精细的透明抠图和局部 warp。
+      </div>
+    </main>
+
+    <script>
+      const config = {
+        assets: {
+          mannequin: '../../refs/style/base-mannequin-best.jpeg',
+          shirt: '../../refs/style/short-sleeve-neutral-layer-best.jpeg',
+          trousers: '../../refs/style/trousers-neutral-layer-best.jpeg',
+        },
+        overlays: {
+          shirt: {
+            accentMasks: [
+              {
+                points: [
+                  { x: 0.03, y: 0.38 },
+                  { x: 0.08, y: 0.28 },
+                  { x: 0.25, y: 0.31 },
+                  { x: 0.19, y: 0.47 },
+                  { x: 0.08, y: 0.45 },
+                ],
+              },
+              {
+                points: [
+                  { x: 0.73, y: 0.26 },
+                  { x: 0.95, y: 0.30 },
+                  { x: 0.90, y: 0.45 },
+                  { x: 0.81, y: 0.50 },
+                  { x: 0.71, y: 0.34 },
+                ],
+              },
+              {
+                points: [
+                  { x: 0.20, y: 0.87 },
+                  { x: 0.76, y: 0.86 },
+                  { x: 0.77, y: 0.95 },
+                  { x: 0.22, y: 0.98 },
+                ],
+              },
+            ],
+            silhouette: [
+              {
+                points: [
+                  { x: 0.04, y: 0.27 },
+                  { x: 0.12, y: 0.15 },
+                  { x: 0.28, y: 0.10 },
+                  { x: 0.56, y: 0.07 },
+                  { x: 0.86, y: 0.16 },
+                  { x: 0.95, y: 0.28 },
+                  { x: 0.91, y: 0.41 },
+                  { x: 0.83, y: 0.95 },
+                  { x: 0.62, y: 0.99 },
+                  { x: 0.27, y: 0.97 },
+                  { x: 0.16, y: 0.90 },
+                  { x: 0.16, y: 0.52 },
+                  { x: 0.05, y: 0.37 },
+                ],
+              },
+            ],
+            sourceAnchors: {
+              leftShoulder: { x: 0.16, y: 0.16 },
+              rightShoulder: { x: 0.85, y: 0.20 },
+              leftHem: { x: 0.25, y: 0.95 },
+              rightHem: { x: 0.81, y: 0.92 },
+            },
+            targetAnchors: {
+              leftShoulder: { x: 0.39, y: 0.25 },
+              rightShoulder: { x: 0.62, y: 0.22 },
+              leftHem: { x: 0.43, y: 0.52 },
+              rightHem: { x: 0.63, y: 0.49 },
+            },
+            cutouts: [
+              { type: 'ellipse', cx: 0.50, cy: 0.13, rx: 0.15, ry: 0.05 },
+              {
+                type: 'polygon',
+                points: [
+                  { x: 0.02, y: 0.27 },
+                  { x: 0.14, y: 0.20 },
+                  { x: 0.20, y: 0.38 },
+                  { x: 0.08, y: 0.36 },
+                ],
+              },
+              {
+                type: 'polygon',
+                points: [
+                  { x: 0.82, y: 0.18 },
+                  { x: 0.98, y: 0.26 },
+                  { x: 0.92, y: 0.42 },
+                  { x: 0.80, y: 0.38 },
+                ],
+              },
+            ],
+            mesh: {
+              sourcePoints: {
+                leftSleeveTip: { x: 0.08, y: 0.22 },
+                leftCollar: { x: 0.41, y: 0.13 },
+                rightCollar: { x: 0.57, y: 0.15 },
+                rightSleeveTip: { x: 0.88, y: 0.18 },
+                leftUnderarm: { x: 0.22, y: 0.39 },
+                rightUnderarm: { x: 0.79, y: 0.36 },
+                leftHem: { x: 0.27, y: 0.96 },
+                rightHem: { x: 0.83, y: 0.93 },
+              },
+              targetPoints: {
+                leftSleeveTip: { x: 0.41, y: 0.25 },
+                leftCollar: { x: 0.45, y: 0.21 },
+                rightCollar: { x: 0.56, y: 0.20 },
+                rightSleeveTip: { x: 0.60, y: 0.25 },
+                leftUnderarm: { x: 0.44, y: 0.35 },
+                rightUnderarm: { x: 0.57, y: 0.34 },
+                leftHem: { x: 0.46, y: 0.57 },
+                rightHem: { x: 0.58, y: 0.54 },
+              },
+              triangles: [
+                ['leftSleeveTip', 'leftCollar', 'leftUnderarm'],
+                ['leftCollar', 'rightCollar', 'leftUnderarm'],
+                ['rightCollar', 'rightUnderarm', 'leftUnderarm'],
+                ['rightCollar', 'rightSleeveTip', 'rightUnderarm'],
+                ['leftUnderarm', 'rightUnderarm', 'leftHem'],
+                ['rightUnderarm', 'rightHem', 'leftHem'],
+              ],
+            },
+            color: '#cb4b16',
+          },
+          trousers: {
+            accentMasks: [
+              {
+                points: [
+                  { x: 0.20, y: 0.04 },
+                  { x: 0.80, y: 0.04 },
+                  { x: 0.79, y: 0.12 },
+                  { x: 0.22, y: 0.12 },
+                ],
+              },
+              {
+                points: [
+                  { x: 0.19, y: 0.09 },
+                  { x: 0.32, y: 0.10 },
+                  { x: 0.43, y: 1.00 },
+                  { x: 0.24, y: 1.00 },
+                ],
+              },
+              {
+                points: [
+                  { x: 0.68, y: 0.10 },
+                  { x: 0.81, y: 0.09 },
+                  { x: 0.76, y: 1.00 },
+                  { x: 0.57, y: 1.00 },
+                ],
+              },
+            ],
+            silhouette: [
+              {
+                points: [
+                  { x: 0.32, y: 0.01 },
+                  { x: 0.67, y: 0.01 },
+                  { x: 0.73, y: 0.10 },
+                  { x: 0.69, y: 0.98 },
+                  { x: 0.60, y: 1.00 },
+                  { x: 0.56, y: 0.66 },
+                  { x: 0.52, y: 0.19 },
+                  { x: 0.45, y: 0.42 },
+                  { x: 0.41, y: 0.98 },
+                  { x: 0.31, y: 1.00 },
+                  { x: 0.31, y: 0.42 },
+                  { x: 0.28, y: 0.14 },
+                ],
+              },
+            ],
+            sourceAnchors: {
+              leftWaist: { x: 0.34, y: 0.05 },
+              rightWaist: { x: 0.66, y: 0.06 },
+              leftHem: { x: 0.33, y: 0.99 },
+              rightHem: { x: 0.64, y: 0.99 },
+            },
+            targetAnchors: {
+              leftWaist: { x: 0.42, y: 0.47 },
+              rightWaist: { x: 0.64, y: 0.45 },
+              leftHem: { x: 0.44, y: 0.98 },
+              rightHem: { x: 0.69, y: 0.98 },
+            },
+            cutouts: [
+              {
+                type: 'polygon',
+                points: [
+                  { x: 0.33, y: 0.01 },
+                  { x: 0.69, y: 0.01 },
+                  { x: 0.58, y: 0.09 },
+                  { x: 0.42, y: 0.09 },
+                ],
+              },
+              {
+                type: 'polygon',
+                points: [
+                  { x: 0.44, y: 0.18 },
+                  { x: 0.52, y: 0.30 },
+                  { x: 0.56, y: 1.00 },
+                  { x: 0.44, y: 1.00 },
+                ],
+              },
+              {
+                type: 'polygon',
+                points: [
+                  { x: 0.29, y: 0.88 },
+                  { x: 0.33, y: 0.99 },
+                  { x: 0.37, y: 0.88 },
+                ],
+              },
+              {
+                type: 'polygon',
+                points: [
+                  { x: 0.61, y: 0.88 },
+                  { x: 0.65, y: 0.99 },
+                  { x: 0.69, y: 0.88 },
+                ],
+              },
+            ],
+            mesh: {
+              sourcePoints: {
+                leftWaist: { x: 0.33, y: 0.05 },
+                rightWaist: { x: 0.68, y: 0.05 },
+                leftHip: { x: 0.33, y: 0.16 },
+                rightHip: { x: 0.66, y: 0.14 },
+                crotchTop: { x: 0.50, y: 0.30 },
+                leftKnee: { x: 0.36, y: 0.58 },
+                rightKnee: { x: 0.63, y: 0.58 },
+                leftHem: { x: 0.33, y: 0.99 },
+                rightHem: { x: 0.64, y: 0.99 },
+              },
+              targetPoints: {
+                leftWaist: { x: 0.45, y: 0.46 },
+                rightWaist: { x: 0.60, y: 0.45 },
+                leftHip: { x: 0.45, y: 0.54 },
+                rightHip: { x: 0.58, y: 0.52 },
+                crotchTop: { x: 0.52, y: 0.60 },
+                leftKnee: { x: 0.47, y: 0.75 },
+                rightKnee: { x: 0.58, y: 0.75 },
+                leftHem: { x: 0.49, y: 0.98 },
+                rightHem: { x: 0.60, y: 0.98 },
+              },
+              triangles: [
+                ['leftWaist', 'rightWaist', 'crotchTop'],
+                ['leftWaist', 'leftHip', 'crotchTop'],
+                ['rightWaist', 'rightHip', 'crotchTop'],
+                ['leftHip', 'leftKnee', 'crotchTop'],
+                ['rightHip', 'rightKnee', 'crotchTop'],
+                ['leftKnee', 'leftHem', 'crotchTop'],
+                ['rightKnee', 'rightHem', 'crotchTop'],
+              ],
+            },
+            color: '#2563eb',
+          },
+          mannequinDebug: {
+            shirt: {
+              leftShoulder: { x: 0.39, y: 0.25 },
+              rightShoulder: { x: 0.62, y: 0.22 },
+              leftHem: { x: 0.43, y: 0.52 },
+              rightHem: { x: 0.63, y: 0.49 },
+            },
+            trousers: {
+              leftWaist: { x: 0.42, y: 0.47 },
+              rightWaist: { x: 0.64, y: 0.45 },
+              leftHem: { x: 0.44, y: 0.98 },
+              rightHem: { x: 0.69, y: 0.98 },
+            },
+          },
+        },
+      };
+
+      const statusEl = document.getElementById('status');
+      const shirtColorInput = document.getElementById('shirt-color');
+      const shirtColorValueEl = document.getElementById('shirt-color-value');
+      const shirtAccentColorInput = document.getElementById('shirt-accent-color');
+      const shirtAccentColorValueEl = document.getElementById('shirt-accent-color-value');
+      const trousersColorInput = document.getElementById('trousers-color');
+      const trousersColorValueEl = document.getElementById('trousers-color-value');
+      const trousersAccentColorInput = document.getElementById('trousers-accent-color');
+      const trousersAccentColorValueEl = document.getElementById('trousers-accent-color-value');
+      const appState = {
+        mannequinImage: null,
+        processedShirt: null,
+        processedTrousers: null,
+      };
+      let controlsBound = false;
+
+      function setStatus(text, isError = false) {
+        statusEl.textContent = text;
+        statusEl.style.color = isError ? '#b91c1c' : '#b4532a';
+      }
+
+      function loadImage(src) {
+        return new Promise((resolve, reject) => {
+          const image = new Image();
+          image.onload = () => resolve(image);
+          image.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+          image.src = src;
+        });
+      }
+
+      function toPixels(point, width, height) {
+        return {
+          x: point.x * width,
+          y: point.y * height,
+        };
+      }
+
+      function buildPixelPointMap(points, width, height) {
+        return Object.fromEntries(
+          Object.entries(points).map(([key, value]) => [key, toPixels(value, width, height)]),
+        );
+      }
+
+      function buildSelectedPixelPointMap(points, selectedKeys, width, height) {
+        return Object.fromEntries(
+          selectedKeys.map((key) => [key, toPixels(points[key], width, height)]),
+        );
+      }
+
+      function buildLabeledPixelPointMap(points, width, height, prefix = '') {
+        return Object.fromEntries(
+          Object.entries(points).map(([key, value]) => [
+            prefix ? `${prefix}${key}` : key,
+            toPixels(value, width, height),
+          ]),
+        );
+      }
+
+      function drawMarker(ctx, point, label, color) {
+        ctx.save();
+        ctx.fillStyle = color;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.font = '600 16px PingFang SC, sans-serif';
+        ctx.fillStyle = '#1e1915';
+        ctx.strokeStyle = 'rgba(255,255,255,0.95)';
+        ctx.lineWidth = 4;
+        ctx.strokeText(label, point.x + 10, point.y - 10);
+        ctx.fillText(label, point.x + 10, point.y - 10);
+        ctx.restore();
+      }
+
+      function renderDebugCanvas(canvas, image, anchorMapGroups) {
+        const ctx = canvas.getContext('2d');
+        const width = image.naturalWidth || image.width;
+        const height = image.naturalHeight || image.height;
+        canvas.width = width;
+        canvas.height = height;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(image, 0, 0);
+
+        for (const group of anchorMapGroups) {
+          for (const [key, point] of Object.entries(group.points)) {
+            drawMarker(ctx, point, key, group.color);
+          }
+        }
+      }
+
+      function applySilhouetteMask(canvas, silhouettes) {
+        if (!silhouettes || silhouettes.length === 0) {
+          return canvas;
+        }
+
+        const ctx = canvas.getContext('2d');
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-in';
+
+        for (const silhouette of silhouettes) {
+          ctx.beginPath();
+          silhouette.points.forEach((point, index) => {
+            const x = point.x * canvas.width;
+            const y = point.y * canvas.height;
+            if (index === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
+          });
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        ctx.restore();
+        return canvas;
+      }
+
+      function normalizeHexColor(value) {
+        const match = String(value).trim().match(/^#?([0-9a-fA-F]{6})$/);
+        return match ? `#${match[1].toLowerCase()}` : null;
+      }
+
+      function parseHexColor(value) {
+        const normalized = normalizeHexColor(value);
+        if (!normalized) {
+          throw new Error(`Invalid color: ${value}`);
+        }
+
+        return {
+          hex: normalized,
+          r: Number.parseInt(normalized.slice(1, 3), 16),
+          g: Number.parseInt(normalized.slice(3, 5), 16),
+          b: Number.parseInt(normalized.slice(5, 7), 16),
+        };
+      }
+
+      function clampChannel(value) {
+        return Math.max(0, Math.min(255, Math.round(value)));
+      }
+
+      function updateColorLabel(input, output) {
+        const normalized = normalizeHexColor(input.value);
+        if (!normalized) {
+          return;
+        }
+
+        input.value = normalized;
+        output.textContent = normalized.toUpperCase();
+      }
+
+      function recolorGarment(sourceCanvas, hexColor) {
+        const target = parseHexColor(hexColor);
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        canvas.width = sourceCanvas.width;
+        canvas.height = sourceCanvas.height;
+        ctx.drawImage(sourceCanvas, 0, 0);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+
+        for (let index = 0; index < data.length; index += 4) {
+          const alpha = data[index + 3];
+          if (alpha === 0) {
+            continue;
+          }
+
+          const luminance = (data[index] + data[index + 1] + data[index + 2]) / (255 * 3);
+          const shade = 0.42 + luminance * 0.58;
+          const highlight = Math.max(0, luminance - 0.88) / 0.12;
+
+          let r = target.r * shade;
+          let g = target.g * shade;
+          let b = target.b * shade;
+
+          r += (255 - r) * highlight * 0.18;
+          g += (255 - g) * highlight * 0.18;
+          b += (255 - b) * highlight * 0.18;
+
+          data[index] = clampChannel(r);
+          data[index + 1] = clampChannel(g);
+          data[index + 2] = clampChannel(b);
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+        return canvas;
+      }
+
+      function createMaskedRegion(sourceCanvas, masks) {
+        if (!masks || masks.length === 0) {
+          return sourceCanvas;
+        }
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = sourceCanvas.width;
+        canvas.height = sourceCanvas.height;
+        ctx.drawImage(sourceCanvas, 0, 0);
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-in';
+
+        for (const mask of masks) {
+          ctx.beginPath();
+          mask.points.forEach((point, index) => {
+            const x = point.x * canvas.width;
+            const y = point.y * canvas.height;
+            if (index === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
+          });
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        ctx.restore();
+        return canvas;
+      }
+
+      function recolorGarmentWithAccent(sourceCanvas, baseHexColor, accentHexColor, accentMasks) {
+        const baseLayer = recolorGarment(sourceCanvas, baseHexColor);
+        if (!accentMasks || accentMasks.length === 0) {
+          return baseLayer;
+        }
+
+        const accentSource = createMaskedRegion(sourceCanvas, accentMasks);
+        const accentLayer = recolorGarment(accentSource, accentHexColor);
+        const ctx = baseLayer.getContext('2d');
+        ctx.drawImage(accentLayer, 0, 0);
+        return baseLayer;
+      }
+
+      function clearCutouts(canvas, cutouts) {
+        if (!cutouts || cutouts.length === 0) {
+          return canvas;
+        }
+
+        const ctx = canvas.getContext('2d');
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-out';
+
+        for (const cutout of cutouts) {
+          ctx.beginPath();
+
+          if (cutout.type === 'ellipse') {
+            ctx.ellipse(
+              cutout.cx * canvas.width,
+              cutout.cy * canvas.height,
+              cutout.rx * canvas.width,
+              cutout.ry * canvas.height,
+              0,
+              0,
+              Math.PI * 2,
+            );
+            ctx.fill();
+            continue;
+          }
+
+          if (cutout.type === 'polygon') {
+            cutout.points.forEach((point, index) => {
+              const x = point.x * canvas.width;
+              const y = point.y * canvas.height;
+              if (index === 0) {
+                ctx.moveTo(x, y);
+              } else {
+                ctx.lineTo(x, y);
+              }
+            });
+            ctx.closePath();
+            ctx.fill();
+          }
+        }
+
+        ctx.restore();
+        return canvas;
+      }
+
+      function buildMaskedGarment(image, silhouette, cutouts) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+        ctx.drawImage(image, 0, 0);
+        applySilhouetteMask(canvas, silhouette);
+        clearCutouts(canvas, cutouts);
+        return canvas;
+      }
+
+      function invert3x3(matrix) {
+        const [a, b, c] = matrix[0];
+        const [d, e, f] = matrix[1];
+        const [g, h, i] = matrix[2];
+        const A = e * i - f * h;
+        const B = -(d * i - f * g);
+        const C = d * h - e * g;
+        const D = -(b * i - c * h);
+        const E = a * i - c * g;
+        const F = -(a * h - b * g);
+        const G = b * f - c * e;
+        const H = -(a * f - c * d);
+        const I = a * e - b * d;
+        const determinant = a * A + b * B + c * C;
+
+        if (Math.abs(determinant) < 1e-8) {
+          throw new Error('Anchor matrix is singular.');
+        }
+
+        const reciprocal = 1 / determinant;
+        return [
+          [A * reciprocal, D * reciprocal, G * reciprocal],
+          [B * reciprocal, E * reciprocal, H * reciprocal],
+          [C * reciprocal, F * reciprocal, I * reciprocal],
+        ];
+      }
+
+      function multiplyMatrixVector(matrix, vector) {
+        return matrix.map((row) => row[0] * vector[0] + row[1] * vector[1] + row[2] * vector[2]);
+      }
+
+      function solveAffineLeastSquares(sourcePoints, targetPoints) {
+        const design = sourcePoints.map((point) => [point.x, point.y, 1]);
+        const ata = [
+          [0, 0, 0],
+          [0, 0, 0],
+          [0, 0, 0],
+        ];
+        const atbx = [0, 0, 0];
+        const atby = [0, 0, 0];
+
+        for (let index = 0; index < design.length; index += 1) {
+          const row = design[index];
+          const target = targetPoints[index];
+          for (let i = 0; i < 3; i += 1) {
+            for (let j = 0; j < 3; j += 1) {
+              ata[i][j] += row[i] * row[j];
+            }
+            atbx[i] += row[i] * target.x;
+            atby[i] += row[i] * target.y;
+          }
+        }
+
+        const inverse = invert3x3(ata);
+        const [a, c, e] = multiplyMatrixVector(inverse, atbx);
+        const [b, d, f] = multiplyMatrixVector(inverse, atby);
+        return { a, b, c, d, e, f };
+      }
+
+      function drawOverlay(ctx, sourceCanvas, sourceAnchorMap, targetAnchorMap) {
+        const keys = Object.keys(sourceAnchorMap);
+        const sourcePoints = keys.map((key) => sourceAnchorMap[key]);
+        const targetPoints = keys.map((key) => targetAnchorMap[key]);
+        const matrix = solveAffineLeastSquares(sourcePoints, targetPoints);
+
+        ctx.save();
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.e, matrix.f);
+        ctx.drawImage(sourceCanvas, 0, 0);
+        ctx.restore();
+      }
+
+      function drawMeshOverlay(ctx, sourceCanvas, meshConfig, targetWidth, targetHeight) {
+        for (const triangle of meshConfig.triangles) {
+          const maskedTriangle = createMaskedRegion(sourceCanvas, [
+            { points: triangle.map((key) => meshConfig.sourcePoints[key]) },
+          ]);
+          const sourceAnchorMap = buildSelectedPixelPointMap(
+            meshConfig.sourcePoints,
+            triangle,
+            sourceCanvas.width,
+            sourceCanvas.height,
+          );
+          const targetAnchorMap = buildSelectedPixelPointMap(
+            meshConfig.targetPoints,
+            triangle,
+            targetWidth,
+            targetHeight,
+          );
+          drawOverlay(ctx, maskedTriangle, sourceAnchorMap, targetAnchorMap);
+        }
+      }
+
+      function drawConfiguredOverlay(ctx, sourceCanvas, overlayConfig, targetWidth, targetHeight) {
+        if (overlayConfig.mesh) {
+          drawMeshOverlay(ctx, sourceCanvas, overlayConfig.mesh, targetWidth, targetHeight);
+          return;
+        }
+
+        const sourceAnchorMap = buildPixelPointMap(
+          overlayConfig.sourceAnchors,
+          sourceCanvas.width,
+          sourceCanvas.height,
+        );
+        const targetAnchorMap = buildPixelPointMap(
+          overlayConfig.targetAnchors,
+          targetWidth,
+          targetHeight,
+        );
+        drawOverlay(ctx, sourceCanvas, sourceAnchorMap, targetAnchorMap);
+      }
+
+      function buildDebugGroups(overlayConfig, width, height, color, kind, prefix = '') {
+        if (overlayConfig.mesh) {
+          const points = kind === 'source' ? overlayConfig.mesh.sourcePoints : overlayConfig.mesh.targetPoints;
+          return [{ points: buildLabeledPixelPointMap(points, width, height, prefix), color }];
+        }
+
+        const points = kind === 'source' ? overlayConfig.sourceAnchors : overlayConfig.targetAnchors;
+        return [{ points: buildLabeledPixelPointMap(points, width, height, prefix), color }];
+      }
+
+      function prepareCanvas(canvas, width, height) {
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, width, height);
+        return ctx;
+      }
+
+      function renderAll() {
+        if (!appState.mannequinImage || !appState.processedShirt || !appState.processedTrousers) {
+          return;
+        }
+
+        updateColorLabel(shirtColorInput, shirtColorValueEl);
+        updateColorLabel(shirtAccentColorInput, shirtAccentColorValueEl);
+        updateColorLabel(trousersColorInput, trousersColorValueEl);
+        updateColorLabel(trousersAccentColorInput, trousersAccentColorValueEl);
+
+        const mannequinWidth = appState.mannequinImage.naturalWidth;
+        const mannequinHeight = appState.mannequinImage.naturalHeight;
+        const recoloredShirt = recolorGarmentWithAccent(
+          appState.processedShirt,
+          shirtColorInput.value,
+          shirtAccentColorInput.value,
+          config.overlays.shirt.accentMasks,
+        );
+        const recoloredTrousers = recolorGarmentWithAccent(
+          appState.processedTrousers,
+          trousersColorInput.value,
+          trousersAccentColorInput.value,
+          config.overlays.trousers.accentMasks,
+        );
+        const shirtSourceAnchors = buildPixelPointMap(
+          config.overlays.shirt.sourceAnchors,
+          recoloredShirt.width,
+          recoloredShirt.height,
+        );
+        const shirtTargetAnchors = buildPixelPointMap(
+          config.overlays.shirt.targetAnchors,
+          mannequinWidth,
+          mannequinHeight,
+        );
+        const trousersSourceAnchors = buildPixelPointMap(
+          config.overlays.trousers.sourceAnchors,
+          recoloredTrousers.width,
+          recoloredTrousers.height,
+        );
+        const trousersTargetAnchors = buildPixelPointMap(
+          config.overlays.trousers.targetAnchors,
+          mannequinWidth,
+          mannequinHeight,
+        );
+
+        const shirtCanvas = document.getElementById('shirt-preview');
+        const trousersCanvas = document.getElementById('trousers-preview');
+        const fullCanvas = document.getElementById('full-preview');
+        const baseDebugCanvas = document.getElementById('base-debug');
+        const shirtDebugCanvas = document.getElementById('shirt-debug');
+        const trousersDebugCanvas = document.getElementById('trousers-debug');
+        const shirtTargetGroups = buildDebugGroups(
+          config.overlays.shirt,
+          mannequinWidth,
+          mannequinHeight,
+          '#7c3aed',
+          'target',
+          'shirt.',
+        );
+        const trousersTargetGroups = buildDebugGroups(
+          config.overlays.trousers,
+          mannequinWidth,
+          mannequinHeight,
+          '#2563eb',
+          'target',
+          'trousers.',
+        );
+        const shirtSourceGroups = buildDebugGroups(
+          config.overlays.shirt,
+          recoloredShirt.width,
+          recoloredShirt.height,
+          '#cb4b16',
+          'source',
+        );
+        const trousersSourceGroups = buildDebugGroups(
+          config.overlays.trousers,
+          recoloredTrousers.width,
+          recoloredTrousers.height,
+          '#2563eb',
+          'source',
+        );
+
+        const shirtCtx = prepareCanvas(shirtCanvas, mannequinWidth, mannequinHeight);
+        shirtCtx.drawImage(appState.mannequinImage, 0, 0);
+        drawConfiguredOverlay(
+          shirtCtx,
+          recoloredShirt,
+          config.overlays.shirt,
+          mannequinWidth,
+          mannequinHeight,
+        );
+
+        const trousersCtx = prepareCanvas(trousersCanvas, mannequinWidth, mannequinHeight);
+        trousersCtx.drawImage(appState.mannequinImage, 0, 0);
+        drawConfiguredOverlay(
+          trousersCtx,
+          recoloredTrousers,
+          config.overlays.trousers,
+          mannequinWidth,
+          mannequinHeight,
+        );
+
+        const fullCtx = prepareCanvas(fullCanvas, mannequinWidth, mannequinHeight);
+        fullCtx.drawImage(appState.mannequinImage, 0, 0);
+        drawConfiguredOverlay(
+          fullCtx,
+          recoloredTrousers,
+          config.overlays.trousers,
+          mannequinWidth,
+          mannequinHeight,
+        );
+        drawConfiguredOverlay(
+          fullCtx,
+          recoloredShirt,
+          config.overlays.shirt,
+          mannequinWidth,
+          mannequinHeight,
+        );
+
+        renderDebugCanvas(baseDebugCanvas, appState.mannequinImage, [
+          ...shirtTargetGroups,
+          ...trousersTargetGroups,
+        ]);
+        renderDebugCanvas(shirtDebugCanvas, recoloredShirt, shirtSourceGroups);
+        renderDebugCanvas(trousersDebugCanvas, recoloredTrousers, trousersSourceGroups);
+      }
+
+      function bindControls() {
+        if (controlsBound) {
+          return;
+        }
+
+        const rerender = () => renderAll();
+        shirtColorInput.addEventListener('input', rerender);
+        shirtAccentColorInput.addEventListener('input', rerender);
+        trousersColorInput.addEventListener('input', rerender);
+        trousersAccentColorInput.addEventListener('input', rerender);
+        controlsBound = true;
+      }
+
+      async function main() {
+        try {
+          const [mannequinImage, shirtImage, trousersImage] = await Promise.all([
+            loadImage(config.assets.mannequin),
+            loadImage(config.assets.shirt),
+            loadImage(config.assets.trousers),
+          ]);
+
+          const processedShirt = buildMaskedGarment(
+            shirtImage,
+            config.overlays.shirt.silhouette,
+            config.overlays.shirt.cutouts,
+          );
+          const processedTrousers = buildMaskedGarment(
+            trousersImage,
+            config.overlays.trousers.silhouette,
+            config.overlays.trousers.cutouts,
+          );
+
+          appState.mannequinImage = mannequinImage;
+          appState.processedShirt = processedShirt;
+          appState.processedTrousers = processedTrousers;
+          bindControls();
+          renderAll();
+
+          setStatus('叠合验证完成。当前支持主色和辅色分区控色，Hex 才是展示真相源。');
+        } catch (error) {
+          setStatus(error instanceof Error ? error.message : String(error), true);
+        }
+      }
+
+      main();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,41 @@
+{
+  "id": "trousers-volc-garment-only-three-quarter",
+  "provider": "volcengine",
+  "modelEnv": "VOLC_MODEL",
+  "prompt": {
+    "files": [
+      "../prompts/variants/trousers-garment-only-reference-note.txt",
+      "../prompts/variants/trousers-garment-only-lock.txt",
+      "../prompts/variants/garment-only-background-lock.txt",
+      "../prompts/variants/trousers-garment-only-angle-lock.txt",
+      "../prompts/variants/vector-flatten-adjustment.txt"
+    ]
+  },
+  "negativePrompt": {
+    "files": [
+      "../prompts/base/common-negative.txt",
+      "../prompts/variants/trousers-garment-only-negative.txt"
+    ]
+  },
+  "referenceImages": [
+    "../../refs/style/trousers-garment-source.jpeg",
+    "../../refs/style/base-mannequin-best.jpeg"
+  ],
+  "size": "2K",
+  "tags": [
+    "trousers",
+    "volcengine",
+    "garment-only",
+    "three-quarter"
+  ],
+  "metadata": {
+    "template": "trousers",
+    "round": "garment-only-three-quarter"
+  },
+  "providerOptions": {
+    "responseFormat": "url",
+    "watermark": false,
+    "stream": false,
+    "sequentialImageGeneration": "disabled"
+  }
+}

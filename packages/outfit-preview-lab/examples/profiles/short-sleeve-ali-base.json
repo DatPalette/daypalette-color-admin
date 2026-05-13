@@ -1,0 +1,34 @@
+{
+  "id": "short-sleeve-ali-base",
+  "provider": "aliyun",
+  "modelEnv": "ALI_MODEL",
+  "prompt": {
+    "files": [
+      "../prompts/base/style-prefix.txt",
+      "../prompts/base/china-face.txt",
+      "../prompts/variants/short-sleeve-round2.txt",
+      "../prompts/variants/vector-flatten-adjustment.txt"
+    ]
+  },
+  "negativePrompt": {
+    "files": [
+      "../prompts/base/common-negative.txt"
+    ]
+  },
+  "size": "1024*1024",
+  "tags": [
+    "short-sleeve",
+    "aliyun",
+    "matrix"
+  ],
+  "metadata": {
+    "template": "short-sleeve",
+    "batch": "style-scan"
+  },
+  "providerOptions": {
+    "style": "<flat illustration>",
+    "waitForCompletion": true,
+    "pollIntervalMs": 3000,
+    "timeoutMs": 300000
+  }
+}

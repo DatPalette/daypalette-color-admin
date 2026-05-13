@@ -1,0 +1,45 @@
+{
+  "id": "short-sleeve-volc-underwear-dual-ref",
+  "provider": "volcengine",
+  "modelEnv": "VOLC_MODEL",
+  "prompt": {
+    "files": [
+      "../prompts/variants/dual-reference-pose-base-note.txt",
+      "../prompts/base/style-prefix.txt",
+      "../prompts/base/china-face.txt",
+      "../prompts/variants/confident-expression.txt",
+      "../prompts/variants/full-body-template-lock.txt",
+      "../prompts/variants/clean-background-lock.txt",
+      "../prompts/variants/short-sleeve-template-lock.txt",
+      "../prompts/variants/short-sleeve-coverage-lock.txt",
+      "../prompts/variants/vector-flatten-adjustment.txt"
+    ]
+  },
+  "negativePrompt": {
+    "files": [
+      "../prompts/base/common-negative.txt",
+      "../prompts/variants/single-figure-negative.txt",
+      "../prompts/variants/short-sleeve-coverage-negative.txt"
+    ]
+  },
+  "referenceImages": [
+    "../../refs/pose/pose.png",
+    "../../refs/style/base-mannequin-best.jpeg"
+  ],
+  "size": "2K",
+  "tags": [
+    "short-sleeve",
+    "volcengine",
+    "underwear-dual-ref"
+  ],
+  "metadata": {
+    "template": "short-sleeve",
+    "round": "underwear-dual-ref"
+  },
+  "providerOptions": {
+    "responseFormat": "url",
+    "watermark": false,
+    "stream": false,
+    "sequentialImageGeneration": "disabled"
+  }
+}

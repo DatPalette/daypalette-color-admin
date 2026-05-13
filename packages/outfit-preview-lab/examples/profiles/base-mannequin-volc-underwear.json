@@ -1,0 +1,42 @@
+{
+  "id": "base-mannequin-volc-underwear",
+  "provider": "volcengine",
+  "modelEnv": "VOLC_MODEL",
+  "prompt": {
+    "files": [
+      "../prompts/variants/reference-fusion-note.txt",
+      "../prompts/base/style-prefix.txt",
+      "../prompts/base/china-face.txt",
+      "../prompts/variants/confident-expression.txt",
+      "../prompts/variants/croquis-pose-lock.txt",
+      "../prompts/variants/mannequin-underwear-base.txt",
+      "../prompts/variants/vector-flatten-adjustment.txt"
+    ]
+  },
+  "negativePrompt": {
+    "files": [
+      "../prompts/base/common-negative.txt",
+      "../prompts/variants/single-figure-negative.txt",
+      "../prompts/variants/no-extra-garment-negative.txt"
+    ]
+  },
+  "referenceImages": [
+    "../../refs/pose/pose.png"
+  ],
+  "size": "2K",
+  "tags": [
+    "base-mannequin",
+    "volcengine",
+    "underwear-base"
+  ],
+  "metadata": {
+    "template": "base-mannequin",
+    "round": "underwear-base"
+  },
+  "providerOptions": {
+    "responseFormat": "url",
+    "watermark": false,
+    "stream": false,
+    "sequentialImageGeneration": "disabled"
+  }
+}

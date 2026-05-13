@@ -1,0 +1,42 @@
+{
+  "id": "croquis-volc-pose-style-fusion",
+  "provider": "volcengine",
+  "modelEnv": "VOLC_MODEL",
+  "prompt": {
+    "files": [
+      "../prompts/variants/reference-fusion-note.txt",
+      "../prompts/base/style-prefix.txt",
+      "../prompts/base/china-face.txt",
+      "../prompts/variants/confident-expression.txt",
+      "../prompts/variants/croquis-round2.txt",
+      "../prompts/variants/croquis-pose-lock.txt",
+      "../prompts/variants/vector-flatten-adjustment.txt"
+    ]
+  },
+  "negativePrompt": {
+    "files": [
+      "../prompts/base/common-negative.txt",
+      "../prompts/variants/single-figure-negative.txt"
+    ]
+  },
+  "referenceImages": [
+    "../../refs/pose/pose.png",
+    "../../refs/style/croquis-style-good.jpeg"
+  ],
+  "size": "2K",
+  "tags": [
+    "croquis",
+    "volcengine",
+    "pose-style-fusion"
+  ],
+  "metadata": {
+    "template": "croquis",
+    "round": "pose-style-fusion"
+  },
+  "providerOptions": {
+    "responseFormat": "url",
+    "watermark": false,
+    "stream": false,
+    "sequentialImageGeneration": "disabled"
+  }
+}

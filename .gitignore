@@ -9,3 +9,7 @@ apps/admin-api/.env.*
 apps/admin-web/node_modules
 apps/admin-api/node_modules
 packages/*/node_modules
+packages/outfit-preview-lab/.local
+packages/outfit-preview-lab/.env.local
+packages/outfit-preview-lab/.env.*
+!packages/outfit-preview-lab/.env.example

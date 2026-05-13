@@ -1,0 +1,39 @@
+{
+  "id": "short-sleeve-volc-round2",
+  "provider": "volcengine",
+  "modelEnv": "VOLC_MODEL",
+  "prompt": {
+    "files": [
+      "../prompts/variants/reference-fusion-note.txt",
+      "../prompts/base/style-prefix.txt",
+      "../prompts/base/china-face.txt",
+      "../prompts/variants/short-sleeve-round2.txt",
+      "../prompts/variants/vector-flatten-adjustment.txt"
+    ]
+  },
+  "negativePrompt": {
+    "files": [
+      "../prompts/base/common-negative.txt"
+    ]
+  },
+  "referenceImages": [
+    "../../refs/pose/pose-reference.png",
+    "../../refs/style/style-reference.png"
+  ],
+  "size": "2K",
+  "tags": [
+    "short-sleeve",
+    "volcengine",
+    "round2"
+  ],
+  "metadata": {
+    "template": "short-sleeve",
+    "round": "2"
+  },
+  "providerOptions": {
+    "responseFormat": "url",
+    "watermark": false,
+    "stream": false,
+    "sequentialImageGeneration": "disabled"
+  }
+}

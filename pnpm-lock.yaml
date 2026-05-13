@@ -198,6 +198,8 @@ importers:
 
   packages/file-store: {}
 
+  packages/outfit-preview-lab: {}
+
   packages/validation:
     dependencies:
       '@daypalette-color-admin/contracts':

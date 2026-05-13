@@ -1,0 +1,46 @@
+{
+  "id": "trousers-volc-pose-locked-neutral-layer",
+  "provider": "volcengine",
+  "modelEnv": "VOLC_MODEL",
+  "prompt": {
+    "files": [
+      "../prompts/variants/pose-locked-bottom-reference-note.txt",
+      "../prompts/variants/trousers-pose-locked-layer-lock.txt",
+      "../prompts/variants/pose-locked-bottom-fit-lock.txt",
+      "../prompts/variants/trousers-garment-only-angle-lock.txt",
+      "../prompts/variants/neutral-structure-color-lock.txt",
+      "../prompts/variants/garment-only-background-lock.txt",
+      "../prompts/variants/vector-flatten-adjustment.txt"
+    ]
+  },
+  "negativePrompt": {
+    "files": [
+      "../prompts/base/common-negative.txt",
+      "../prompts/variants/trousers-garment-only-negative.txt",
+      "../prompts/variants/visible-body-removal-negative.txt",
+      "../prompts/variants/neutral-structure-negative.txt"
+    ]
+  },
+  "referenceImages": [
+    "../../refs/style/trousers-garment-source.jpeg",
+    "../../refs/style/base-mannequin-best.jpeg"
+  ],
+  "size": "2K",
+  "tags": [
+    "trousers",
+    "volcengine",
+    "pose-locked",
+    "neutral-layer",
+    "shape-first"
+  ],
+  "metadata": {
+    "template": "trousers",
+    "round": "pose-locked-neutral-layer"
+  },
+  "providerOptions": {
+    "responseFormat": "url",
+    "watermark": false,
+    "stream": false,
+    "sequentialImageGeneration": "disabled"
+  }
+}

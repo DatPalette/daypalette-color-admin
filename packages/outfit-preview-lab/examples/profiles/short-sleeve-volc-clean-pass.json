@@ -1,0 +1,38 @@
+{
+  "id": "short-sleeve-volc-clean-pass",
+  "provider": "volcengine",
+  "modelEnv": "VOLC_MODEL",
+  "prompt": {
+    "files": [
+      "../prompts/variants/short-sleeve-clean-pass-lock.txt",
+      "../prompts/variants/vector-flatten-adjustment.txt"
+    ]
+  },
+  "negativePrompt": {
+    "files": [
+      "../prompts/base/common-negative.txt",
+      "../prompts/variants/short-sleeve-coverage-negative.txt",
+      "../prompts/variants/short-sleeve-clean-boundary-negative.txt",
+      "../prompts/variants/short-sleeve-clean-pass-negative.txt"
+    ]
+  },
+  "referenceImages": [
+    "../../refs/style/short-sleeve-clean-pass-source.jpeg"
+  ],
+  "size": "2K",
+  "tags": [
+    "short-sleeve",
+    "volcengine",
+    "clean-pass"
+  ],
+  "metadata": {
+    "template": "short-sleeve",
+    "round": "clean-pass"
+  },
+  "providerOptions": {
+    "responseFormat": "url",
+    "watermark": false,
+    "stream": false,
+    "sequentialImageGeneration": "disabled"
+  }
+}

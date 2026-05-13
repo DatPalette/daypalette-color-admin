@@ -1,0 +1,42 @@
+{
+  "id": "short-sleeve-ali-style-scan",
+  "continueOnError": true,
+  "jobs": [
+    {
+      "profile": "../profiles/short-sleeve-ali-base.json",
+      "overrides": {
+        "id": "short-sleeve-ali-flat-illustration",
+        "providerOptions": {
+          "style": "<flat illustration>"
+        }
+      }
+    },
+    {
+      "profile": "../profiles/short-sleeve-ali-base.json",
+      "overrides": {
+        "id": "short-sleeve-ali-portrait",
+        "providerOptions": {
+          "style": "<portrait>"
+        }
+      }
+    },
+    {
+      "profile": "../profiles/short-sleeve-ali-base.json",
+      "overrides": {
+        "id": "short-sleeve-ali-sketch",
+        "providerOptions": {
+          "style": "<sketch>"
+        }
+      }
+    },
+    {
+      "profile": "../profiles/short-sleeve-ali-base.json",
+      "overrides": {
+        "id": "short-sleeve-ali-watercolor",
+        "providerOptions": {
+          "style": "<watercolor>"
+        }
+      }
+    }
+  ]
+}
